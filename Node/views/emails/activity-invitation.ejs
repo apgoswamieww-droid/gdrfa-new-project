@@ -1,0 +1,157 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#7A2530"
+                                style="color: #fff; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px;">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="content-block" style="padding: 0 0 20px;">
+                                            <h2 style="color: #7A2530; margin: 0 0 15px 0; font-size: 24px;">
+                                                Hello <%= employeeName %>!
+                                            </h2>
+                                            <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.6; color: #333;">
+                                                We are excited to inform you that you have been invited to participate in a new activity. This is a great opportunity to engage in sports and recreational activities.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Event Details Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="color: #7A2530; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                Event Details
+                                            </h3>
+                                            <table width="100%" style="margin: 10px 0;">
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Event Name:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= eventName %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Activity:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= activityName %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Location:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= location %></td>
+                                                </tr>
+                                                <% if (startDate && endDate) { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Date:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= startDate %> to <%= endDate %></td>
+                                                </tr>
+                                                <% } %>
+                                                <% if (startTime && endTime) { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Time:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= startTime %> - <%= endTime %></td>
+                                                </tr>
+                                                <% } %>
+                                                <% if (eventDescription) { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555; vertical-align: top;">Description:</td>
+                                                    <td style="padding: 8px 0; color: #333; line-height: 1.6;"><%= eventDescription %></td>
+                                                </tr>
+                                                <% } %>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <% if (targetType === 'competitive') { %>
+                                    <!-- Team Information Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px; background-color: #e8f4f8; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="color: #7A2530; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                Your Team Information
+                                            </h3>
+                                            <table width="100%" style="margin: 10px 0;">
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Team Name:</td>
+                                                    <td style="padding: 8px 0; color: #333; font-weight: bold;"><%= teamName %></td>
+                                                </tr>
+                                                <% if (isCaptain === '1') { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Your Role:</td>
+                                                    <td style="padding: 8px 0; color: #333;">
+                                                        <span style="color: #d4a853; font-weight: bold;">Team Captain</span>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+
+                                    <!-- Participation Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px; background-color: #fff8e1; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="color: #7A2530; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                How to Participate
+                                            </h3>
+                                            <p style="margin: 0 0 10px; font-size: 15px; line-height: 1.6; color: #333;">
+                                                Please log in to the GDRFA Sports Portal to view the full event details, check the schedule, and confirm your participation.
+                                            </p>
+                                            <p style="margin: 0; font-size: 14px; color: #666;">
+                                                If you have any questions, please contact your event coordinator.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer Message -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px 0; border-top: 1px solid #eee;">
+                                            <p style="margin: 0; color: #666; font-size: 14px; text-align: center; line-height: 1.6;">
+                                                This is an automated notification from the GDRFA Sports Management System.<br>
+                                                For any questions or concerns, please contact your event coordinator or system administrator.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- GDRFA Footer -->
+                                    <tr>
+                                        <td align="center" style="padding: 20px 0; background-color: #f8f9fa; border-radius: 0 0 8px 8px;">
+                                            <p style="margin: 0; color: #7A2530; font-weight: bold; font-size: 16px;">
+                                                General Directorate of Residency and Foreigners Affairs
+                                            </p>
+                                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                                                Sports & Recreation Department
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>

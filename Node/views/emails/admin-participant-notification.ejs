@@ -1,0 +1,184 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#7A2530"
+                                style="color: #fff; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px;">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="content-block" style="padding: 0 0 20px;">
+                                            <h2 style="color: #7A2530; margin: 0 0 15px 0; font-size: 24px;">
+                                                Hello <%= adminName %>!
+                                            </h2>
+                                            <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.6; color: #333;">
+                                                A new participant has registered for your event <strong><%= eventName %></strong>. Please review the details below and take appropriate action if needed.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Participant Details Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px; background-color: #e8f4f8; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="color: #7A2530; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                👤 Participant Information
+                                            </h3>
+                                            <table width="100%" style="margin: 10px 0;">
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Name:</td>
+                                                    <td style="padding: 8px 0; color: #333; font-weight: bold;"><%= participantName %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Email:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= participantEmail %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Mobile:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= participantMobile %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Registration Type:</td>
+                                                    <td style="padding: 8px 0; color: #333;">
+                                                        <% if (participantType === 'Individual') { %>
+                                                            <span style="color: #28a745;">🏃 Individual Participant</span>
+                                                        <% } else { %>
+                                                            <span style="color: #d4a853;">👑 Team Captain</span>
+                                                        <% } %>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Registration Date:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= registrationDate %></td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Event Details Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="color: #7A2530; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                📅 Event Details
+                                            </h3>
+                                            <table width="100%" style="margin: 10px 0;">
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Event Name:</td>
+                                                    <td style="padding: 8px 0; color: #333; font-weight: bold;"><%= eventName %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Location:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= eventLocation %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Date:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= eventStartDate %> to <%= eventEndDate %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Activity:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= activityName %> - <%= activityType %></td>
+                                                </tr>
+                                                <% if (eventDescription && eventDescription !== 'No description provided') { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555; vertical-align: top;">Description:</td>
+                                                    <td style="padding: 8px 0; color: #333; line-height: 1.6;"><%= eventDescription %></td>
+                                                </tr>
+                                                <% } %>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Action Items Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 0 0 20px;">
+                                            <h3 style="color: #7A2530; margin: 20px 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                📋 Administrative Actions
+                                            </h3>
+                                            <ul style="color: #333; font-size: 16px; line-height: 1.8; padding-left: 25px;">
+                                                <li style="margin: 10px 0;">Review participant's profile and eligibility</li>
+                                                <li style="margin: 10px 0;">Verify participant meets event requirements</li>
+                                                <li style="margin: 10px 0;">Contact participant if additional information is needed</li>
+                                                <li style="margin: 10px 0;">Update event participant list and manage capacity</li>
+                                                <li style="margin: 10px 0; color: #dc3545; font-weight: bold;">Take action on pending approvals if required</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Call to Action Buttons -->
+                                    <tr>
+                                        <td align="center" style="padding: 30px 0;">
+                                            <table style="margin: 0 auto;">
+                                                <tr>
+                                                    <td style="padding: 0 10px;">
+                                                        <a href="<%= userDetailsUrl %>" 
+                                                           style="background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; font-size: 14px;">
+                                                            View Participant Profile
+                                                        </a>
+                                                    </td>
+                                                    <td style="padding: 0 10px;">
+                                                        <a href="<%= eventDetailsUrl %>" 
+                                                           style="background-color: #7A2530; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; font-size: 14px;">
+                                                            Manage Event
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer Message -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px 0; border-top: 1px solid #eee;">
+                                            <p style="margin: 0; color: #666; font-size: 14px; text-align: center; line-height: 1.6;">
+                                                This is an automated notification from the GDRFA Sports Management System.<br>
+                                                You are receiving this email because you are listed as an administrator for this event.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- GDRFA Footer -->
+                                    <tr>
+                                        <td align="center" style="padding: 20px 0; background-color: #f8f9fa; border-radius: 0 0 8px 8px;">
+                                            <p style="margin: 0; color: #7A2530; font-weight: bold; font-size: 16px;">
+                                                General Directorate of Residency and Foreigners Affairs
+                                            </p>
+                                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                                                Sports & Recreation Department - Event Management System
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>

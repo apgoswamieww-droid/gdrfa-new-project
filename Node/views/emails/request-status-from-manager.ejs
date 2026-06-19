@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#7A2530"
+                                style="color: #fff; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px;">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="content-block" style="padding: 0 0 20px;">
+                                            <h2 style="color: #7A2530; margin: 0 0 15px 0; font-size: 24px;">
+                                                Hello <%= userFullName %>!
+                                            </h2>
+                                            <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.6; color: #333;">
+                                                Your request to participate in the following event has been
+                                                <strong style="color:<%= status == 'Approved' ? '#28a745' : '#dc3545' %>;">
+                                                    <%= status %>
+                                                </strong>.
+                                            </p>
+                                            <% if (status == 'Cancelled') { %>
+                                            <p style="margin: 10px 0; font-size: 16px; line-height: 1.6; color: #dc3545;">
+                                                <strong>Reason:</strong> <%= rejectionReason || 'Your registration has been cancelled by the event administrator.' %>
+                                            </p>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Event Details Section -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="color: #7A2530; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #7A2530; display: inline-block; padding-bottom: 5px;">
+                                                📅 Event Details
+                                            </h3>
+                                            <table width="100%" style="margin: 10px 0;">
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Event Name:</td>
+                                                    <td style="padding: 8px 0; color: #333; font-weight: bold;"><%= eventName %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Location:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= eventLocation %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Start Date:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= startDate %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">End Date:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= endDate %></td>
+                                                </tr>
+                                                <% if (startTime) { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Start Time:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= startTime %></td>
+                                                </tr>
+                                                <% } %>
+                                                <% if (endTime) { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">End Time:</td>
+                                                    <td style="padding: 8px 0; color: #333;"><%= endTime %></td>
+                                                </tr>
+                                                <% } %>
+                                                <% if (typeof activityName !== 'undefined' && activityName) { %>
+                                                <tr>
+                                                    <td width="30%" style="padding: 8px 0; font-weight: bold; color: #555;">Activity:</td>
+                                                    <td style="padding: 8px 0; color: #333;">
+                                                        <%= activityName %>
+                                                        <% if (typeof activityType !== 'undefined' && activityType) { %> - <%= activityType %><% } %>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Status Message -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px 0;">
+                                            <% if (status == 'Approved') { %>
+                                            <p style="font-size: 16px; line-height: 1.6; color: #28a745; text-align: center;">
+                                                ✅ We look forward to your participation in the event.
+                                            </p>
+                                            <% } else if (status == 'Cancelled') { %>
+                                            <p style="font-size: 16px; line-height: 1.6; color: #dc3545; text-align: center;">
+                                                ❌ Your registration has been cancelled by the administrator.
+                                            </p>
+                                            <p style="font-size: 14px; line-height: 1.6; color: #666; text-align: center;">
+                                                If you believe this is a mistake, please contact the event administrator.
+                                            </p>
+                                            <% } else { %>
+                                            <p style="font-size: 16px; line-height: 1.6; color: #dc3545; text-align: center;">
+                                                ❌ Unfortunately, your request could not be approved at this time.
+                                            </p>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer Message -->
+                                    <tr>
+                                        <td class="content-block" style="padding: 20px 0; border-top: 1px solid #eee;">
+                                            <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.6;">
+                                                Best regards,<br>
+                                                <strong style="color: #7A2530;">GDRFA Sports & Recreation Department</strong>
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- GDRFA Footer -->
+                                    <tr>
+                                        <td align="center" style="padding: 20px 0; background-color: #f8f9fa; border-radius: 0 0 8px 8px;">
+                                            <p style="margin: 0; color: #7A2530; font-weight: bold; font-size: 16px;">
+                                                General Directorate of Residency and Foreigners Affairs
+                                            </p>
+                                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                                                Sports & Recreation Department - Event Management System
+                                            </p>
+                                            <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">
+                                                &copy; 2025 GDRFA. All rights reserved.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>

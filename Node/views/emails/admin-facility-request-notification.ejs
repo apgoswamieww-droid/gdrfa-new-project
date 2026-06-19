@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#7A2530"
+                                style="color: #fff; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px; font-size: 16px; color: #333;">
+                                <p>Hello <strong><%= adminName %></strong>,</p>
+
+                                <p>
+                                    A new facility booking request has been submitted. Here are the details:
+                                </p>
+
+                                <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold; width: 40%;">Requester Name:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= requesterName %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">Requester Email:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= requesterEmail %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">Facility:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= facilityName %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">Date:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= requestDate %></td>
+                                    </tr>
+                                    <% if (timeSlot) { %>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">Time Slot:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= timeSlot %></td>
+                                    </tr>
+                                    <% } %>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">Description:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= description %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">Status:</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span style="color: #d4a853; font-weight: bold;">Pending Approval</span></td>
+                                    </tr>
+                                </table>
+
+                                <p>
+                                    Please review this request and take appropriate action.
+                                </p>
+
+                                <p>
+                                    Best regards,<br>
+                                    <strong>The GDRFA Team</strong>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="footer" style="width: 100%; clear: both; color: #999; text-align: center; font-size: 12px; margin-top: 20px;">
+                        <p style="color: #999;">&copy; 2025 GDRFA. All rights reserved.</p>
+                    </div>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>

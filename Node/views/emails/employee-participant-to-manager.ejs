@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#7A2530"
+                                style="color: #fff; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px; font-size: 16px; color: #333;">
+                                <p>Hello <strong><%= managerData.name %></strong>,</p>
+
+                                <p>
+                                    We would like to inform you that your team member <strong><%= userData.name %></strong> has successfully registered for an event. Please find the complete details below:
+                                </p>
+
+                                <!-- User Details -->
+                                <h3 style="margin-top:20px; color:#7A2530;">User Details</h3>
+                                <table style="width: 100%; margin: 10px 0; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Full Name:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userData.name %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Email:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userData.email %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Phone:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userData.phone %></td>
+                                    </tr>
+                                     <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>User Link:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">
+                                            <a href="<%= userDetailsUrl %>" target="_blank" style="color:#7A2530; font-weight:bold;">View User Details</a>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Event Details -->
+                                <h3 style="margin-top:20px; color:#7A2530;">Event Details</h3>
+                                <table style="width: 100%; margin: 10px 0; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Event Name:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= eventData.name %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Location:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= eventData.location %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Start Date:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= eventData.startDate %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>End Date:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= eventData.endDate %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Start Time:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= eventData.startTime %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>End Time:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= eventData.endTime %></td>
+                                    </tr>
+                                   
+                                </table>
+
+                                <p>
+                                    This is an automated notification to keep you informed about your team member's event participation. Please review the details and contact us if you require any additional information.
+                                </p>
+
+                                <p>
+                                    Best regards,<br>
+                                    <strong>GDRFA Events Team</strong><br>
+                                    General Directorate of Residency and Foreigners Affairs
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="footer" style="width: 100%; clear: both; color: #999; text-align: center; font-size: 12px; margin-top: 20px;">
+                        <p style="color: #999;">&copy; 2025 GDRFA. All rights reserved.</p>
+                    </div>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>

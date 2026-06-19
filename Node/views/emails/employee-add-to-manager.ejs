@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#7A2530"
+                                style="color: #fff; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px; font-size: 16px; color: #333;">
+                                <p>Hello <strong><%= managerName %></strong>,</p>
+
+                                <p>
+                                    A new employee <strong><%= userFullName %></strong> has been created in the system and assigned under your management.  
+                                    Below are the employee details:
+                                </p>
+
+                                <!-- Employee Details -->
+                                <h3 style="margin-top:20px; color:#7A2530;">Employee Details</h3>
+                                <table style="width: 100%; margin: 10px 0; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Full Name:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userFullName %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Email:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userEmail %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Phone:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userPhone %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Sector:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userSector %></td>
+                                    </tr>
+                                     <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Department:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userDepartment %></td>
+                                    </tr>
+                                      <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Section:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userSection %></td>
+                                    </tr>
+                                      <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Branch:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= userBranch %></td>
+                                    </tr>
+                                </table>
+
+                                <p style="color:#2E8B57;">
+                                    ✅ The employee will receive a password setup email to complete their account registration.
+                                </p>
+
+                                <p>
+                                    As their assigned manager, you will be responsible for:
+                                </p>
+                                <ul>
+                                    <li>Employee onboarding and orientation</li>
+                                    <li>Performance management and evaluations</li>
+                                    <li>Approving event participation requests</li>
+                                    <li>Providing guidance and support</li>
+                                </ul>
+
+                                <p>
+                                    Please welcome the new employee and provide them with the necessary guidance and support. 
+                                    If you have any questions, please contact the HR department.
+                                </p>
+
+                                <p>
+                                    Best regards,<br>
+                                    <strong>GDRFA HR Team</strong><br>
+                                    <strong>General Directorate of Residency and Foreigners Affairs</strong>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="footer" style="width: 100%; clear: both; color: #999; text-align: center; font-size: 12px; margin-top: 20px;">
+                        <p style="color: #999;">&copy; 2025 GDRFA. All rights reserved.</p>
+                    </div>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>

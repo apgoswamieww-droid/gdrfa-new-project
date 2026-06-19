@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+@font-face {
+	font-family: "JUSTSans";
+	src: url("./assets/fonts/JUSTSans-Md.eot");
+	src: url("./assets/fonts/JUSTSans-Md.eot?#iefix") format("embedded-opentype"), url("./assets/fonts/JUSTSans-Md.woff2") format("woff2"), url("./assets/fonts/JUSTSans-Md.woff") format("woff"), url("./assets/fonts/JUSTSans-Md.ttf") format("truetype"), url("./assets/fonts/JUSTSans-Md.svg#JUSTSans-Md") format("svg");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "JUSTSans";
+	src: url("./assets/fonts/JUSTSans-SmBd.eot");
+	src: url("./assets/fonts/JUSTSans-SmBd.eot?#iefix") format("embedded-opentype"), url("./assets/fonts/JUSTSans-SmBd.woff2") format("woff2"), url("./assets/fonts/JUSTSans-SmBd.woff") format("woff"), url("./assets/fonts/JUSTSans-SmBd.ttf") format("truetype"), url("./assets/fonts/JUSTSans-SmBd.svg#JUSTSans-SmBd") format("svg");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "JUSTSans";
+	src: url("./assets/fonts/JUSTSans-Bd.eot");
+	src: url("./assets/fonts/JUSTSans-Bd.eot?#iefix") format("embedded-opentype"), url("./assets/fonts/JUSTSans-Bd.woff2") format("woff2"), url("./assets/fonts/JUSTSans-Bd.woff") format("woff"), url("./assets/fonts/JUSTSans-Bd.ttf") format("truetype"), url("./assets/fonts/JUSTSans-Bd.svg#JUSTSans-Bd") format("svg");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'JUSTSans';
+	src: url('./assets/fonts/JUSTSans-Rg.eot');
+	src: url('./assets/fonts/JUSTSans-Rg.eot?#iefix') format('embedded-opentype'), url('./assets/fonts/JUSTSans-Rg.woff2') format('woff2'), url('./assets/fonts/JUSTSans-Rg.woff') format('woff'), url('./assets/fonts/JUSTSans-Rg.ttf') format('truetype'), url('./assets/fonts/JUSTSans-Rg.svg#JUSTSans-Rg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'JUSTSans';
+	src: url('./assets/fonts/JUSTSans-Lt.eot');
+	src: url('./assets/fonts/JUSTSans-Lt.eot?#iefix') format('embedded-opentype'), url('./assets/fonts/JUSTSans-Lt.woff2') format('woff2'), url('./assets/fonts/JUSTSans-Lt.woff') format('woff'), url('./assets/fonts/JUSTSans-Lt.ttf') format('truetype'), url('./assets/fonts/JUSTSans-Lt.svg#JUSTSans-Lt') format('svg');
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+}
+
+
+@theme {
+	--font-just: 'JUSTSans';
+	--color-primary: #7A2530;
+	--color-secondary: #0A2240;
+	--color-black: #161616;
+	--color-red-light:#FFF3F3;
+	--hero-gradient: linear-gradient(180deg, rgba(37, 26, 3, 0) 23.71%, rgba(37, 26, 3, 0.122274) 34.84%, rgba(37, 26, 3, 0.275224) 45.69%, rgba(37, 26, 3, 0.513472) 61.84%, #251A03 100%);
+	--breakpoint-xs: 480px;
+}
+
+
+.slide-equal-height .swiper-wrapper{@apply flex items-stretch}
+.stroke-black {
+  -webkit-text-stroke: 1px #fff;
+  color: transparent;
+}
+
+
+.last-slider .swiper-slide-next + .swiper-slide .image-box{@apply lg:h-[420px] sm:h-60}
+.last-slider .swiper-slide-next .image-box,
+.last-slider .swiper-slide-next + .swiper-slide + .swiper-slide .image-box{@apply lg:h-60 sm:h-36}
+.last-slider .swiper-slide-active,
+.last-slider .swiper-slide-next,
+.last-slider .swiper-slide-next + .swiper-slide + .swiper-slide,
+.last-slider .swiper-slide-next + .swiper-slide + .swiper-slide + .swiper-slide{@apply xl:!w-[16%] lg:!w-[17%] sm:!w-[18%];}
+.last-slider .swiper-slide-next + .swiper-slide{@apply lg:!w-[26%] sm:!w-[28%];}
+.last-slider .swiper-slide-next + .swiper-slide + .swiper-slide,
+.last-slider .swiper-slide-next + .swiper-slide + .swiper-slide + .swiper-slide,
+.last-slider .swiper-slide-next + .swiper-slide + .swiper-slide + .swiper-slide + .swiper-slide{@apply justify-start}
+.last-slider .swiper-slide-next + .swiper-slide,
+.last-slider .swiper-slide-active{@apply max-sm:!w-[25%]}
+.last-slider .swiper-slide-next{@apply max-sm:!w-[50%]}
+.last-slider .swiper-slide-next .image-box{@apply max-sm:h-60 max-xs:h-48}
+.last-slider .swiper-slide-next + .swiper-slide {@apply max-sm:justify-start}
+
+.body-fitness-slider .swiper-slide-active{@apply opacity-0}
+
+@keyframes loginRunnerFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+@keyframes loginStatRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loginOrbit {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  to {
+    transform: rotate(360deg) scale(1.04);
+  }
+}
+
+.login-runner {
+  animation: loginRunnerFloat 5s ease-in-out infinite;
+}
+
+.login-stat {
+  animation: loginStatRise 700ms ease both;
+}
+
+.login-orbit {
+  animation: loginOrbit 12s linear infinite;
+}
+
+@keyframes notificationPop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notificationIconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.notification-pop {
+  animation: notificationPop 420ms ease both;
+}
+
+.notification-icon {
+  animation: notificationIconPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sportsClipFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-24px) rotate(8deg);
+  }
+}
+
+.sports-clip {
+  font-size: clamp(44px, 7vw, 112px);
+  animation: sportsClipFloat 6s ease-in-out infinite;
+}
+
+.sports-detail-grid {
+  background-image:
+    linear-gradient(rgba(122, 37, 48, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 37, 48, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><%= title %></title>
+</head>
+
+<body style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6em; background-color: #f6f6f6; margin: 0;">
+    <table class="body-wrap" width="100%" bgcolor="#f6f6f6">
+        <tr>
+            <td></td>
+            <td class="container" width="600" align="center" style="margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff"
+                        style="border-radius: 5px; background-color: #ffffff; border: 1px solid #ddd;">
+                        <tr>
+                            <td align="center" bgcolor="#38414a"
+                                style="color: #fff; background-color: #7A2530; font-weight: 500; padding: 20px;">
+                                <img src="<%= logoUrl %>" height="80" alt="logo" style="width: 80px; height: 80px;" />
+                                <br />
+                                <span style="margin-top: 10px; display: block; font-size: 18px;">
+                                    <%= title %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="content-wrap" style="padding: 20px; font-size: 16px; color: #333;">
+                                <p>Hello <strong><%= name %></strong>,</p>
+
+                                <p>
+                                    Your facility request status has been updated. Here are the details:
+                                </p>
+
+                                <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Facility:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= facilityName %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Status:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= facilityStatus %></td>
+                                    </tr>
+                                     <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Date:</strong></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><%= approvedDate %></td>
+                                    </tr>
+                                </table>
+
+                                <p>
+                                    If you have any questions regarding this request, please contact our support team.
+                                </p>
+
+                                <p>
+                                    Best regards,<br>
+                                    <strong>The GDRFA Team</strong>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="footer" style="width: 100%; clear: both; color: #999; text-align: center; font-size: 12px; margin-top: 20px;">
+                        <p style="color: #999;">&copy; 2025 GDRFA. All rights reserved.</p>
+                    </div>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>
