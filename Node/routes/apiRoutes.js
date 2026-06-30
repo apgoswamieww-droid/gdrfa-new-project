@@ -73,6 +73,8 @@ router.post('/admin/logout', adminAuthController.logout);
 // Password management – strict limits
 router.post('/forgot-password', passwordLimiter, authController.postForgotPassword);
 router.post('/reset-password', passwordLimiter, authController.postResetPassword);
+router.post('/admin/forgot-password', passwordLimiter, adminAuthController.forgotPassword);
+router.post('/admin/reset-password', passwordLimiter, adminAuthController.resetPassword);
 
 // Public form submissions – moderate limits
 router.post('/contact-us', publicFormLimiter, ContactUsController.contactStore);

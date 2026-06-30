@@ -188,12 +188,12 @@ export default function Login() {
                   />
                   Remember me
                 </label>
-                <a
+                {/* <a
                   onClick={() => navigate("/forgot-password")}
                   className="text-primary hover:underline font-medium transition-colors cursor-pointer"
                 >
                   Forgot Password?
-                </a>
+                </a> */}
               </div>
 
               {/* Sign In Button */}

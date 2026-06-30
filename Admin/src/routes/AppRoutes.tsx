@@ -48,6 +48,7 @@ import ProfilePage from '../pages/Profile/ProfilePage';
 import AccountSettings from '../pages/Settings/AccountSettings';
 import Login from '../auth/Login';
 import ForgotPassword from '../auth/ForgotPassword';
+import ResetPassword from '../auth/ResetPassword';
 import Register from '../auth/Register';
 import Masters from '../pages/Masters/masters';
 
@@ -56,6 +57,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

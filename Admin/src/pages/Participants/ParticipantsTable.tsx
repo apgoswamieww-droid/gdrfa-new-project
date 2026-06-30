@@ -40,13 +40,13 @@ export default function ParticipantsTable({
   data, 
   onView, 
   onStatusChange,
-  onEvaluate,
+  // onEvaluate,
   onDelete
 }: { 
   data: Participant[]; 
   onView: (data: Participant) => void;
   onStatusChange: (id: number, status: string) => void;
-  onEvaluate?: (data: Participant) => void;
+  // onEvaluate?: (data: Participant) => void;
   onDelete?: (id: number) => void;
 }) {
   const columns: Column<Participant>[] = useMemo(() => [
@@ -158,7 +158,7 @@ export default function ParticipantsTable({
         <ViewIcon />
       </button>
       
-      {onEvaluate && (
+      {/* {onEvaluate && (
         <button
           title="Add Evaluation"
           onClick={() => onEvaluate(row)}
@@ -166,7 +166,7 @@ export default function ParticipantsTable({
         >
           <EvaluationIcon />
         </button>
-      )}
+      )} */}
 
       {row.status === "0" && (
         <>

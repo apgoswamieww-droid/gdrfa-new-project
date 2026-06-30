@@ -15,7 +15,7 @@ function App() {
   useLanguage();
 
   // ✅ Define auth routes where layout should be hidden
-  const authRoutes = ['/login', '/register', '/forgot-password'];
+  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
   const isAuthPage = authRoutes.includes(location.pathname);
   const isLoggedIn = Boolean(localStorage.getItem("adminToken"));
 

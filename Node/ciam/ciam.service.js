@@ -87,7 +87,7 @@ class CiamService {
     const mockToken = jwt.sign(
       {
         sub: 'ml687',
-        email: 'cmamer@dnrd.ae',
+        email: 'apgoswami@yopmail.com',
         client_user_id: '9FD05067-8E38-4B62-BE00-02CD16B633FF',
         user_type: 'internal',
         jti: require('uuid').v4(),
@@ -112,7 +112,7 @@ class CiamService {
         userDomain: "ml687",
         name: "Amir Abdulla Mohamed Almulla",
         nameArAe: "عامر عبدالله محمد الملا",
-        email: "cmamer@dnrd.ae",
+        email: "apgoswami@yopmail.com",
         userName: null,
         mobile: "0509888345",
         isSupervisor: 1,
@@ -165,7 +165,7 @@ class CiamService {
           return jwt.sign(
             {
               sub: 'ml687',
-              email: 'cmamer@dnrd.ae',
+              email: 'apgoswami@yopmail.com',
               client_user_id: '9FD05067-8E38-4B62-BE00-02CD16B633FF',
               user_type: 'internal',
               jti: require('uuid').v4(),
@@ -371,7 +371,7 @@ class CiamService {
           deptNameAR: "إدارة أذونات الإقامة", deptNameEN: "Residence Permits Department",
           sectionNameAr: "قسم الحالات الإنسانية", sectionNameEn: "Humanitarian Cases Section",
           branchNameAR: null, branchNameEN: null, unitNameAR: null, unitNameEN: null,
-          loginName: "ml687", emailAddress: "cmamer@dnrd.ae",
+          loginName: "ml687", emailAddress: "apgoswami@yopmail.com",
           hireDate: "2005-10-19T00:00:00", hireTypeID: 1, hireTypeEN: "Local", hireTypeAR: "المحلي",
           uaeid: "784-1981-6964071-5",
           serviceDurationYears: 20, serviceDurationMonths: 4, serviceDurationDays: 0,

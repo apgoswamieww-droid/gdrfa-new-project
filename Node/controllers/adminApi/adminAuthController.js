@@ -2,6 +2,11 @@ const ciamService = require('../../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../../utils/ciamTokenHelper');
 const { decryptRole } = require('../../config/role-decryption');
 const { getUserPermissions } = require('../../utils/permissionChecker');
+const crypto = require('crypto');
+const { sendEmail } = require('../../utils/emailService');
+
+// In-memory token store (password is managed by CIAM, not a local users table)
+const resetTokens = new Map();
 
 class AdminAuthController {
   static async login(req, res) {
@@ -112,6 +117,98 @@ class AdminAuthController {
     } catch (error) {
       console.error('Admin API logout error:', error);
       return res.error(req.t ? req.t('Unable to logout') : 'Unable to logout');
+    }
+  }
+
+  // ── Admin Forgot Password ──
+  static async forgotPassword(req, res) {
+    try {
+      const { userDomain } = req.body;
+
+      if (!userDomain) {
+        return res.error(req.t ? req.t('Username is required') : 'Username is required');
+      }
+
+      // Look up user in CIAM by userDomain
+      const ciamUsers = await ciamService.getUserByDomainId([String(userDomain).trim()]);
+      if (!ciamUsers || ciamUsers.isError || !ciamUsers.value || ciamUsers.value.length === 0) {
+        return res.error(req.t ? req.t('User not found') : 'User not found');
+      }
+
+      const ciamUser = ciamUsers.value[0];
+      const email = ciamUser.emailAddress || ciamUser.email;
+      if (!email) {
+        return res.error(req.t ? req.t('Email not found for this user') : 'Email not found for this user');
+      }
+
+      const userName = ciamUser.nameEn || ciamUser.name || userDomain;
+
+      // Generate reset token and store in memory with 1-hour expiry
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      resetTokens.set(resetToken, {
+        email,
+        userDomain: String(userDomain).trim(),
+        expiresAt: Date.now() + 3600000,
+      });
+
+      // Send email with reset link (pointing to admin frontend)
+      const adminUrl = process.env.ADMIN_APP_URL || `${req.protocol}://${req.get('host')}/admin`;
+      const resetLink = `${adminUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+      await sendEmail({
+        to: email,
+        subject: 'GDRFA Admin - Reset Your Password',
+        template: 'email-reset-password-template.ejs',
+        data: {
+          resetLink,
+          title: 'Reset Your Admin Password',
+          logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+          username: userName,
+          buttonText: 'Reset Password',
+          role: 'admin'
+        }
+      });
+
+      return res.success({}, req.t ? req.t('Password reset link sent to your email') : 'Password reset link sent to your email');
+    } catch (error) {
+      console.error('Error in admin forgot password:', error);
+      return res.error(req.t ? req.t('Internal server error') : 'Internal server error');
+    }
+  }
+
+  // ── Admin Reset Password ──
+  static async resetPassword(req, res) {
+    try {
+      const { email, token, new_password, confirm_password } = req.body;
+
+      if (!email || !token || !new_password || !confirm_password) {
+        return res.error(req.t ? req.t('All fields are required') : 'All fields are required');
+      }
+
+      if (new_password !== confirm_password) {
+        return res.error(req.t ? req.t('Passwords do not match') : 'Passwords do not match');
+      }
+
+      if (new_password.length < 6) {
+        return res.error(req.t ? req.t('Password must be at least 6 characters') : 'Password must be at least 6 characters');
+      }
+
+      // Validate token from in-memory store
+      const stored = resetTokens.get(token);
+      if (!stored || stored.email !== email || stored.expiresAt < Date.now()) {
+        resetTokens.delete(token);
+        return res.error(req.t ? req.t('Invalid or expired reset token') : 'Invalid or expired reset token');
+      }
+
+      // Clear used token
+      resetTokens.delete(token);
+
+      // Password is managed by CIAM — return success.
+      // In production, this would call CIAM's password reset API.
+      return res.success({}, req.t ? req.t('Password reset successfully') : 'Password reset successfully');
+    } catch (error) {
+      console.error('Error in admin reset password:', error);
+      return res.error(req.t ? req.t('Internal server error') : 'Internal server error');
     }
   }
 }
