@@ -173,7 +173,7 @@ class ApiController {
     static async getProfile(req, res) {
         try {
             const userId = req.user.id;
-
+            console.log('Fetching profile for userId:', userId);
             let myUserInfo = await ciamService.getUserByDomainId(userId.split(','), req.headers.authorization);
             if (myUserInfo?.isError || myUserInfo == null) {
                 const refreshed = await attemptTokenRefresh(req);
@@ -245,7 +245,7 @@ class ApiController {
                 // Continue without evaluation data
                 latestEvaluation = null;
             }
-
+            console.log('Latest evaluation data:', latestEvaluation);
             const getAge = d => { const b = new Date(d); const t = new Date(); return t.getFullYear() - b.getFullYear() - (t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate()) ? 1 : 0); };
             // Transform data into proper objects
             const formattedUser = {

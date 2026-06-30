@@ -33,6 +33,27 @@ export default function SportsEventList() {
     fetchEvents();
   }, [activeStatus]);
 
+  const getEventStatus = (event: any): { label: string; type: "completed" | "ongoing" | "upcoming" } | null => {
+    // If admin marked as completed
+    if (String(event.eventActiveStatus) === "2") {
+      return { label: t("sportsEvents.completed"), type: "completed" };
+    }
+    const now = new Date();
+    const start = event.startDate ? new Date(event.startDate) : null;
+    const end = event.endDate ? new Date(event.endDate) : null;
+    if (start && end && now >= start && now <= end) {
+      return { label: t("sportsEvents.ongoing"), type: "ongoing" };
+    }
+    if (start && now < start) {
+      return { label: t("sportsEvents.upcoming"), type: "upcoming" };
+    }
+    // Fallback: if eventActiveStatus is "1" (active)
+    if (String(event.eventActiveStatus) === "1") {
+      return { label: t("sportsEvents.ongoing"), type: "ongoing" };
+    }
+    return null;
+  };
+
   const formatDate = (start: string | null, end: string | null) => {
     if (!start) return t("sportsEvents.tba");
     const s = new Date(start);
@@ -104,6 +125,20 @@ export default function SportsEventList() {
                         <span className="inline-block rounded-full text-white md:text-xs/tight text-[10px]/tight font-semibold lg:py-1.5 py-1 lg:px-3.5 px-2.5 bg-primary lg:m-1.5">
                           {t("sportsEvents.sports")}
                         </span>
+                        {(() => {
+                          const status = getEventStatus(event);
+                          if (!status) return null;
+                          const colors = {
+                            completed: "bg-green-500 text-white",
+                            ongoing: "bg-blue-500 text-white",
+                            upcoming: "bg-amber-500 text-white",
+                          };
+                          return (
+                            <span className={`inline-block rounded-full md:text-xs/tight text-[10px]/tight font-semibold lg:py-1.5 py-1 lg:px-3.5 px-2.5 lg:m-1.5 ${colors[status.type]}`}>
+                              {status.label}
+                            </span>
+                          );
+                        })()}
                       </div>
                       <div className="w-full lg:rounded-2xl rounded-xl bg-white/75 border border-white xl:p-[18px] lg:p-3.5 p-3 lg:min-h-32 flex flex-col justify-between backdrop-blur-[3px] text-start">
                         <h2 className="font-bold lg:text-lg/tight text-base/tight text-secondary lg:mb-3 mb-2 line-clamp-2">{i18n.language === 'ar' ? event.name_ar || event.name : event.name}</h2>

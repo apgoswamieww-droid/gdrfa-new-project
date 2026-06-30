@@ -140,6 +140,27 @@ export default function AllEventSec() {
     }
   };
 
+  const getEventStatus = (event: any): { label: string; type: "completed" | "ongoing" | "upcoming" } | null => {
+    // If admin marked as completed
+    if (String(event.eventActiveStatus) === "2") {
+      return { label: t("sportsEvents.completed"), type: "completed" };
+    }
+    const now = new Date();
+    const start = event.startDate ? new Date(event.startDate) : null;
+    const end = event.endDate ? new Date(event.endDate) : null;
+    if (start && end && now >= start && now <= end) {
+      return { label: t("sportsEvents.ongoing"), type: "ongoing" };
+    }
+    if (start && now < start) {
+      return { label: t("sportsEvents.upcoming"), type: "upcoming" };
+    }
+    // Fallback: if eventActiveStatus is "1" (active)
+    if (String(event.eventActiveStatus) === "1") {
+      return { label: t("sportsEvents.ongoing"), type: "ongoing" };
+    }
+    return null;
+  };
+
   const formatDate = (start: string, end: string) => {
     const s = new Date(start);
     const e = new Date(end);
@@ -339,8 +360,8 @@ export default function AllEventSec() {
                 </div>
               ) : displayedEvents.length > 0 ? (
                 displayedEvents.map((item: any) => (
-                  <Link to={`/sport-activity-list/${item.id}`}>
-                    <div key={item.id} className="flex flex-col">
+                  <Link to={`/sport-activity-list/${item.id}`} key={item.id}>
+                    <div className="flex flex-col">
                       <div className="lg:rounded-3xl rounded-2xl lg:h-100 sm:h-72 xs:h-52 h-60 overflow-hidden bg-[linear-gradient(360deg,#2E0006_0%,rgba(148,1,20,0)_100%)] p-[0.2px] relative">
                         <div className="lg:rounded-3xl rounded-2xl h-full overflow-hidden">
                           <img
@@ -350,11 +371,27 @@ export default function AllEventSec() {
                           />
                         </div>
                         <div className="md:p-2 p-1 flex flex-col justify-between absolute inset-0 z-20 items-start bg-[linear-gradient(360deg,#2E0006_0%,rgba(148,1,20,0)_100%)]">
-                          <span className="inline-block rounded-full text-primary md:text-xs/tight text-[10px]/tight font-semibold lg:py-1.5 py-1 lg:px-3.5 px-2.5 bg-white lg:m-1.5">
-                            {item.targetType === "competitive"
-                              ? t("home.team")
-                              : t("home.individual")}
-                          </span>
+                          <div className="flex gap-2 flex-wrap">
+                            <span className="inline-block rounded-full text-primary md:text-xs/tight text-[10px]/tight font-semibold lg:py-1.5 py-1 lg:px-3.5 px-2.5 bg-white lg:m-1.5">
+                              {item.targetType === "competitive"
+                                ? t("home.team")
+                                : t("home.individual")}
+                            </span>
+                            {(() => {
+                              const status = getEventStatus(item);
+                              if (!status) return null;
+                              const colors: Record<string, string> = {
+                                completed: "bg-green-500 text-white",
+                                ongoing: "bg-blue-500 text-white",
+                                upcoming: "bg-amber-500 text-white",
+                              };
+                              return (
+                                <span className={`inline-block rounded-full md:text-xs/tight text-[10px]/tight font-semibold lg:py-1.5 py-1 lg:px-3.5 px-2.5 lg:m-1.5 ${colors[status.type]}`}>
+                                  {status.label}
+                                </span>
+                              );
+                            })()}
+                          </div>
                           <div className="w-full lg:rounded-2xl rounded-xl bg-white/70 border border-white xl:p-[18px] lg:p-3.5 p-2.5 lg:min-h-28 xs:min-h-24 flex flex-col justify-between backdrop-blur-[2px]">
                             <h5 className="font-bold lg:text-lg/tight text-base/tight text-secondary lg:mb-3 mb-2 line-clamp-2">
                               {item.name && (i18n.language === 'ar' ? item.name_ar || item.name : item.name)}
@@ -408,8 +445,7 @@ export default function AllEventSec() {
                         <p className="md:text-sm/tight text-xs/tight font-medium opacity-60 text-secondary line-clamp-3 flex-1">
                           {i18n.language === 'ar' ? item.eventDescription_ar || item.eventDescription : item.eventDescription}
                         </p>
-                        <Link
-                          to={`/sport-activity-list/${item.id}`}
+                        <span
                           className="group xl:min-w-10 xl:w-10 min-w-7 w-7 text-white hover:text-primary aspect-square border border-primary rounded-full bg-primary transition-all duration-300 hover:bg-transparent flex justify-center items-center shrink-0"
                         >
                           <svg
@@ -434,7 +470,7 @@ export default function AllEventSec() {
                               strokeLinejoin="round"
                             />
                           </svg>
-                        </Link>
+                        </span>
                       </div>
                     </div>
                   </Link>

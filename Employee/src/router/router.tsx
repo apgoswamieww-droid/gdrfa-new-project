@@ -16,6 +16,7 @@ import MediaKnowledgeDetail from "../pages/MediaKnowledge/MediaKnowledgeDetail";
 import ContactUs from "../pages/ContactUs";
 import Faq from "../pages/Faq";
 import CmsPageWrapper from "../pages/CmsPage";
+import Certificates from "../pages/Certificates";
 
 const AppRouting = () => {
   return (
@@ -27,6 +28,7 @@ const AppRouting = () => {
           <Route path="/login" Component={Login} />
           <Route path="/forgot-password" Component={ForgotPassword} />
           <Route path="/profile" Component={Profile} />
+          <Route path="/certificates" Component={Certificates} />
           <Route path="/sport-activity-list" Component={SportsEventList} />
           <Route path="/sport-activity-list/:eventId" Component={SportsEventDetail} />
           <Route path="/achievement" Component={Achievements} />

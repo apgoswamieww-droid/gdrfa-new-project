@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getEventActivitiesApi, updateEventActivitiesApi, getYearsApi } from "../../api/events.api";
-import { getEmployeesWithFiltersApi, type EmployeeWithDetails, type EmployeeFilterOptions } from "../../api/employees.api";
+import { getEmployeesWithFiltersApi, type EmployeeFilterOptions } from "../../api/employees.api";
 import EmployeeSelectionModal from "../../component/EmployeeSelectionModal/EmployeeSelectionModal";
 import { useTranslation } from "../../hooks/useTranslation";
 import { formatDate } from "../../utils/dateUtils";
@@ -129,7 +129,7 @@ const ManageEventActivity = () => {
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [filterOptions, setFilterOptions] = useState<EmployeeFilterOptions>({
     sectors: [], departments: [], sections: [], branches: [],
-    ranks: [], jobTitles: [], genders: [], workSystems: [],
+    ranks: [], jobTitles: [], genders: [], workSystems: [], staffTypes: [],
   });
 
   const eventStartStr = useMemo(() => {

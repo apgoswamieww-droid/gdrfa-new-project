@@ -37,6 +37,7 @@ const faqAdminController = require('../controllers/adminApi/faqController');
 const commonController = require('../controllers/commonController');
 const dashboardAdminController = require('../controllers/adminApi/dashboardAdminController');
 const evaluationAdminController = require('../controllers/adminApi/evaluationController');
+const fitnessEvaluationAdminController = require('../controllers/adminApi/fitnessEvaluationController');
 
 const uploadTeam = createUploader('uploads/team');
 const uploadFaq = createUploader('uploads/faq');
@@ -272,6 +273,18 @@ router.post('/admin/fitness-score-matrix/bulk-import', verifyToken, verifyAdminO
 // Fitness Test (Evaluate Participant)
 router.post('/admin/fitness-test', verifyToken, verifyAdminOrSuperAdmin, fitnessCategoryAdminController.storeFitnessTest);
 
+// Fitness Evaluation (Excel Upload) Routes
+router.get('/admin/fitness-evaluations', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.list);
+router.get('/admin/fitness-evaluations/:id', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.show);
+router.post('/admin/fitness-evaluations', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.store);
+router.put('/admin/fitness-evaluations/:id', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.update);
+router.delete('/admin/fitness-evaluations/:id', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.delete);
+router.get('/admin/fitness-evaluations-years', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.getYears);
+router.get('/admin/fitness-evaluations/:id/user-lookup', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.lookupUserByGrp);
+router.put('/admin/evaluation-results/:id', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.updateResult);
+router.delete('/admin/evaluation-results/:id', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.deleteResult);
+router.post('/admin/fitness-evaluations/:id/delete-session', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.deleteSession);
+
 // CMS Admin Routes
 router.get('/admin/cms-pages', verifyToken, cmsAdminController.list);
 router.get('/admin/cms-pages/:id', verifyToken, cmsAdminController.show);
@@ -323,6 +336,7 @@ router.get('/job-titles', verifyToken, authController.getJobTitles);
 
 router.post('/participant', verifyToken, pageController.postEventParticipant);
 router.get('/certificates', verifyToken, pageController.getCertificates);
+router.get('/certificates/:id/download', verifyToken, pageController.downloadCertificate);
 router.get('/sport-events', sportEventController.getSportEvents);
 router.get('/notifications', verifyToken, notificationController.getAllNotification);
 router.get('/clear-notification/:id', verifyToken, notificationController.clearNotificationById);

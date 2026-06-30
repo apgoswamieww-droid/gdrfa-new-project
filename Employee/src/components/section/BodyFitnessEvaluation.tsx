@@ -24,20 +24,53 @@ export default function BodyFitnessEvaluationYo() {
     const isLoggedIn = Boolean(token);
 
     useEffect(() => {
-        if (!isLoggedIn) return;
+        if (!isLoggedIn) {
+            console.log('[BodyFitnessEvaluation] ❌ Not logged in — skipping fetch');
+            return;
+        }
 
         let cancelled = false;
 
         const fetchFitnessData = async () => {
             try {
                 setLoading(true);
+                console.log(`[BodyFitnessEvaluation] 🔵 STEP 1: Calling getFitnessCategory API with filterType = "${filterType}"`);
                 const response = await getFitnessCategory(filterType);
-                if (!cancelled && response.data?.categories) {
-                    setCategories(response.data.categories);
+                console.log('[BodyFitnessEvaluation] 🔵 STEP 2: Raw API response:', response);
 
+                if (!cancelled) {
+                    if (response?.data) {
+                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3: response.data:', response.data);
+                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3a: response.data.categories:', response.data.categories);
+                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3b: response.data.filter:', response.data.filter);
+                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3c: response.data.total_points:', response.data.total_points);
+                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3d: response.data.evaluation_date:', response.data.evaluation_date);
+                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3e: response.data.user:', response.data.user);
+                    }
+
+                    if (response.data?.categories) {
+                        console.log(`[BodyFitnessEvaluation] 🔵 STEP 4: Setting ${response.data.categories.length} categories into state`);
+                        response.data.categories.forEach((cat: any, i: number) => {
+                            console.log(`[BodyFitnessEvaluation]   Category[${i}]:`, {
+                                category_id: cat.category_id,
+                                category_name: cat.category_name,
+                                unit: cat.unit,
+                                input_value: cat.input_value,
+                                result_points: cat.result_points,
+                                level: cat.level,
+                                last_update: cat.last_update,
+                                total_points: cat.total_points,
+                                evaluation_points: cat.evaluation_points,
+                            });
+                        });
+                        setCategories(response.data.categories);
+                    } else {
+                        console.log('[BodyFitnessEvaluation] ⚠️ STEP 4: No categories found in response — setting empty array');
+                        if (!cancelled) setCategories([]);
+                    }
                 }
-            } catch {
-                // silently fail
+            } catch (err) {
+                console.error('[BodyFitnessEvaluation] ❌ API call failed:', err);
             } finally {
                 if (!cancelled) {
                     setLoading(false);
@@ -52,18 +85,25 @@ export default function BodyFitnessEvaluationYo() {
         };
     }, [isLoggedIn, filterType]);
 
+    console.log('[BodyFitnessEvaluation] 🟢 Rendering with categories state:', categories);
+
     const bodyFitnessData = categories.length > 0
-        ? categories.map((cat: any, index: any) => ({
-            id: cat.category_id || index,
-            label: cat.category_name,
-            pts: cat.result_points ?? 0,
-            level: cat.level || "Beginner",
-            date: cat.last_update ? new Date(cat.last_update).toLocaleDateString(t('i18n.language') === 'ar' ? 'ar-AE' : 'en-US', { day: "numeric", month: "short", year: "numeric" }).replace(/, \d{4}/, "") : "",
-            stats: [`${cat.input_value || "—"} ${cat.unit || ""}`],
-            rings: [cat.result_points ?? 0, Math.max(0, (cat.result_points ?? 0) - 20), Math.max(0, (cat.result_points ?? 0) - 40)],
-            emoji: [Fitness1, Fitness2, Fitness3][index % 3],
-        }))
+        ? categories.map((cat: any, index: any) => {
+            const item = {
+                id: cat.category_id || index,
+                label: cat.category_name,
+                pts: cat.result_points ?? 0,
+                date: cat.last_update ? new Date(cat.last_update).toLocaleDateString(t('i18n.language') === 'ar' ? 'ar-AE' : 'en-US', { day: "numeric", month: "short", year: "numeric" }).replace(/, \d{4}/, "") : "",
+                stats: [""],
+                rings: [cat.result_points ?? 0, Math.max(0, (cat.result_points ?? 0) - 20), Math.max(0, (cat.result_points ?? 0) - 40)],
+                emoji: [Fitness1, Fitness2, Fitness3][index % 3],
+            };
+            console.log(`[BodyFitnessEvaluation] 🟢 Transformed item[${index}]:`, item);
+            return item;
+        })
         : [];
+
+    console.log('[BodyFitnessEvaluation] 🟢 bodyFitnessData length:', bodyFitnessData.length, '| Will render?', bodyFitnessData.length > 0 ? 'YES ✅' : 'NO ❌ (null)');
 
     const [activeIndex, setActiveIndex] = useState(0);
     const loopItems = bodyFitnessData.length > 0 && bodyFitnessData.length < 6
@@ -239,11 +279,11 @@ export default function BodyFitnessEvaluationYo() {
                                         <div>
                                             <img src={item.emoji} alt="" className="max-w-40 2xl:max-h-70 xl:max-h-42 lg:max-h-36 md:max-h-30 max-h-25 2xl:-mt-36 xl:-mt-20 -mt-14 absolute" />
                                         </div>
+
                                         <div className="flex flex-col justify-between lg:w-5/6 w-[65%]">
                                             <h5 className="lg:text-lg/tight text-base/tight font-bold text-primary mb-0.5 text-end">{item.label}</h5>
                                             <div className="text-end">
                                                 <h4 className="xl:text-2xl/tight text-lg/tight font-bold text-secondary mb-0.5">{item.pts} {t('home.points')}</h4>
-                                                <span className="lg:text-base/tight text-sm/tight text-secondary opacity-40 font-medium block">{t('home.level')}: {item.level}</span>
                                                 <span className="hidden">{item.date}</span>
                                             </div>
                                         </div>
@@ -258,7 +298,6 @@ export default function BodyFitnessEvaluationYo() {
                                 </div>
                                 <div className="text-end lg:w-5/6 w-[60%]">
                                     <h4 className="xl:text-2xl/tight text-lg/tight font-bold lg:mb-1.5 mb-1">{activeItem.pts} {t('home.points')}</h4>
-                                    <span className="lg:text-base/tight md:text-sm/tight text-xs/tight font-bold block text-[#CDA5A6]">{t('home.level')}: {activeItem.level}</span>
                                     <span className="md:text-sm/tight text-xs/tight font-medium block text-[#CDA5A6]">{t('home.lastEvaluatedOn')} {activeItem.date}</span>
                                 </div>
                             </div>

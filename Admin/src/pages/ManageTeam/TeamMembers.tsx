@@ -245,7 +245,7 @@ const TeamMembers = () => {
 
   if (loading) return <div className="p-4">Loading...</div>;
 
-  const imageUrl = team?.image ? `${import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/"}${team.image}` : null;
+  const imageUrl = team?.image ? `${import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/"}${team.image}` : undefined;
 
   return (
     <div className="p-4 2xl:space-y-8 space-y-6">

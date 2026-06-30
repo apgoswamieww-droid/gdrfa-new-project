@@ -645,22 +645,31 @@ class EventAdminController {
                 : (Array.isArray(selectedUserIds) ? selectedUserIds.join(',') : (selectedUserIds || ''));
             const eventAdminsStr = eventAdmins || '';
 
-            // Update event
-            await db.query(`
-                UPDATE events SET
-                    [activityId] = ?, [targetType] = ?, [teamName] = ?, [targetedEmployees] = ?,
-                    [ageRange] = ?, [selectedEmployees] = ?, [eventAdmins] = ?,
-                    [gender] = ?, [sector] = ?, [department] = ?, [section] = ?, [branch] = ?,
-                    [rank] = ?, [jobTitle] = ?,
-                    [updatedAt] = GETDATE()
-                WHERE id = ?
-            `, [
+            // Update event – build SET dynamically so missing columns don't cause errors
+            const existingCols = await getExistingColumns();
+            const setClauses = [
+                '[activityId] = ?', '[targetType] = ?', '[teamName] = ?', '[targetedEmployees] = ?',
+                '[ageRange] = ?', '[selectedEmployees] = ?', '[eventAdmins] = ?',
+                '[gender] = ?', '[sector] = ?', '[department] = ?', '[section] = ?', '[branch] = ?',
+            ];
+            const setParams = [
                 activityIdStr, targetType, teamNameStr, targetedEmployeesStr,
                 ageRangeStr, selectedEmployeesStr, eventAdminsStr,
                 genderStr, sectorStr, departmentStr, sectionStr, branchStr,
-                rankStr, jobTitleStr,
-                eventId
-            ]);
+            ];
+            if (existingCols.has('rank')) {
+                setClauses.push('[rank] = ?');
+                setParams.push(rankStr);
+            }
+            if (existingCols.has('jobTitle')) {
+                setClauses.push('[jobTitle] = ?');
+                setParams.push(jobTitleStr);
+            }
+            setClauses.push('[updatedAt] = GETDATE()');
+            await db.query(`
+                UPDATE events SET ${setClauses.join(', ')}
+                WHERE id = ?
+            `, [...setParams, eventId]);
 
             // Handle schedules
             if (activityIds.length > 0 && schedules && Array.isArray(schedules)) {

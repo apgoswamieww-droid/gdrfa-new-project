@@ -153,6 +153,7 @@ const NAV_PERMISSIONS: Record<string, string[]> = {
   teams: ["view-team"],
   events: ["view-event"],
   request: ["view-list-participants"],
+  "fitness-evaluation": ["view-evaluation-list"],
   facility: ["view-list-facilities", "can-approve-or-reject-request"],
   "facility-view": ["view-list-facilities"],
   "facility-request": ["can-approve-or-reject-request"],
@@ -295,6 +296,7 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
     { key: "teams", label: t.sidebar.teams, icon: "teams", href: "/teams" },
     { key: "events", label: t.sidebar.manageEvents, icon: "events", href: "/events" },
     { key: "request", label: t.sidebar.participantsRequest, icon: "request", href: "/participant-requests" },
+    { key: "fitness-evaluation", label: t.sidebar.fitnessEvaluation, icon: "evaluation_config", href: "/fitness-evaluation" },
     { key: "audit-history", label: "Audit History", icon: "cms_pages", href: "/audit-history" },
     { key: "notifications", label: "Notifications", icon: "help", href: "/notifications" },
     {

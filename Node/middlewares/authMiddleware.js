@@ -76,6 +76,7 @@ module.exports = {
         const buildFallbackUser = () => ({
           id: user.sub || 'unknown',
           userDomain: user.sub || 'unknown',
+          email: user.email || user.preferred_username || null,
           roleId: '',
           permissions: [],
           token
@@ -115,6 +116,7 @@ module.exports = {
           userDomain: userInfo.userDomain,
           nameEn: userInfo.nameEn || null,
           nameAr: userInfo.nameAr || null,
+          email: userInfo.emailAddress || userInfo.email || null,
           roleId,
           permissions,
           token

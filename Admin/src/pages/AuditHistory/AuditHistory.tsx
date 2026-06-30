@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import DataTable, { type Column } from "../../component/Table/DataTable";
 import { getApprovalHistoryApi } from "../../api/approvalHistory.api";
 import SearchInput from "../../component/Input/SearchInput";
-import { useTranslation } from "../../hooks/useTranslation";
 
 interface ApprovalRecord {
   id: number;
@@ -42,7 +41,6 @@ const statusBadge = (status: string) => {
 };
 
 const AuditHistory = () => {
-  const { t } = useTranslation();
   const [data, setData] = useState<ApprovalRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

@@ -96,7 +96,35 @@ export default function SportsEventDetail() {
     return new Date(dateStr).toLocaleDateString(locale, options);
   };
 
+  const getEventStatusBadge = () => {
+    // If admin marked as completed
+    if (String(event.eventActiveStatus) === "2") {
+      return { label: t("sportsEvents.completed"), type: "completed" as const };
+    }
+    const now = new Date();
+    const start = event.startDate ? new Date(event.startDate) : null;
+    const end = event.endDate ? new Date(event.endDate) : null;
+    if (start && end && now >= start && now <= end) {
+      return { label: t("sportsEvents.ongoing"), type: "ongoing" as const };
+    }
+    if (start && now < start) {
+      return { label: t("sportsEvents.upcoming"), type: "upcoming" as const };
+    }
+    // Fallback: if eventActiveStatus is "1" (active)
+    if (String(event.eventActiveStatus) === "1") {
+      return { label: t("sportsEvents.ongoing"), type: "ongoing" as const };
+    }
+    return null;
+  };
+
   const getRegistrationStatus = () => {
+    // If event is marked as completed, show Event Completed
+    if (String(event.eventActiveStatus) === "2") {
+      return {
+        label: t("sportsEvents.detail.eventCompleted"),
+        type: "completed" as const,
+      };
+    }
     const now = new Date();
     const start = event.regStartDate ? new Date(event.regStartDate) : null;
     const end = event.regEndDate ? new Date(event.regEndDate) : null;
@@ -235,11 +263,25 @@ export default function SportsEventDetail() {
                 <span className="rtl:-scale-x-100 rotate-180"><ArrowIcon /></span>
                 {t("sportsEvents.detail.backToHome")}
               </Link>
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-2 flex-wrap mb-4">
                 <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
                   {event.targetType === "competitive" ? t("sportsEvents.team") : t("sportsEvents.individual")}
                 </span>
                 <span className="rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">{t("sportsEvents.sports")}</span>
+                {(() => {
+                  const status = getEventStatusBadge();
+                  if (!status) return null;
+                  const colors: Record<string, string> = {
+                    completed: "bg-green-500 text-white",
+                    ongoing: "bg-blue-500 text-white",
+                    upcoming: "bg-amber-500 text-white",
+                  };
+                  return (
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${colors[status.type]}`}>
+                      {status.label}
+                    </span>
+                  );
+                })()}
               </div>
               <h1 className="text-white md:text-4xl text-2xl font-bold leading-tight">
                 {eventName}
@@ -351,6 +393,7 @@ export default function SportsEventDetail() {
                       warning: "bg-amber-50 text-amber-700 border-amber-200",
                       success: "bg-green-50 text-green-700 border-green-200",
                       danger: "bg-red-50 text-red-700 border-red-200",
+                      completed: "bg-green-50 text-green-700 border-green-200",
                     };
                     return (
                       <div className={`rounded-xl border px-4 py-3 text-sm font-bold ${colors[status.type]}`}>

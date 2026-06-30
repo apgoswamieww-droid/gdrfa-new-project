@@ -1,4 +1,5 @@
 import { apiRequest } from "./request";
+import { useAuthStore } from "../store/store";
 
 export async function getSponsors() {
   return apiRequest({
@@ -208,9 +209,43 @@ export async function getMyApprovalHistory(participantId: number) {
   });
 }
 
+export async function getMyFitnessEvaluations(page = 1, limit = 50) {
+  return apiRequest({
+    url: `/evaluation?page=${page}&limit=${limit}`,
+    method: "GET",
+  });
+}
+
 export async function getProfileImage() {
   return apiRequest({
     url: "/profile-image",
     method: "GET",
   });
+}
+
+export async function downloadCertificatePdf(certId: number) {
+  return downloadCertificate(certId, "pdf");
+}
+
+export async function downloadCertificateImage(certId: number) {
+  return downloadCertificate(certId, "png");
+}
+
+async function downloadCertificate(certId: number, format: "pdf" | "png") {
+  const state = useAuthStore.getState();
+  const token = state.accessToken || state.token;
+  const baseUrl = (import.meta.env.VITE_BASE_URL || "https://localhost:3000/api").replace(/\/$/, "");
+  const response = await fetch(`${baseUrl}/certificates/${certId}/download?format=${format}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Download failed");
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `certificate-${certId}.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

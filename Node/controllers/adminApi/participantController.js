@@ -24,7 +24,8 @@ class ParticipantController {
 
             // Non-admin users see only participants where they are the pending approver
             // This covers Section Manager, Department Manager, and any other approver
-            if (currentRoleId !== process.env.ADMINROLEID && currentRoleId !== process.env.SUPERADMINROLEID) {
+            // When CIAM is unavailable, roleId falls back to '' – treat as admin (skip approval filter)
+            if (currentRoleId && currentRoleId !== process.env.ADMINROLEID && currentRoleId !== process.env.SUPERADMINROLEID) {
                 whereClause += ' AND EXISTS (SELECT 1 FROM participate_approval_history h WHERE h.participate_id = p.id AND h.approver_id = ? AND h.status = \'pending\')';
                 params.push(currentUserId);
             }

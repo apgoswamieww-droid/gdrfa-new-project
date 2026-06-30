@@ -21,6 +21,9 @@ export const ROUTE_PERMISSIONS: Record<string, string[]> = {
 
   "/participant-requests": ["view-list-participants"],
 
+  "/fitness-evaluation": ["view-evaluation-list"],
+  "/fitness-evaluation/edit": ["view-evaluation-list"],
+
   "/facility": ["view-list-facilities"],
   "/facility/view": ["view-list-facilities"],
   "/facility/request": ["can-approve-or-reject-request"],

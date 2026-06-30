@@ -101,7 +101,7 @@ class FitnessCategoryController {
       await db.query(
         `INSERT INTO fitness_categories (name, slug, unit_type, is_time, points, status, unit, createdAt, updatedAt)
          VALUES (?, ?, ?, ?, 0, '1', NULL, SYSDATETIME(), SYSDATETIME())`,
-        [name.trim(), slug.trim().toLowerCase(), unit_type]
+        [name.trim(), slug.trim().toLowerCase(), unit_type, unit_type === 'time' ? 1 : 0]
       );
 
       return res.json({ status: true, message: 'Fitness Category created successfully' });

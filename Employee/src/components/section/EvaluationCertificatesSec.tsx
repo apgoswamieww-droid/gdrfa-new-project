@@ -6,9 +6,10 @@ import PrimaryBtn from "../common/PrimaryBtn";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "../../store/store";
-import { getCertificates } from "../../api/page.api";
+import { getCertificates, downloadCertificateImage } from "../../api/page.api";
+import Toast from "../ui/Toast";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -20,6 +21,15 @@ export default function EvaluationCertificatesSec(){
     const [certificates, setCertificates] = useState<any>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+    const handleDownload = useCallback(async (id: number) => {
+        try {
+            await downloadCertificateImage(id);
+        } catch {
+            setToast({ message: "Download failed", type: "error" });
+        }
+    }, []);
 
     const isLoggedIn = Boolean(token);
 
@@ -75,6 +85,7 @@ export default function EvaluationCertificatesSec(){
 
     return(
         <>
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         <HorizontalLine />
         <section className="">
             <div className="max-w-[1366px] w-full mx-auto md:px-7 px-4">
@@ -119,7 +130,14 @@ export default function EvaluationCertificatesSec(){
                                             <h3 className="text-black lg:text-2xl/tight text-lg/tight font-bold lg:mb-2 mb-1">{item.activity_title || item.event_title}</h3>
                                             <p className="text-secondary opacity-40 text-sm/tight font-medium">{item.event_title}</p>
                                             <span className="block w-[60px] h-px bg-secondary xl:my-8 md:my-5 my-3.5"></span>
-                                            <PrimaryBtn className="max-w-[292px] w-full">{t("evaluationCertificates.download")}</PrimaryBtn>
+                                            <div>
+                                              <PrimaryBtn
+                                                className="max-w-[292px] w-full"
+                                                onClick={() => handleDownload(item.id)}
+                                              >
+                                                {t("evaluationCertificates.download")}
+                                              </PrimaryBtn>
+                                            </div>
                                         </div>
                                         <div className="xs:w-1/2 w-full self-end">
                                             <img src={CertificateImg} alt="" className="ms-auto lg:h-84 md:h-70 rtl:-scale-x-100" />

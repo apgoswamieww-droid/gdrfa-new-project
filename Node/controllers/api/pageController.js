@@ -98,7 +98,7 @@ class PageController {
 
       // Fetch all active events
       const events = await db.query(`
-                SELECT id, name,name_ar, eventDescription, eventDescription_ar, image, startDate, endDate, location, status, createdAt, targetType
+                SELECT id, name,name_ar, eventDescription, eventDescription_ar, image, startDate, endDate, location, status, createdAt, targetType, eventActiveStatus
                 FROM events 
                 WHERE CONVERT(NVARCHAR(MAX), status) = '1' AND deletedAt IS NULL
                 ORDER BY startDate ASC
@@ -187,6 +187,7 @@ class PageController {
           total_joined: totalJoined,
           userImages: userImages,
           targetType: event.targetType,
+          eventActiveStatus: event.eventActiveStatus || "0",
         });
       });
 
@@ -1629,17 +1630,16 @@ class PageController {
       let lastUpdate = null;
       let evaluationDate = null;
 
-      if (filter === "monthly" || filter === "yearly") {
-        // === Aggregated Totals for the Period ===
-        const aggregatedData = await db.query(
-          `SELECT 
-                        fc.id as category_id, 
-                        fc.name as category_name, 
-                        fc.unit,
-                        fc.is_time,
-                        SUM(CASE WHEN ISNUMERIC(er.value) = 1 THEN CAST(er.value AS FLOAT) ELSE 0 END) as input_value,
-                        SUM(CASE WHEN ISNUMERIC(er.result) = 1 THEN CAST(er.result AS FLOAT) ELSE 0 END) as result_points,
-                        MAX(er.updatedAt) as last_update
+      // === Aggregated Totals (all modes — sum all evaluation results by category) ===
+      const aggregatedData = await db.query(
+        `SELECT 
+                      fc.id as category_id, 
+                      fc.name as category_name, 
+                      fc.unit,
+                      fc.is_time,
+                      STRING_AGG(CAST(er.value AS NVARCHAR(MAX)), ', ') as input_values,
+                      SUM(CASE WHEN ISNUMERIC(er.result) = 1 THEN CAST(er.result AS FLOAT) ELSE 0 END) as result_points,
+                      MAX(er.updatedAt) as last_update
                      FROM fitness_categories fc
                      JOIN evaluation_results er ON fc.id = er.fitness_category_id
                      JOIN evaluations e ON e.id = er.evaluation_id
@@ -1649,61 +1649,25 @@ class PageController {
                        AND er.deletedAt IS NULL
                        ${dateWhereClause}
                      GROUP BY fc.id, fc.name, fc.unit, fc.is_time`,
-          [userId, ...dateParams],
-        );
+        [userId, ...dateParams],
+      );
 
-        categoriesWithResults = (aggregatedData || []).map((row) => {
-          const points = parseFloat(row.result_points) || 0;
-          totalPeriodPoints += points;
-          if (!lastUpdate || new Date(row.last_update) > new Date(lastUpdate)) {
-            lastUpdate = row.last_update;
-          }
-          return {
-            ...row,
-            input_value: parseFloat(row.input_value) || 0,
-            result_points: points,
-            level: null,
-            total_points: 0,
-            evaluation_points: 0,
-          };
-        });
-
-        evaluationDate = lastUpdate;
-      } else {
-        // === Fetch LATEST evaluation (Default behavior) ===
-        const latestEval = await db.queryOne(
-          `SELECT TOP 1 e.id, e.user_id, e.total_points, e.evaluation_points, 
-                            e.evaluator_id, e.examiner_name, e.createdAt, e.updatedAt
-                     FROM evaluations e
-                     WHERE e.user_id = ? AND e.status = '1' AND e.deletedAt IS NULL
-                     ORDER BY e.createdAt DESC`,
-          [userId],
-        );
-
-        if (latestEval) {
-          evaluationDate = latestEval.createdAt;
-          lastUpdate = latestEval.updatedAt;
-          totalPeriodPoints = latestEval.total_points;
-
-          const results = await db.query(
-            `SELECT er.fitness_category_id, er.value, er.result, er.updatedAt, fc.name as category_name, fc.unit, fc.is_time
-                         FROM evaluation_results er
-                         JOIN fitness_categories fc ON er.fitness_category_id = fc.id
-                         WHERE er.evaluation_id = ? AND er.deletedAt IS NULL`,
-            [latestEval.id],
-          );
-
-          categoriesWithResults = (results || []).map((r) => ({
-            category_id: r.fitness_category_id,
-            category_name: r.category_name,
-            input_value: parseFloat(r.value) || 0,
-            unit: r.unit,
-            result_points: parseFloat(r.result) || 0,
-            last_update: r.updatedAt,
-            level: null,
-          }));
+      categoriesWithResults = (aggregatedData || []).map((row) => {
+        const points = parseFloat(row.result_points) || 0;
+        totalPeriodPoints += points;
+        if (!lastUpdate || new Date(row.last_update) > new Date(lastUpdate)) {
+          lastUpdate = row.last_update;
         }
-      }
+        return {
+          ...row,
+          input_values: row.input_values || '',
+          result_points: points,
+          total_points: 0,
+          evaluation_points: 0,
+        };
+      });
+
+      evaluationDate = lastUpdate;
 
       // Final formatting
       const formattedCategories = (categoriesWithResults || []).map((cat) => ({
@@ -1795,6 +1759,7 @@ class PageController {
                  OFFSET ? ROWS FETCH NEXT ? ROWS ONLY`,
         [userId.toString(), offset, parseInt(limit)],
       );
+
       const evlUserIds = [...new Set(evaluations.map((x) => x.evaluator_id))];
 
       let userInfoMap = new Map();
@@ -1819,13 +1784,35 @@ class PageController {
         );
       }
 
+      const evalIds = evaluations.map((x) => x.id);
+
+      let resultsMap = new Map();
+      if (evalIds.length > 0) {
+        const results = await db.query(
+          `SELECT er.evaluation_id, er.id as result_id, er.fitness_category_id, er.value as input_value, er.result, er.createdAt,
+                          fc.name as category_name, fc.slug, fc.unit_type
+                   FROM evaluation_results er
+                   LEFT JOIN fitness_categories fc ON er.fitness_category_id = fc.id
+                   WHERE er.evaluation_id IN (${evalIds.map(() => '?').join(',')}) AND er.deletedAt IS NULL
+                   ORDER BY er.id ASC`,
+          evalIds,
+        );
+        if (results && results.length > 0) {
+          results.forEach((r) => {
+            const eid = r.evaluation_id;
+            if (!resultsMap.has(eid)) resultsMap.set(eid, []);
+            resultsMap.get(eid).push(r);
+          });
+        }
+      }
+
       evaluations = evaluations.map((x) => {
-        let informationOfEvl = userInfoMap.get(x.evaluator_id);
+        let informationOfEvl = userInfoMap.get(x.evaluator_id) || {};
         return {
           ...x,
-          evaluatorId: informationOfEvl.evaluator_id,
-          evaluatorName: informationOfEvl.name,
-          evaluatorEmail: informationOfEvl.email,
+          evaluatorName: informationOfEvl.name || null,
+          evaluatorEmail: informationOfEvl.email || null,
+          results: resultsMap.get(x.id) || [],
         };
       });
 
@@ -1843,6 +1830,151 @@ class PageController {
       console.error("Error fetching evaluations:", error.message);
       return res.error(getLocalizedMessage(req, "Internal server error"));
     }
+  }
+
+  // GET /api/certificates/:id/download
+  static async downloadCertificate(req, res) {
+    try {
+      const certId = req.params.id;
+      const userId = req.user?.id;
+      const format = req.query.format || 'pdf';
+
+      if (!['pdf', 'png'].includes(format)) {
+        return res.status(400).json({ status: false, message: 'Invalid format. Use pdf or png.' });
+      }
+
+      if (!certId || !userId) {
+        return res.status(400).json({ status: false, message: 'Invalid request' });
+      }
+
+      const cert = await db.queryOne(
+        `SELECT ec.id, ec.user_id, ec.event_id, ec.activity_id, ec.createdAt,
+                e.name as event_title, at.name as activity_title
+         FROM event_certificates ec
+         LEFT JOIN events e ON ec.event_id = e.id
+         LEFT JOIN activity_types at ON ec.activity_id = at.id
+         WHERE ec.id = ? AND ec.user_id = ? AND ec.deletedAt IS NULL`,
+        [certId, userId],
+      );
+
+      if (!cert) {
+        return res.status(404).json({ status: false, message: 'Certificate not found' });
+      }
+
+      let userName = userId;
+      try {
+        const userInfo = await ciamService.getUserByDomainId([userId], req.headers.authorization);
+        if (userInfo?.value?.[0]?.nameEn) {
+          userName = userInfo.value[0].nameEn;
+        }
+      } catch (e) {
+        // fallback to userId
+      }
+
+      const sharp = require('sharp');
+
+      const issueDate = cert.createdAt
+        ? new Date(cert.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '-';
+
+      if (format === 'png') {
+        const svg = PageController._buildCertificateSvg(userName, cert, issueDate);
+        const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Content-Disposition', `attachment; filename="certificate-${certId}.png"`);
+        return res.send(pngBuffer);
+      }
+
+      // PDF format
+      const PDFDocument = require('pdfkit');
+      const doc = new PDFDocument({
+        layout: 'landscape',
+        size: 'A4',
+        margins: { top: 40, bottom: 40, left: 40, right: 40 },
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="certificate-${certId}.pdf"`);
+      doc.pipe(res);
+
+      PageController._buildPdfCertificate(doc, userName, cert, issueDate);
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating certificate:', error.message);
+      return res.status(500).json({ status: false, message: 'Failed to generate certificate' });
+    }
+  }
+
+  static _escapeXml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+
+  static _buildCertificateSvg(userName, cert, issueDate) {
+    const activityTitle = PageController._escapeXml(cert.activity_title || 'Sports Activity');
+    const eventTitle = cert.event_title ? PageController._escapeXml(cert.event_title) : '';
+    const safeName = PageController._escapeXml(userName);
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="842" height="595" xmlns="http://www.w3.org/2000/svg">
+  <rect width="842" height="595" fill="#FAFAFA"/>
+  <rect x="18" y="18" width="806" height="559" fill="none" stroke="#7A2530" stroke-width="3" rx="4"/>
+  <rect x="24" y="24" width="794" height="547" fill="none" stroke="#7A2530" stroke-width="1" rx="2"/>
+  <rect x="40" y="40" width="762" height="2" fill="#7A2530" opacity="0.15"/>
+  <rect x="40" y="553" width="762" height="2" fill="#7A2530" opacity="0.15"/>
+  <text x="421" y="120" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="36" font-weight="bold" fill="#7A2530">GDRFA</text>
+  <text x="421" y="146" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7A2530" letter-spacing="3">SPORTS &amp; WELLNESS</text>
+  <rect x="331" y="160" width="180" height="1" fill="#7A2530" opacity="0.3"/>
+  <text x="421" y="195" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="13" fill="#888888" font-style="italic">Certificate of Achievement</text>
+  <rect x="331" y="210" width="180" height="1" fill="#7A2530" opacity="0.3"/>
+  <text x="421" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">This is to certify that</text>
+  <text x="421" y="320" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="bold" fill="#1a1a1a">${safeName}</text>
+  <text x="421" y="360" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">has successfully completed</text>
+  <text x="421" y="400" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="bold" fill="#7A2530">${activityTitle}</text>
+  ${eventTitle ? `<text x="421" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#999999">${eventTitle}</text>` : ''}
+  <text x="421" y="475" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#aaaaaa">Issued on: ${issueDate}</text>
+  <text x="421" y="540" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#cccccc">General Directorate of Residency and Foreigners Affairs</text>
+</svg>`;
+  }
+
+  static _buildPdfCertificate(doc, userName, cert, issueDate) {
+    const pageW = doc.page.width;
+    const pageH = doc.page.height;
+    const cx = pageW / 2;
+    const color = '#7A2530';
+
+    doc.rect(18, 18, pageW - 36, pageH - 36).lineWidth(3).stroke(color);
+    doc.rect(24, 24, pageW - 48, pageH - 48).lineWidth(1).stroke(color);
+
+    doc.lineWidth(0.5).strokeColor(color).opacity(0.15);
+    doc.moveTo(40, 40).lineTo(pageW - 40, 40).stroke();
+    doc.moveTo(40, pageH - 40).lineTo(pageW - 40, pageH - 40).stroke();
+    doc.opacity(1);
+
+    doc.font('Helvetica-Bold').fontSize(36).fillColor(color).text('GDRFA', cx, 105, { align: 'center' });
+    doc.font('Helvetica').fontSize(11).fillColor(color).text('SPORTS & WELLNESS', cx, 138, { align: 'center', characterSpacing: 3 });
+
+    doc.moveTo(cx - 90, 155).lineTo(cx + 90, 155).lineWidth(0.5).strokeColor(color).opacity(0.3).stroke().opacity(1);
+
+    doc.font('Helvetica-Oblique').fontSize(13).fillColor('#888888').text('Certificate of Achievement', cx, 180, { align: 'center' });
+
+    doc.moveTo(cx - 90, 200).lineTo(cx + 90, 200).lineWidth(0.5).strokeColor(color).opacity(0.3).stroke().opacity(1);
+
+    doc.font('Helvetica').fontSize(14).fillColor('#666666').text('This is to certify that', cx, 255, { align: 'center' });
+
+    doc.font('Helvetica-Bold').fontSize(34).fillColor('#1a1a1a').text(userName, cx, 295, { align: 'center' });
+
+    doc.font('Helvetica').fontSize(13).fillColor('#666666').text('has successfully completed', cx, 345, { align: 'center' });
+
+    doc.font('Helvetica-Bold').fontSize(22).fillColor(color).text(cert.activity_title || 'Sports Activity', cx, 380, { align: 'center' });
+
+    if (cert.event_title) {
+      doc.font('Helvetica').fontSize(12).fillColor('#999999').text(cert.event_title, cx, 415, { align: 'center' });
+    }
+
+    doc.font('Helvetica').fontSize(11).fillColor('#aaaaaa').text(`Issued on: ${issueDate}`, cx, 465, { align: 'center' });
+
+    doc.font('Helvetica').fontSize(9).fillColor('#cccccc').text('General Directorate of Residency and Foreigners Affairs', cx, 545, { align: 'center' });
   }
 }
 

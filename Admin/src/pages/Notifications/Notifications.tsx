@@ -5,7 +5,6 @@ import {
   markAdminNotificationAsRead,
   clearAllAdminNotifications,
 } from "../../api/notification.api";
-import { useTranslation } from "../../hooks/useTranslation";
 
 function formatTime(dateStr: string): string {
   const now = Date.now();
@@ -22,7 +21,6 @@ function formatTime(dateStr: string): string {
 }
 
 const Notifications = () => {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<"all" | "unread">("all");
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);

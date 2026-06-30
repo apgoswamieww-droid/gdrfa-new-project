@@ -4,8 +4,9 @@ import { Navigate, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AvtarImage } from "../../assets/images/images";
 import { useAuthStore } from "../../store/store";
-import { getMyFacilityRequests, getFitnessCategory, uploadProfileImage, getProfileImage } from "../../api/page.api";
+import { getMyFacilityRequests, uploadProfileImage, getProfileImage, getMyFitnessEvaluations } from "../../api/page.api";
 import { getNotifications, getUnreadCount } from "../../api/notification.api";
+import { getProfileApi } from "../../api/auth.api";
 
 type DetailItem = {
   label: string;
@@ -61,37 +62,65 @@ export default function Profile() {
   const [notificationsList, setNotificationsList] = useState<any>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [fitnessData, setFitnessData] = useState<any>(null);
-  const [fitnessLoading, setFitnessLoading] = useState(true);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [evaluations, setEvaluations] = useState<any[]>([]);
+  const [evaluationsLoading, setEvaluationsLoading] = useState(true);
 
   useEffect(() => {
     if (!authToken) return;
     let cancelled = false;
     const fetchAll = async () => {
       try {
-        const [reqResp, notifResp, unreadResp, fitResp, profileImgResp] = await Promise.all([
+        // Fetch full profile data from CIAM to enrich user details
+        const profileResp = await getProfileApi();
+        if (!cancelled && profileResp.status && profileResp.data) {
+          // Read current user directly from store to avoid stale closure
+          const currentUser = useAuthStore.getState().user || {};
+          // Merge the full CIAM profile data into the auth store
+          // Use data objects (sectorData, departmentData, etc.) for display names
+          setUser({
+            ...currentUser,
+            mobile: profileResp.data.mobile || currentUser.mobile,
+            gender: profileResp.data.gender || currentUser.gender,
+            age: profileResp.data.age || currentUser.age,
+            dob: profileResp.data.dob || currentUser.dob,
+            jobTitle: profileResp.data.jobTitleData?.name || profileResp.data.jobTitle || currentUser.jobTitle,
+            rank: profileResp.data.rankData || currentUser.rank,
+            sector: profileResp.data.sectorData || currentUser.sector,
+            department: profileResp.data.departmentData || currentUser.department,
+            section: profileResp.data.sectionData || currentUser.section,
+            branch: profileResp.data.branchData || currentUser.branch,
+            workSystem: profileResp.data.workSystem || currentUser.workSystem,
+            image: profileResp.data.image || currentUser.image,
+            email: profileResp.data.email || currentUser.email,
+            name: profileResp.data.name || currentUser.name,
+            assignedTo: profileResp.data.assignedTo || currentUser.assignedTo,
+          });
+        }
+
+        const [reqResp, notifResp, unreadResp, profileImgResp, evalResp] = await Promise.all([
           getMyFacilityRequests(),
           getNotifications(1, 20),
           getUnreadCount(),
-          getFitnessCategory(),
           getProfileImage(),
+          getMyFitnessEvaluations(),
         ]);
         if (!cancelled) {
           setFacilityRequests(reqResp.data || []);
           setNotificationsList(notifResp.data?.notifications || []);
           setUnreadCount(unreadResp.data?.unreadCount || 0);
-          setFitnessData(fitResp.data || null);
           setProfileImageUrl(profileImgResp.data?.image || null);
+          setEvaluations(evalResp.data?.data || []);
         }
       } catch {
-        if (!cancelled) setFacilityRequests([]);
+        if (!cancelled) { setFacilityRequests([]); setEvaluations([]); }
       } finally {
-        if (!cancelled) { setRequestsLoading(false); setNotificationsLoading(false); setFitnessLoading(false); }
+        if (!cancelled) { setRequestsLoading(false); setNotificationsLoading(false); setEvaluationsLoading(false); }
       }
     };
     fetchAll();
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken]);
 
   const profile = useMemo(() => {
@@ -103,39 +132,36 @@ export default function Profile() {
     };
   }, [user, profileImageUrl]);
 
+  // Normalize work detail values to display strings (some are objects from the API)
+  const normalizeValue = (val: any): string => {
+    if (val == null) return "";
+    if (typeof val === "object") return val.name || val.id || "";
+    return String(val);
+  };
+
   const personalDetails: DetailItem[] = [
     { label: t("profile.username"), value: profile.username || fallbackProfile.username },
     { label: t("profile.email"), value: profile.email || fallbackProfile.email },
     { label: t("profile.mobile"), value: profile.mobile || fallbackProfile.mobile },
-    { label: t("profile.gender"), value: profile.gender || fallbackProfile.gender },
+    { label: t("profile.gender"), value: typeof profile.gender === "string" ? profile.gender : (profile.gender === "Male" ? "Male" : profile.gender === "Female" ? "Female" : fallbackProfile.gender) },
     { label: t("profile.age"), value: String(profile.age || fallbackProfile.age) },
   ];
 
   const workDetails: DetailItem[] = [
-    { label: t("profile.jobTitle"), value: profile.jobTitle || fallbackProfile.jobTitle },
-    { label: t("profile.rank"), value: profile.rank || fallbackProfile.rank },
-    { label: t("profile.sector"), value: profile.sector || fallbackProfile.sector },
-    { label: t("profile.department"), value: profile.department || fallbackProfile.department },
-    { label: t("profile.section"), value: profile.section || fallbackProfile.section },
-    { label: t("profile.branch"), value: profile.branch || fallbackProfile.branch },
-    { label: t("profile.workSystem"), value: profile.workSystem || fallbackProfile.workSystem },
+    { label: t("profile.jobTitle"), value: normalizeValue(profile.jobTitle) || fallbackProfile.jobTitle },
+    { label: t("profile.rank"), value: normalizeValue(profile.rank) || fallbackProfile.rank },
+    { label: t("profile.sector"), value: normalizeValue(profile.sector) || fallbackProfile.sector },
+    { label: t("profile.department"), value: normalizeValue(profile.department) || fallbackProfile.department },
+    { label: t("profile.section"), value: normalizeValue(profile.section) || fallbackProfile.section },
+    { label: t("profile.branch"), value: normalizeValue(profile.branch) || fallbackProfile.branch },
+    { label: t("profile.workSystem"), value: normalizeValue(profile.workSystem) || fallbackProfile.workSystem },
   ];
 
-  const formatEvalDate = (dateStr: string | null) => {
-    if (!dateStr) return fallbackProfile.latestEvaluationDate;
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
+  
 
-  const latestEvalDate = fitnessData?.evaluation_date ? formatEvalDate(fitnessData.evaluation_date) : fallbackProfile.latestEvaluationDate;
-  const totalPointsValue = fitnessData?.categories?.reduce((sum: any, item: any) => sum + (item.total_points || 0), 0) ?? Number(profile.totalPoints || fallbackProfile.totalPoints);
-  const totalPoints = `${totalPointsValue} ${t("profile.points")}`;
+  
 
-  const evaluationDetails = [
-    { label: t("profile.lastEvaluationDate"), value: latestEvalDate },
-    { label: t("profile.totalPoints"), value: totalPoints },
-    { label: t("profile.requests"), value: String(facilityRequests.length) },
-  ];
+  
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -196,23 +222,19 @@ export default function Profile() {
                 <h1 className="mt-5 text-secondary font-bold xl:text-3xl/tight text-2xl/tight">{profile.name}</h1>
                 <p className="mt-2 text-primary font-bold text-sm">{profile.jobTitle || fallbackProfile.jobTitle}</p>
                 <p className="mt-3 text-secondary/60 text-sm/tight font-medium max-w-80">{t("profile.readOnlyNote")}</p>
+                <Link to="/certificates" className="mt-5 block w-full rounded-2xl bg-primary text-white px-5 py-3 text-sm font-bold text-center hover:bg-primary/90 transition-colors">
+                  {t("profile.viewCertificates")}
+                </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="mt-5 rounded-2xl border border-primary text-primary hover:bg-primary hover:text-white px-5 py-3 text-sm font-bold transition-all cursor-pointer"
+                  className="mt-3 rounded-2xl border border-primary text-primary hover:bg-primary hover:text-white px-5 py-3 text-sm font-bold transition-all cursor-pointer w-full"
                 >
                   {t("profile.logout")}
                 </button>
               </div>
 
-              <div className="mt-7 grid grid-cols-3 gap-2">
-                {evaluationDetails.map((item) => (
-                  <div key={item.label} className="rounded-2xl bg-red-light px-3 py-3 text-center">
-                    <strong className="block text-primary text-lg font-bold">{item.value}</strong>
-                    <span className="mt-1 block text-[11px]/tight text-secondary/60 font-semibold">{item.label}</span>
-                  </div>
-                ))}
-              </div>
+              
 
               <section ref={notificationsRef} id="notifications" className="mt-5 scroll-mt-28">
                 <div className="flex items-center justify-between gap-3 mb-3 text-start">
@@ -279,61 +301,20 @@ export default function Profile() {
               </div>
             </section>
 
-            <section className="bg-primary text-white xl:rounded-[44px] rounded-3xl xl:p-7 md:p-6 p-4 shadow-[0_24px_80px_rgba(122,37,48,0.22)]">
-              <div className="flex md:flex-row flex-col md:items-center justify-between gap-4 text-start">
-                <div>
-                  <h2 className="font-bold xl:text-3xl/tight text-2xl/tight">{t("profile.evaluationSummary")}</h2>
-                  <p className="mt-2 text-white/70 text-sm font-medium max-w-120">{t("profile.evaluationSubtitle")}</p>
-                </div>
-                <Link to="/certificates" className="rounded-2xl bg-white text-primary px-5 py-3 text-sm font-bold w-fit cursor-pointer inline-block hover:bg-white/90 transition-colors">
-                  {t("profile.viewCertificates")}
-                </Link>
-              </div>
-
-              <div className="mt-6 grid gap-3 md:grid-cols-2">
-                <div className="rounded-3xl bg-white/12 border border-white/15 p-4 text-center">
-                  <span className="text-white/70 text-sm font-medium">{t("profile.lastEvaluationDate")}</span>
-                  <strong className="mt-2 block text-3xl font-bold">{latestEvalDate}</strong>
-                </div>
-                <div className="rounded-3xl bg-white/12 border border-white/15 p-4 text-center">
-                  <span className="text-white/70 text-sm font-medium">{t("profile.totalPoints")}</span>
-                  <strong className="mt-2 block text-3xl font-bold">{totalPointsValue}</strong>
-                </div>
-              </div>
-
-              <div className="mt-6 grid md:grid-cols-3 gap-3">
-                {fitnessLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="rounded-3xl bg-white/12 border border-white/15 p-4">
-                      <div className="h-3 bg-white/20 rounded animate-pulse w-20" />
-                      <div className="mt-3 h-8 bg-white/20 rounded animate-pulse w-16" />
-                      <div className="mt-2 h-3 bg-white/20 rounded animate-pulse w-24" />
-                    </div>
-                  ))
-                ) : fitnessData?.categories && fitnessData.categories.length > 0 ? (
-                  fitnessData.categories.map((cat: any) => (
-                    <div key={cat.category_id} className="rounded-3xl bg-white/12 border border-white/15 p-4">
-                      <span className="text-white/65 text-sm font-semibold">{cat.category_name}</span>
-                      <strong className="mt-2 block text-3xl font-bold">{cat.result_points ?? "-"}</strong>
-                      <span className="mt-1 block text-white/70 text-sm">{cat.level || "N/A"}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-3 rounded-3xl bg-white/12 border border-white/15 p-6 text-center">
-                    <p className="text-white/70 text-sm font-medium">{t("profile.noEvaluationData") || "No evaluation data available"}</p>
-                  </div>
-                )}
-              </div>
-            </section>
-
           </div>
         </div>
 
         <FacilityRequestsSection requestsRef={requestsRef} requests={facilityRequests} loading={requestsLoading} />
+        <FitnessEvaluationSection evaluations={evaluations} loading={evaluationsLoading} />
       </div>
     </section>
   );
 }
+
+
+
+ 
+  
 
 function FacilityRequestsSection({ requestsRef, requests, loading }: { requestsRef: RefObject<HTMLElement | null>; requests: any; loading: boolean }) {
   const { t } = useTranslation();
@@ -407,6 +388,96 @@ function FacilityRequestsSection({ requestsRef, requests, loading }: { requestsR
           </tbody>
         </table>
       </div>
+    </section>
+  );
+}
+
+function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]; loading: boolean }) {
+  const { t } = useTranslation();
+
+  const groupedResults = useMemo(() => {
+    const groups: { key: string; label: string; results: any[]; total: number }[] = [];
+    const map = new Map<string, any[]>();
+    evaluations.forEach((ev) => {
+      (ev.results || []).forEach((r: any) => {
+        const d = new Date(r.createdAt ?? ev.createdAt ?? "");
+        const key = `${d.toLocaleDateString("en-GB")} ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(r);
+      });
+    });
+    const sortedKeys = Array.from(map.keys()).sort().reverse();
+    sortedKeys.forEach((key, i) => {
+      const items = map.get(key)!;
+      const total = items.reduce((s: number, r: any) => s + Number(r.result || 0), 0);
+      groups.push({ key, label: i === 0 ? "Latest" : `Previous — ${key}`, results: items, total });
+    });
+    return groups;
+  }, [evaluations]);
+
+  const overallTotal = useMemo(() => {
+    return groupedResults.reduce((sum, g) => sum + g.total, 0);
+  }, [groupedResults]);
+
+  return (
+    <section className="mt-5 bg-white/90 border-2 border-primary/10 xl:rounded-[44px] rounded-3xl xl:p-7 md:p-6 p-4 backdrop-blur-xl shadow-[0_24px_80px_rgba(10,34,64,0.12)] scroll-mt-28 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4 mb-6">
+        <div className="text-start">
+          <h2 className="text-secondary font-bold xl:text-3xl/tight text-2xl/tight tracking-tight">{t("profile.evaluationHistory")}</h2>
+          <p className="mt-1 text-secondary/55 text-sm font-medium">{t("profile.evaluationHistorySubtitle")}</p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="bg-primary/10 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+            <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">Total Score</span>
+            <span className="block text-xl font-bold text-primary">{Math.round(overallTotal)}</span>
+          </div>
+          <div className="bg-primary/10 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+            <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">Sessions</span>
+            <span className="block text-xl font-bold text-primary">{groupedResults.length}</span>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-gray-100 p-4 bg-white shadow-sm">
+              <div className="h-4 bg-gray-100 rounded animate-pulse w-1/4 mb-3" />
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, j) => (
+                  <div key={j} className="h-4 bg-gray-50 rounded animate-pulse w-full" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : groupedResults.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          {groupedResults.map((group, gi) => (
+            <div key={group.key} className="rounded-lg border border-gray-100 bg-white shadow-sm overflow-hidden">
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-[11px] font-bold text-secondary/70">{gi === 0 ? "Latest" : group.label}</span>
+                <span className="text-[13px] font-bold text-primary">{group.total.toFixed(2).replace(/\.00$/, '')} pts</span>
+              </div>
+              <div className="p-2 space-y-1.5">
+                {group.results.map((r: any) => (
+                  <div key={r.result_id || r.id} className="flex items-center justify-between px-2 py-1.5 rounded bg-gray-50/50">
+                    <span className="text-[11px] font-semibold text-gray-600 truncate">{r.category_name || `Cat #${r.fitness_category_id}`}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] text-gray-500">{r.input_value}{r.unit_type ? ` ${r.unit_type}` : ''}</span>
+                      <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{r.result} pts</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-primary/5 bg-[#F7EEF0] px-6 py-12 text-center">
+          <p className="text-secondary/40 text-lg font-bold">{t("profile.noEvaluations")}</p>
+        </div>
+      )}
     </section>
   );
 }

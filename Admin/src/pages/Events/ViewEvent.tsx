@@ -248,7 +248,7 @@ const ViewEvent = () => {
   };
 
   const [filterOptions, setFilterOptions] = useState<EmployeeFilterOptions>({
-    sectors: [], departments: [], sections: [], branches: [], ranks: [], jobTitles: [], genders: [], workSystems: [],
+    sectors: [], departments: [], sections: [], branches: [], ranks: [], jobTitles: [], genders: [], workSystems: [], staffTypes: [],
   });
 
   const fetchWinners = async () => {
@@ -422,7 +422,7 @@ const ViewEvent = () => {
         toast.success(res.message || "Participants added successfully");
         setShowAddParticipantModal(false);
         // Refresh participant list
-        const refreshed = await getParticipantsApi({ event_id: id });
+        const refreshed = await getParticipantsApi({ event_id: id, length: 500 });
         if (refreshed.status && refreshed.data?.data) {
           setParticipants(refreshed.data.data);
         }
@@ -732,7 +732,7 @@ const ViewEvent = () => {
       const res = await deleteParticipantApi(deleteTarget);
       if (res.status) {
         toast.success(t.participants?.successDelete || "Participant removed successfully");
-        const refreshed = await getParticipantsApi({ event_id: id });
+        const refreshed = await getParticipantsApi({ event_id: id, length: 500 });
         if (refreshed.status && refreshed.data?.data) {
           setParticipants(refreshed.data.data);
         }

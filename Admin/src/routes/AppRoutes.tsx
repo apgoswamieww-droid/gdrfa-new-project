@@ -38,6 +38,8 @@ import ManageEmployees from '../pages/Employees/ManageEmployees';
 import ManageParticipants from '../pages/Participants/ManageParticipants';
 import ViewParticipant from '../pages/Participants/ViewParticipant';
 import Evaluation from '../pages/Participants/Evaluation';
+import ManageFitnessEvaluation from '../pages/FitnessEvaluation/ManageFitnessEvaluation';
+import FitnessEvaluationForm from '../pages/FitnessEvaluation/FitnessEvaluationForm';
 import Notifications from '../pages/Notifications/Notifications';
 import AuditHistory from '../pages/AuditHistory/AuditHistory';
 import ViewFacilities from '../pages/Facilities/ViewFacilities';
@@ -83,6 +85,8 @@ const AppRoutes = () => {
         <Route path="/participant-requests" element={<ProtectedRoute><ManageParticipants /></ProtectedRoute>} />
         <Route path="/participant-requests/view/:id" element={<ProtectedRoute><ViewParticipant /></ProtectedRoute>} />
         <Route path="/participant-requests/evaluation/:id" element={<ProtectedRoute><Evaluation /></ProtectedRoute>} />
+        <Route path="/fitness-evaluation" element={<ProtectedRoute><ManageFitnessEvaluation /></ProtectedRoute>} />
+        <Route path="/fitness-evaluation/edit/:id" element={<ProtectedRoute><FitnessEvaluationForm /></ProtectedRoute>} />
         <Route path="/audit-history" element={<ProtectedRoute><AuditHistory /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/facility/view" element={<ProtectedRoute><ViewFacilities /></ProtectedRoute>} />

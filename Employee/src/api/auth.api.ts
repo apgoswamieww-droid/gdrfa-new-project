@@ -20,3 +20,10 @@ export const forgotPasswordApi = (body: { email: string }) => {
     body,
   });
 };
+
+export const getProfileApi = () => {
+  return apiRequest({
+    url: "/profile",
+    method: "GET",
+  });
+};

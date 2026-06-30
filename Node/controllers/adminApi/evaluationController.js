@@ -221,9 +221,16 @@ class EvaluationController {
           lookupValue = fitnessScoring.convertRunningToSeconds(lookupValue) ?? lookupValue;
         }
         console.log('[calculateScores] lookup:', { catId: v.category_id, resolvedGender, ageGroupId: ageGroup.id, lookupValue });
-        const points = await fitnessScoring.lookupScore(
+        let points = await fitnessScoring.lookupScore(
           parseInt(v.category_id), resolvedGender, ageGroup.id, lookupValue
         );
+        // Fallback for count-based categories: use raw value as points
+        if (points === 0 && catTypeMap[v.category_id] !== 'time') {
+          const raw = parseFloat(v.value);
+          if (!isNaN(raw) && raw > 0) {
+            points = Math.round(raw);
+          }
+        }
         scores.push({ category_id: v.category_id, points });
       }
 

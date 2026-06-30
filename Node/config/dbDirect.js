@@ -46,7 +46,7 @@ function processResultRows(rows) {
 function parseConnectionString(connectionString) {
   if (!connectionString) {
     return {
-      server: 'localhost\\SQLEXPRESS',
+      server: '192.168.5.174',
       database: 'Sports',
       trustedConnection: true
     };
@@ -92,7 +92,7 @@ function buildConnectionString(config) {
   if (config.driver) {
     parts.push(`Driver={${config.driver}}`);
   } else {
-    parts.push('Driver={ODBC Driver 17 for SQL Server}');
+    parts.push('Driver={ODBC Driver 18 for SQL Server}');
   }
   
   if (config.server) {
