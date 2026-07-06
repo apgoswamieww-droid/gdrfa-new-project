@@ -25,6 +25,7 @@ jest.mock('../../config/dbDirect', () => ({
 
 jest.mock('../../ciam/ciam.service', () => ({
   getUserByDomainId: jest.fn(),
+  getUserRoles: jest.fn(),
 }));
 
 jest.mock('../../utils/ciamTokenHelper', () => ({
@@ -344,6 +345,7 @@ describe('verifyToken()', () => {
       cb(null, { sub: 'ml687', lng: 'en' });
     });
     ciamService.getUserByDomainId.mockResolvedValue(mockUserInfo);
+    ciamService.getUserRoles.mockResolvedValue(mockUserEncryptedRoles);
     decryptRole.mockResolvedValue([{ ClientRoleId: '3' }]);
     getUserPermissions.mockResolvedValue(['view-events', 'manage-events']);
 
@@ -355,12 +357,14 @@ describe('verifyToken()', () => {
     await flushMicrotasks();
 
     expect(next).toHaveBeenCalled();
-    expect(req.user).toEqual({
+    expect(req.user).toMatchObject({
       id: 'ml687',
       userDomain: 'ml687',
       roleId: '3',
       permissions: ['view-events', 'manage-events'],
       token: 'valid.jwt.token',
+      email: 'test@dnrd.ae',
+      nameEn: 'Test User',
     });
   });
 
@@ -415,74 +419,34 @@ describe('verifyToken()', () => {
     });
   });
 
-  // ── CIAM fails THEN refresh succeeds THEN retry succeeds ────────
+    // ── CIAM unavailable → falls back to JWT payload ───────────────
 
-  test('CIAM fails → refresh succeeds → retry succeeds → next()', async () => {
-    jwt.verify.mockImplementation((token, secret, cb) => {
-      cb(null, { sub: 'ml687' });
-    });
-    // First CIAM call returns null (simulated 401)
-    ciamService.getUserByDomainId
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(mockUserInfo); // retry succeeds
-    attemptTokenRefresh.mockResolvedValue({
-      accessToken: 'refreshed-token',
-      refreshToken: 'new-refresh',
-    });
-    decryptRole.mockResolvedValue([{ ClientRoleId: '3' }]);
-    getUserPermissions.mockResolvedValue([]);
-
-    const req = mockReq({ authHeader: 'Bearer expired.token' });
-    const res = mockRes();
-    const next = jest.fn();
-
-    await verifyToken(req, res, next);
-    await flushMicrotasks();
-
-    // Verify refresh was attempted
-    expect(attemptTokenRefresh).toHaveBeenCalledWith(req);
-    // Verify retry used the refreshed token
-    expect(ciamService.getUserByDomainId).toHaveBeenNthCalledWith(
-      2,
-      ['ml687'],
-      'refreshed-token'
-    );
-    expect(next).toHaveBeenCalled();
-    // The source keeps the original token in req.user.token (not the refreshed one)
-    expect(req.user.token).toBe('expired.token');
-  });
-
-  // ── CIAM fails → refresh fails → 401 ────────────────────────────
-
-  test('CIAM fails → refresh fails → returns 401', async () => {
+  test('CIAM returns null → falls back to JWT payload and calls next()', async () => {
     jwt.verify.mockImplementation((token, secret, cb) => {
       cb(null, { sub: 'ml687' });
     });
     ciamService.getUserByDomainId.mockResolvedValue(null);
-    attemptTokenRefresh.mockResolvedValue({
-      accessToken: null,
-      refreshToken: null,
-    });
 
-    const req = mockReq({ authHeader: 'Bearer expired.token' });
+    const req = mockReq({ authHeader: 'Bearer valid.token' });
     const res = mockRes();
     const next = jest.fn();
 
     await verifyToken(req, res, next);
     await flushMicrotasks();
 
-    expect(attemptTokenRefresh).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      status: false,
-      message: 'Session expired, please login again',
+    // Source now falls back to JWT payload instead of attempting refresh
+    expect(next).toHaveBeenCalled();
+    expect(req.user).toMatchObject({
+      id: 'ml687',
+      roleId: '',
+      permissions: [],
     });
-    expect(next).not.toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
   });
 
-  // ── CIAM returns isError → refresh fails → 401 ─────────────────
+  // ── CIAM returns isError → falls back to JWT payload ───────────
 
-  test('CIAM returns isError → refresh fails → returns 401', async () => {
+  test('CIAM returns isError → falls back to JWT payload and calls next()', async () => {
     jwt.verify.mockImplementation((token, secret, cb) => {
       cb(null, { sub: 'ml687' });
     });
@@ -490,28 +454,22 @@ describe('verifyToken()', () => {
       isError: true,
       firstError: 'Token expired',
     });
-    attemptTokenRefresh.mockResolvedValue({
-      accessToken: null,
-      refreshToken: null,
-    });
 
-    const req = mockReq({ authHeader: 'Bearer expired.token' });
+    const req = mockReq({ authHeader: 'Bearer valid.token' });
     const res = mockRes();
     const next = jest.fn();
 
     await verifyToken(req, res, next);
     await flushMicrotasks();
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      status: false,
-      message: 'Session expired, please login again',
-    });
+    expect(next).toHaveBeenCalled();
+    expect(req.user.id).toBe('ml687');
+    expect(res.status).not.toHaveBeenCalled();
   });
 
-  // ── CIAM returns value where value[0] is null ──────────────────
+  // ── CIAM returns value where value[0] is null → falls back ─────
 
-  test('returns 401 when CIAM returns empty value array', async () => {
+  test('CIAM returns empty value array → falls back to JWT payload', async () => {
     jwt.verify.mockImplementation((token, secret, cb) => {
       cb(null, { sub: 'ml687' });
     });
@@ -524,11 +482,10 @@ describe('verifyToken()', () => {
     await verifyToken(req, res, next);
     await flushMicrotasks();
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      status: false,
-      message: 'User not found',
-    });
+    expect(next).toHaveBeenCalled();
+    expect(req.user.id).toBe('ml687');
+    expect(req.user.roleId).toBe('');
+    expect(req.user.permissions).toEqual([]);
   });
 
   // ── Handles missing userInfo.value gracefully (flat array) ──────
@@ -543,6 +500,9 @@ describe('verifyToken()', () => {
         encryptedRoles: mockUserEncryptedRoles,
       },
     ]);
+    ciamService.getUserRoles.mockResolvedValue({
+      encryptedRoles: mockUserEncryptedRoles,
+    });
     decryptRole.mockResolvedValue([{ ClientRoleId: '2' }]);
     getUserPermissions.mockResolvedValue([]);
 
@@ -564,6 +524,7 @@ describe('verifyToken()', () => {
       cb(null, { sub: 'ml687', lng: 'ar' });
     });
     ciamService.getUserByDomainId.mockResolvedValue(mockUserInfo);
+    ciamService.getUserRoles.mockResolvedValue(mockUserEncryptedRoles);
     decryptRole.mockResolvedValue([{ ClientRoleId: '1' }]);
     getUserPermissions.mockResolvedValue([]);
 
@@ -585,6 +546,7 @@ describe('verifyToken()', () => {
       cb(null, { sub: 'ml687' }); // no lng
     });
     ciamService.getUserByDomainId.mockResolvedValue(mockUserInfo);
+    ciamService.getUserRoles.mockResolvedValue(mockUserEncryptedRoles);
     decryptRole.mockResolvedValue([{ ClientRoleId: '1' }]);
     getUserPermissions.mockResolvedValue([]);
 
@@ -607,6 +569,7 @@ describe('verifyToken()', () => {
       cb(null, { sub: 'ml687' });
     });
     ciamService.getUserByDomainId.mockResolvedValue(mockUserInfo);
+    ciamService.getUserRoles.mockResolvedValue(mockUserEncryptedRoles);
     decryptRole.mockResolvedValue([]); // no role
 
     const req = mockReq({ authHeader: 'Bearer valid.token' });

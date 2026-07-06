@@ -25,7 +25,7 @@ export default function BodyFitnessEvaluationYo() {
 
     useEffect(() => {
         if (!isLoggedIn) {
-            console.log('[BodyFitnessEvaluation] ❌ Not logged in — skipping fetch');
+            // console.log('[BodyFitnessEvaluation] ❌ Not logged in — skipping fetch');
             return;
         }
 
@@ -34,22 +34,22 @@ export default function BodyFitnessEvaluationYo() {
         const fetchFitnessData = async () => {
             try {
                 setLoading(true);
-                console.log(`[BodyFitnessEvaluation] 🔵 STEP 1: Calling getFitnessCategory API with filterType = "${filterType}"`);
+                // console.log(`[BodyFitnessEvaluation] 🔵 STEP 1: Calling getFitnessCategory API with filterType = "${filterType}"`);
                 const response = await getFitnessCategory(filterType);
-                console.log('[BodyFitnessEvaluation] 🔵 STEP 2: Raw API response:', response);
+                // console.log('[BodyFitnessEvaluation] 🔵 STEP 2: Raw API response:', response);
 
                 if (!cancelled) {
                     if (response?.data) {
-                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3: response.data:', response.data);
-                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3a: response.data.categories:', response.data.categories);
-                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3b: response.data.filter:', response.data.filter);
-                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3c: response.data.total_points:', response.data.total_points);
-                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3d: response.data.evaluation_date:', response.data.evaluation_date);
-                        console.log('[BodyFitnessEvaluation] 🔵 STEP 3e: response.data.user:', response.data.user);
+                        // console.log('[BodyFitnessEvaluation] 🔵 STEP 3: response.data:', response.data);
+                        // console.log('[BodyFitnessEvaluation] 🔵 STEP 3a: response.data.categories:', response.data.categories);
+                        // console.log('[BodyFitnessEvaluation] 🔵 STEP 3b: response.data.filter:', response.data.filter);
+                        // console.log('[BodyFitnessEvaluation] 🔵 STEP 3c: response.data.total_points:', response.data.total_points);
+                        // console.log('[BodyFitnessEvaluation] 🔵 STEP 3d: response.data.evaluation_date:', response.data.evaluation_date);
+                        // console.log('[BodyFitnessEvaluation] 🔵 STEP 3e: response.data.user:', response.data.user);
                     }
 
                     if (response.data?.categories) {
-                        console.log(`[BodyFitnessEvaluation] 🔵 STEP 4: Setting ${response.data.categories.length} categories into state`);
+                        // console.log(`[BodyFitnessEvaluation] 🔵 STEP 4: Setting ${response.data.categories.length} categories into state`);
                         response.data.categories.forEach((cat: any, i: number) => {
                             console.log(`[BodyFitnessEvaluation]   Category[${i}]:`, {
                                 category_id: cat.category_id,
@@ -65,7 +65,7 @@ export default function BodyFitnessEvaluationYo() {
                         });
                         setCategories(response.data.categories);
                     } else {
-                        console.log('[BodyFitnessEvaluation] ⚠️ STEP 4: No categories found in response — setting empty array');
+                         // console.log('[BodyFitnessEvaluation] ⚠️ STEP 4: No categories found in response — setting empty array');
                         if (!cancelled) setCategories([]);
                     }
                 }
@@ -85,7 +85,7 @@ export default function BodyFitnessEvaluationYo() {
         };
     }, [isLoggedIn, filterType]);
 
-    console.log('[BodyFitnessEvaluation] 🟢 Rendering with categories state:', categories);
+    // console.log('[BodyFitnessEvaluation] 🟢 Rendering with categories state:', categories);
 
     const bodyFitnessData = categories.length > 0
         ? categories.map((cat: any, index: any) => {
@@ -98,12 +98,12 @@ export default function BodyFitnessEvaluationYo() {
                 rings: [cat.result_points ?? 0, Math.max(0, (cat.result_points ?? 0) - 20), Math.max(0, (cat.result_points ?? 0) - 40)],
                 emoji: [Fitness1, Fitness2, Fitness3][index % 3],
             };
-            console.log(`[BodyFitnessEvaluation] 🟢 Transformed item[${index}]:`, item);
+            // console.log(`[BodyFitnessEvaluation] 🟢 Transformed item[${index}]:`, item);
             return item;
         })
         : [];
 
-    console.log('[BodyFitnessEvaluation] 🟢 bodyFitnessData length:', bodyFitnessData.length, '| Will render?', bodyFitnessData.length > 0 ? 'YES ✅' : 'NO ❌ (null)');
+    // console.log('[BodyFitnessEvaluation] 🟢 bodyFitnessData length:', bodyFitnessData.length, '| Will render?', bodyFitnessData.length > 0 ? 'YES ✅' : 'NO ❌ (null)');
 
     const [activeIndex, setActiveIndex] = useState(0);
     const loopItems = bodyFitnessData.length > 0 && bodyFitnessData.length < 6

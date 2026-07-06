@@ -35,7 +35,8 @@
     "sharp": "^0.34.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "tedious": "^18.6.1"
+    "tedious": "^18.6.1",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.27.2",
@@ -47,7 +48,7 @@
     "supertest": "^7.1.1"
   },
   "scripts": {
-    "dev": "nodemon app.js",
+    "dev": "NODE_ENV=development nodemon app.js",
     "watch": "nodemon app.js",
     "prod": "node app.js",
     "test": "jest --detectOpenHandles --forceExit",

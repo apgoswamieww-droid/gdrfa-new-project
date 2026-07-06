@@ -37,32 +37,151 @@ const { swaggerAuth } = require('./middlewares/swaggerAuth');
 
 // Import Routes (API only — EJS admin routes removed)
 const apiRoutes = require('./routes/apiRoutes');
+
+// Global error handler — MUST be registered after all routes
+const errorHandler = require('./middlewares/errorHandler');
+const { installProcessHandlers } = require('./middlewares/errorHandler');
+
+// Install process-level handlers for unhandledRejection and uncaughtException
+installProcessHandlers();
+
 const app = express();
 const serverPort = Number(process.env.PORT || 3000);
 
 // ─── Security Middleware (order matters!) ─────────────────────────────
 
-// 1. Helmet – sets various HTTP security headers
+// 0. Disable technology fingerprinting at the Express level.
+//    Prevents X-Powered-By header from being set in the first place,
+//    rather than relying on Helmet to strip it after the fact.
+app.disable('x-powered-by');
+
+// 1. Remove any Server header set by the HTTP server / reverse proxy.
+//    Express/Node.js don't set Server by default, but NGINX, IIS ARR,
+//    and cloud load balancers may add it.  This catch-all ensures it's
+//    stripped even if added by upstream infrastructure.
+app.use((req, res, next) => {
+  res.removeHeader('Server');
+  res.removeHeader('X-Powered-By');
+  next();
+});
+
+// 2. Host header validation – prevents Host Header Injection attacks.
+//    Rejects requests with unrecognized Host headers immediately.
+const validateHost = require('./middlewares/hostValidation');
+app.use(validateHost);
+
+// 3. Helmet – sets various HTTP security headers.
+//    hidePoweredBy is included by default in Helmet v8 and removes any
+//    remaining X-Powered-By header that might have been set downstream.
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     contentSecurityPolicy: false, // Disabled to allow Swagger UI and inline styles
+    // hidePoweredBy is enabled by default; being explicit here for clarity:
+    hidePoweredBy: true,
   })
 );
 
-// 2. CORS – configure before body parsers for preflight handling
+// 2. CORS – strict origin whitelist
+// ──────────────────────────────────────────────────────────────────────
+//
+// The origin validator below:
+//   1. Allows the two official frontend dev URLs (localhost:4200, localhost:4201)
+//   2. Reads ADDITIONAL origins from the CORS_ORIGIN env var (comma-separated)
+//   3. Falls back to allowing ALL origins ONLY when NODE_ENV=development AND
+//      no CORS_ORIGIN is set (for local development convenience)
+//   4. Blocks ALL other origins with a CORS error (the browser shows a
+//      generic "CORS error" — the origin is never revealed in the error message)
+//
+// Production setup:
+//   CORS_ORIGIN=https://sports.dnrd.gov.ae,https://admin.dnrd.gov.ae
+//
+// Dev environment (built-in defaults — no env var needed for local work):
+//   - http://localhost:4200  (Employee/Website frontend)
+//   - http://localhost:4201  (Admin Panel frontend)
+
+const DEV_WHITELIST = [
+  'http://localhost:4200',
+  'http://localhost:4201',
+];
+
+/**
+ * Parse the CORS_ORIGIN environment variable into an array of allowed origins.
+ * Supports comma-separated and space-separated values.
+ */
+function parseCorsOriginEnv() {
+  const raw = process.env.CORS_ORIGIN;
+  if (!raw || typeof raw !== 'string') return [];
+  return raw
+    .split(/[,\s]+/)
+    .map((o) => o.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Build the allowed-origins set from env vars and built-in defaults.
+ *
+ * When CORS_ORIGIN is set (production), ONLY those origins + the built-in
+ * dev URLs are allowed.  When CORS_ORIGIN is NOT set (dev), only the
+ * built-in dev URLs are allowed — unless NODE_ENV !== 'development',
+ * in which case we fail closed (empty whitelist) to prevent accidental
+ * open access on staging/production.
+ */
+function buildAllowedOrigins() {
+  const envOrigins = parseCorsOriginEnv();
+
+  if (envOrigins.length > 0) {
+    // Production/staging: env origins + dev URLs (for admin maintenance)
+    return [...new Set([...DEV_WHITELIST, ...envOrigins])];
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    // Dev only: built-in URLs
+    return DEV_WHITELIST;
+  }
+
+  // Production without CORS_ORIGIN set — fail closed
+  console.warn(
+    '[CORS] No CORS_ORIGIN environment variable set in production! ' +
+    'All cross-origin requests will be blocked. ' +
+    'Set CORS_ORIGIN=https://your-frontend-domain.com'
+  );
+  return [];
+}
+
+const ALLOWED_ORIGINS = buildAllowedOrigins();
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-    : true, // Allow all in dev; restrict in production
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, Postman, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      // Block the request — the browser shows a generic CORS error
+      // without revealing the blocked origin to the client.
+      console.warn(
+        `[CORS] Blocked request from origin: "${origin}"`
+      );
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With'],
   exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
   optionsSuccessStatus: 200,
 };
+
 app.use(cors(corsOptions));
+
+if (ALLOWED_ORIGINS.length > 0) {
+  console.log(`[CORS] Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
+}
 
 // 3. Body parsers & cookie parser
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -136,10 +255,17 @@ app.use('/api-docs', swaggerAuth, swaggerUi.serve, swaggerUi.setup(swaggerSpec, 
 const { globalLimiter } = require('./middlewares/rateLimiter');
 app.use('/api', cors(corsOptions), globalLimiter, apiRoutes);
 
-// 404 handler
+// 404 handler — MUST be before the global error handler
 app.use((req, res) => {
   res.status(404).json({ status: false, message: 'Route not found' });
 });
+
+// ═════════════════════════════════════════════════════════════════════
+// 🛡️ GLOBAL ERROR HANDLER — catches everything that slips through
+// ═════════════════════════════════════════════════════════════════════
+// Logs full technical details to a rotating file, returns only a
+// generic response with a tracking reference ID to the client.
+app.use(errorHandler);
 
 // Start server
 const startServer = () => {

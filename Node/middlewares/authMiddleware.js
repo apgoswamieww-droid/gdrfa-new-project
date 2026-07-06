@@ -104,10 +104,17 @@ module.exports = {
           return next();
         }
 
+        let rolesInfo;
+        try {
+          rolesInfo = await ciamService.getUserRoles(userInfo.userDomain, token);
+        } catch (ciamError) {
+          console.error('[verifyToken] CIAM getUserRoles error:', ciamError.message);
+          rolesInfo = null;
+        }
         // Get role info
         const { decryptRole } = require('../config/role-decryption');
         const { getUserPermissions } = require('../utils/permissionChecker');
-        const decryptedRoles = await decryptRole(userInfo.encryptedRoles);
+        const decryptedRoles = await decryptRole(rolesInfo.encryptedRoles);
         const roleId = decryptedRoles?.[0]?.ClientRoleId?.toString() || '';
         const permissions = roleId ? await getUserPermissions(roleId, token, userInfo.userDomain) : [];
 

@@ -66,7 +66,6 @@ function setTokens(accessToken: string, refreshToken?: string): void {
 }
 
 async function refreshAccessToken(): Promise<string> {
-  debugger
   const refreshToken = getRefreshToken();
   if (!refreshToken) throw new Error("No refresh token");
 
@@ -144,7 +143,6 @@ async function executeFetch(
   });
 
   if (response.status === 401) {
-    debugger
     return handle401Response(url, method, body, headers, signal);
   }
 

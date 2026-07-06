@@ -50,7 +50,6 @@ export default function Login() {
     setIsSubmitting(true);
 
     try {
-      debugger
       const response = await loginApi({
         username: username.trim(),
         password,

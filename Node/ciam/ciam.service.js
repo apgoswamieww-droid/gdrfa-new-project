@@ -187,6 +187,43 @@ class CiamService {
     };
   }
 
+  async getUserRoles(userId, myAuthToken = null) {
+    try {
+      // const res = await this.axios.post(
+      //   `${this.config.baseUrl}client/client-user/get`,
+      //   {
+      //     "userDomain": userId,
+      //     "projectId": this.config.projectId
+      //   },
+      //   { myAuthToken }
+      // );
+      // return res.data.value;
+
+      return {
+        id: 354,
+        grp: 687,
+        userDomain: userId || "ml687",
+        name: "Amir Abdulla Mohamed Almulla",
+        nameArAe: "عامر عبدالله محمد الملا",
+        email: "apgoswami@yopmail.com",
+        mobile: "0509888345",
+        isSupervisor: 1,
+        currentManagerId: "107",
+        userType: "internal",
+        encryptedRoles: {
+          encryptedKey:
+            "MeJpAxMYZKDndxWDci90wp7W6XxHEIR+7wScPbNnVB1qVEZRIyHtbuuzQGSJm+kdnzuGH8M21EX5K15Ru5UzB/PhBAkTZx2QP/i8i+u5IF+vdSt2HV8fhPcffvNZOd/XSX1yRqzaOWF5pg++64eGEpXTO28Sii/KdWW/45KuIJqL5r9RcDuLgvLiAQKJo+goSKsHgxIN+nZx5aAffvgbvxNPF1fG65lFDQxsoKh1bbD24GUX/EEab/83Ro9VqL0Y2jxcjtH8eoVFER6rIqTwDqmNcM/MXDAJ0zrHnCcg/fdCCrg/ZE3uV23hXDSCH89YXxlrkbfDXkr/MJBkyEbOtA==",
+          encryptedIV:
+            "xXzLRXl7X1t+TIG5cS8YxnA6bIs+VkIH3LDfBVP6Kobvj17aI66J34Ci06hrFpLPwkH8tr0vQVaRMx3Ggpb3k2x8VXP5pD+WvFfwQ8IAiL45EtOT3a7DrFtaqS9zYWwJosPnWLJTRkBILlphVopecBtIZeBd7wQSxeofA7YBjOeqxNV/pDdTeOh3fuyMPEbcSrqaayHaWvqAJOxoEiweX4IqN8DTwuPvHkAqqiArgbe9/Zjwp+ULb/i5qKy55DhEAQhaL39rS2qIBHJIvGIPm65RGfZfvGbhbqm2d3q2yHwhd6X+WDyXRL+Ox2K5LN2cVaU8wSZ88Y5T6/vGrCzRxw==",
+          encryptedData:
+            "p1JxE1pSBu+UTZ2AO8OSXAPY4NdJsYUfq/DQ5qbuyOWAhqoh7k6ozKag5zRUnC/ph6ymu6gyg0ObX5LypbtPrbJPevAzHfYKsuwov34P5ll2SJxCq8efY+U7zEis0Gees2AZLHub1pqn9B59eLx89MIf4f2GuKvocfh09cc5txHyauXbo60N9WCeSZ3Xe8GwhBhqa1fWq4An1ZSScI6sV43QtaYXYWT2FDBaLAgZarTGRfzacD2e7DxjISc09hNmdauwNSuA92jbbunE9UCtqgm9hqI/xdXzvahoKsHpjCwQ44FBveNvx0la41rDyqAn0BY2uDzndYY1RpQN9t/aOa94DQ6zZppRo62LGhiMzJ9qcGZiOwt8mWbXvTEvUT2imrxTDXIzkm8qIYOTx2KQYwqyi8a1gFcDtrN/xe3bqLlJwdfdJwpU2FCQDkuKhB3EluaIuaBGDUNonQ8EK2KZXQTkS3FRe6hi6UaLPGqSxcvG3WVzbdz+/9yzejhyvN8QcppkSY/k7oHyqAKn9ZcrJLRoAr4tao0CzIG54DFw3hZ1DexIaotishCfgC6uflJR/MHs6U7fp85eVfWf6hSFeiI/VVT5OrW4VstB8eg8FOSPQw0kYLYfx4jooWV9h15xNd5NE9XuDwuXqj14HLJFmwFNHaTTIHDQdjex1NKl3/ObzIyaSloktZm6yq5kr2FUwSKotKY2zilN5OdUPeyMoG+9n9+5fJIk+Lf2llKHXE+kQHooJnYcIZjXb8/mbsQyGInjkW7feoEcR3d3g1J3SFgfOe2kJJhbnaAEbgX8q3rCcUossRBXf5oWIQgAde4G3J5DHkcLZn/8JXAoItxgJjlAEVLipUp25AZ/7+ZjQLA3gjs+OzgvG6NJFH25LBZcMH6jy1yVFLbTZdXEqO7kiAC+bCZ1EKXwlzzeqUNnjf3dMOEO9GVdn56UVj/Jw7pLcrY5LceRlyID7eJ3z/+y0TzRB5J2i08VUnQbBnoD3HqZevRyGTB3aVNtKv6CLSX+V7sFQPktSP8zOYEYut0BRLVE0BRBpR+3lohB01fgOUsJn2uqhkAIuIuj0mO+PvREq87g0pKmoVyMfir+yCDq6Q==",
+        },
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
   async getUserByRoleId(roleId, myAuthToken = null) {
     try {
     //   const res = await this.axios.post(

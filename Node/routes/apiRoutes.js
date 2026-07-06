@@ -4,6 +4,7 @@ const authController = require('../controllers/api/authController'); // Capital 
 const adminAuthController = require('../controllers/adminApi/adminAuthController');
 const { ensureAuthenticated, verifyToken } = require('../middlewares/authMiddleware');
 const verifyAdminOrSuperAdmin = require('../middlewares/verifyAdminOrSuperAdmin');
+const { authorizeResource } = require('../middlewares/resourceAuthorization');
 const multer = require('multer');
 const createUploader = require('../utils/multer');
 
@@ -91,52 +92,52 @@ router.get('/admin/dashboard/latest-events', verifyToken, dashboardAdminControll
 router.get('/admin/dashboard/latest-participants', verifyToken, dashboardAdminController.getLatestParticipants);
 
 // KPI Admin Routes
-router.get('/admin/manage-kpi', verifyToken, adminLimiter, kpiAdminController.list);
-router.post('/admin/manage-kpi', verifyToken, kpiAdminController.store);
-router.put('/admin/manage-kpi/:id', verifyToken, kpiAdminController.update);
-router.delete('/admin/manage-kpi/:id', verifyToken, kpiAdminController.delete);
+router.get('/admin/manage-kpi', verifyToken, adminLimiter, authorizeResource('kpi', { operation: 'read' }), kpiAdminController.list);
+router.post('/admin/manage-kpi', verifyToken, authorizeResource('kpi', { operation: 'create' }), kpiAdminController.store);
+router.put('/admin/manage-kpi/:id', verifyToken, authorizeResource('kpi'), kpiAdminController.update);
+router.delete('/admin/manage-kpi/:id', verifyToken, authorizeResource('kpi'), kpiAdminController.delete);
 
 // Event Type Admin Routes
-router.get('/admin/event-types', verifyToken, eventTypeAdminController.list);
-router.post('/admin/event-types', verifyToken, eventTypeAdminController.store);
-router.put('/admin/event-types/:id', verifyToken, eventTypeAdminController.update);
-router.delete('/admin/event-types/:id', verifyToken, eventTypeAdminController.delete);
+router.get('/admin/event-types', verifyToken, authorizeResource('eventType', { operation: 'read' }), eventTypeAdminController.list);
+router.post('/admin/event-types', verifyToken, authorizeResource('eventType', { operation: 'create' }), eventTypeAdminController.store);
+router.put('/admin/event-types/:id', verifyToken, authorizeResource('eventType'), eventTypeAdminController.update);
+router.delete('/admin/event-types/:id', verifyToken, authorizeResource('eventType'), eventTypeAdminController.delete);
 
 // Event Activity Admin Routes
-router.get('/admin/event-activities', verifyToken, eventActivityAdminController.list);
-router.post('/admin/event-activities', verifyToken, eventActivityAdminController.store);
-router.put('/admin/event-activities/:id', verifyToken, eventActivityAdminController.update);
-router.delete('/admin/event-activities/:id', verifyToken, eventActivityAdminController.delete);
-router.get('/admin/event-activities/activity-types', verifyToken, eventActivityAdminController.getActivityTypes);
+router.get('/admin/event-activities', verifyToken, authorizeResource('sportActivity', { operation: 'read' }), eventActivityAdminController.list);
+router.post('/admin/event-activities', verifyToken, authorizeResource('sportActivity', { operation: 'create' }), eventActivityAdminController.store);
+router.put('/admin/event-activities/:id', verifyToken, authorizeResource('sportActivity'), eventActivityAdminController.update);
+router.delete('/admin/event-activities/:id', verifyToken, authorizeResource('sportActivity'), eventActivityAdminController.delete);
+router.get('/admin/event-activities/activity-types', verifyToken, authorizeResource('sportActivity', { operation: 'read' }), eventActivityAdminController.getActivityTypes);
 
 // Event Admin Routes
-router.get('/admin/events', verifyToken, eventAdminController.list);
-router.get('/admin/events/:id', verifyToken, eventAdminController.getById);
-router.post('/admin/events', uploadEvent.single('image'), verifyToken, eventAdminController.store);
-router.put('/admin/events/:id', uploadEvent.single('image'), verifyToken, eventAdminController.update);
-router.delete('/admin/events/:id', verifyToken, eventAdminController.delete);
-router.get('/admin/years', verifyToken, eventAdminController.getYears);
-router.get('/admin/sport-activities', verifyToken, eventAdminController.getSportActivities);
-router.get('/admin/teams-dropdown', verifyToken, eventAdminController.getTeams);
-router.get('/admin/event-coordinators', verifyToken, eventAdminController.getEventCoordinators);
+router.get('/admin/events', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.list);
+router.get('/admin/events/:id', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getById);
+router.post('/admin/events', uploadEvent.single('image'), verifyToken, authorizeResource('event', { operation: 'create' }), eventAdminController.store);
+router.put('/admin/events/:id', uploadEvent.single('image'), verifyToken, authorizeResource('event'), eventAdminController.update);
+router.delete('/admin/events/:id', verifyToken, authorizeResource('event'), eventAdminController.delete);
+router.get('/admin/years', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getYears);
+router.get('/admin/sport-activities', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getSportActivities);
+router.get('/admin/teams-dropdown', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getTeams);
+router.get('/admin/event-coordinators', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getEventCoordinators);
 
 // Event Activity Management (Manage Activity & Players)
-router.get('/admin/events/:id/activities', verifyToken, eventAdminController.getActivities);
-router.put('/admin/events/:id/activities', verifyToken, eventAdminController.updateActivities);
+router.get('/admin/events/:id/activities', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getActivities);
+router.put('/admin/events/:id/activities', verifyToken, authorizeResource('event'), eventAdminController.updateActivities);
 
 // Event Winners
 router.post('/admin/events/get-participants', verifyToken, eventAdminController.getParticipants);
 router.post('/admin/events/mark-complete', verifyToken, eventAdminController.markComplete);
-router.put('/admin/events/:id/event-status', verifyToken, eventAdminController.updateEventStatus);
+router.put('/admin/events/:id/event-status', verifyToken, authorizeResource('event'), eventAdminController.updateEventStatus);
 router.post('/admin/events/mark-activity-complete', verifyToken, eventAdminController.markActivityComplete);
-router.get('/admin/events/:id/winners', verifyToken, eventAdminController.getWinners);
+router.get('/admin/events/:id/winners', verifyToken, authorizeResource('event', { operation: 'read' }), eventAdminController.getWinners);
 
 // Plan Admin Routes
-router.get('/admin/plans', verifyToken, planAdminController.list);
-router.post('/admin/plans', verifyToken, planAdminController.store);
-router.put('/admin/plans/:id', verifyToken, planAdminController.update);
-router.delete('/admin/plans/:id', verifyToken, planAdminController.delete);
-router.get('/admin/plans/kpis', verifyToken, planAdminController.getKpis);
+router.get('/admin/plans', verifyToken, authorizeResource('plan', { operation: 'read' }), planAdminController.list);
+router.post('/admin/plans', verifyToken, authorizeResource('plan', { operation: 'create' }), planAdminController.store);
+router.put('/admin/plans/:id', verifyToken, authorizeResource('plan'), planAdminController.update);
+router.delete('/admin/plans/:id', verifyToken, authorizeResource('plan'), planAdminController.delete);
+router.get('/admin/plans/kpis', verifyToken, authorizeResource('plan', { operation: 'read' }), planAdminController.getKpis);
 
 // Admin User Management Routes
 router.get('/admin/manage-admins', verifyToken, adminUserController.list);
@@ -149,27 +150,27 @@ router.get('/admin/employees/with-filters', verifyToken, employeeController.list
 router.get('/admin/change-status', verifyToken, commonController.changeStatus);
 
 // Team Admin Routes
-router.get('/admin/teams', verifyToken, teamAdminController.list);
-router.get('/admin/teams/list-all', verifyToken, teamAdminController.listAll);
-router.get('/admin/teams/activities', verifyToken, teamAdminController.getActivities);
-router.get('/admin/teams/staff', verifyToken, teamAdminController.getStaff);
-router.get('/admin/teams/:id', verifyToken, teamAdminController.show);
-router.get('/admin/teams/:id/events', verifyToken, teamAdminController.getTeamEvents);
-router.get('/admin/team/members/:id', verifyToken, teamAdminController.getTeamMembersData);
-router.post('/admin/teams', uploadTeam.single('image'), verifyToken, teamAdminController.store);
-router.put('/admin/teams/:id', uploadTeam.single('image'), verifyToken, teamAdminController.update);
-router.delete('/admin/teams/:id', verifyToken, teamAdminController.delete);
-router.post('/admin/team/add-member/store', verifyToken, teamAdminController.addMemberStore);
+router.get('/admin/teams', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.list);
+router.get('/admin/teams/list-all', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.listAll);
+router.get('/admin/teams/activities', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.getActivities);
+router.get('/admin/teams/staff', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.getStaff);
+router.get('/admin/teams/:id', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.show);
+router.get('/admin/teams/:id/events', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.getTeamEvents);
+router.get('/admin/team/members/:id', verifyToken, authorizeResource('team', { operation: 'read' }), teamAdminController.getTeamMembersData);
+router.post('/admin/teams', uploadTeam.single('image'), verifyToken, authorizeResource('team', { operation: 'create' }), teamAdminController.store);
+router.put('/admin/teams/:id', uploadTeam.single('image'), verifyToken, authorizeResource('team'), teamAdminController.update);
+router.delete('/admin/teams/:id', verifyToken, authorizeResource('team'), teamAdminController.delete);
+router.post('/admin/team/add-member/store', verifyToken, authorizeResource('team', { operation: 'create' }), teamAdminController.addMemberStore);
 
 // Participant Admin Routes
-router.get('/admin/participants', verifyToken, participantAdminController.list);
+router.get('/admin/participants', verifyToken, authorizeResource('participant', { operation: 'read' }), participantAdminController.list);
 router.get('/admin/participants/approval-history', verifyToken, verifyAdminOrSuperAdmin, participantAdminController.getApprovalHistory);
-router.get('/admin/participants/:id', verifyToken, participantAdminController.show);
-router.put('/admin/participants/:id/status', verifyToken, participantAdminController.updateStatus);
-router.post('/admin/events/:id/manual-register', verifyToken, participantAdminController.manualRegister);
-router.post('/admin/events/:id/manual-register-team', verifyToken, participantAdminController.manualRegisterTeam);
-router.delete('/admin/participants/team/:teamId', verifyToken, participantAdminController.deleteTeam);
-router.delete('/admin/participants/:id', verifyToken, participantAdminController.delete);
+router.get('/admin/participants/:id', verifyToken, authorizeResource('participant', { operation: 'read' }), participantAdminController.show);
+router.put('/admin/participants/:id/status', verifyToken, authorizeResource('participant'), participantAdminController.updateStatus);
+router.post('/admin/events/:id/manual-register', verifyToken, authorizeResource('participant', { operation: 'create' }), participantAdminController.manualRegister);
+router.post('/admin/events/:id/manual-register-team', verifyToken, authorizeResource('participant', { operation: 'create' }), participantAdminController.manualRegisterTeam);
+router.delete('/admin/participants/team/:teamId', verifyToken, authorizeResource('participantTeam'), participantAdminController.deleteTeam);
+router.delete('/admin/participants/:id', verifyToken, authorizeResource('participant'), participantAdminController.delete);
 
 // Evaluation Admin Routes
 router.get('/admin/evaluation/categories', verifyToken, verifyAdminOrSuperAdmin, evaluationAdminController.getCategories);
@@ -179,17 +180,17 @@ router.get('/admin/evaluation/user/:userId', verifyToken, verifyAdminOrSuperAdmi
 router.get('/admin/evaluation/:id', verifyToken, verifyAdminOrSuperAdmin, evaluationAdminController.getEvaluationDetails);
 
 // FAQ Admin Routes
-router.get('/admin/faqs', verifyToken, faqAdminController.list);
-router.post('/admin/faqs', verifyToken, faqAdminController.store);
-router.put('/admin/faqs/:id', verifyToken, faqAdminController.update);
-router.delete('/admin/faqs/:id', verifyToken, faqAdminController.delete);
-router.put('/admin/faqs/:id/status', verifyToken, faqAdminController.toggleStatus);
+router.get('/admin/faqs', verifyToken, authorizeResource('faq', { operation: 'read' }), faqAdminController.list);
+router.post('/admin/faqs', verifyToken, authorizeResource('faq', { operation: 'create' }), faqAdminController.store);
+router.put('/admin/faqs/:id', verifyToken, authorizeResource('faq'), faqAdminController.update);
+router.delete('/admin/faqs/:id', verifyToken, authorizeResource('faq'), faqAdminController.delete);
+router.put('/admin/faqs/:id/status', verifyToken, authorizeResource('faq'), faqAdminController.toggleStatus);
 
 // Facility Admin Routes
-router.get('/admin/facilities', verifyToken, facilityAdminController.list);
-router.post('/admin/facilities', createUploader('uploads/facility').single('image'), verifyToken, facilityAdminController.store);
-router.put('/admin/facilities/:id', createUploader('uploads/facility').single('image'), verifyToken, facilityAdminController.update);
-router.delete('/admin/facilities/:id', verifyToken, facilityAdminController.delete);
+router.get('/admin/facilities', verifyToken, authorizeResource('facility', { operation: 'read' }), facilityAdminController.list);
+router.post('/admin/facilities', createUploader('uploads/facility').single('image'), verifyToken, authorizeResource('facility', { operation: 'create' }), facilityAdminController.store);
+router.put('/admin/facilities/:id', createUploader('uploads/facility').single('image'), verifyToken, authorizeResource('facility'), facilityAdminController.update);
+router.delete('/admin/facilities/:id', verifyToken, authorizeResource('facility'), facilityAdminController.delete);
 
 // Facility Request Status Change (with email + notification)
 router.get('/admin/facility-request/change-status', verifyToken, commonController.changeFacilityRequestStatus);
@@ -201,19 +202,19 @@ router.get('/sponsors', sponsorController.getAllSponsors);
 // Sponsor Admin API (React admin panel)
 const sponsorAdminController = require('../controllers/adminApi/sponsorController');
 const uploadSponsorAdmin = createUploader('uploads/sponsors');
-router.get('/admin/sponsors', verifyToken, sponsorAdminController.list);
-router.post('/admin/sponsors', uploadSponsorAdmin.single('logo'), verifyToken, sponsorAdminController.store);
-router.put('/admin/sponsors/:id', uploadSponsorAdmin.single('logo'), verifyToken, sponsorAdminController.update);
-router.delete('/admin/sponsors/:id', verifyToken, sponsorAdminController.delete);
+router.get('/admin/sponsors', verifyToken, authorizeResource('sponsor', { operation: 'read' }), sponsorAdminController.list);
+router.post('/admin/sponsors', uploadSponsorAdmin.single('logo'), verifyToken, authorizeResource('sponsor', { operation: 'create' }), sponsorAdminController.store);
+router.put('/admin/sponsors/:id', uploadSponsorAdmin.single('logo'), verifyToken, authorizeResource('sponsor'), sponsorAdminController.update);
+router.delete('/admin/sponsors/:id', verifyToken, authorizeResource('sponsor'), sponsorAdminController.delete);
 
 // Home Slider Admin API (React admin panel)
 const homeSliderAdminController = require('../controllers/adminApi/homeSliderController');
 const { wrapMulter } = require('../utils/uploadMiddleware');
 const uploadHomeSlider = createUploader('uploads/homeSlider');
-router.get('/admin/home-sliders', verifyToken, homeSliderAdminController.list);
-router.post('/admin/home-sliders', wrapMulter(uploadHomeSlider.single('media_path')), verifyToken, homeSliderAdminController.store);
-router.put('/admin/home-sliders/:id', wrapMulter(uploadHomeSlider.single('media_path')), verifyToken, homeSliderAdminController.update);
-router.delete('/admin/home-sliders/:id', verifyToken, homeSliderAdminController.delete);
+router.get('/admin/home-sliders', verifyToken, authorizeResource('homeSlider', { operation: 'read' }), homeSliderAdminController.list);
+router.post('/admin/home-sliders', wrapMulter(uploadHomeSlider.single('media_path')), verifyToken, authorizeResource('homeSlider', { operation: 'create' }), homeSliderAdminController.store);
+router.put('/admin/home-sliders/:id', wrapMulter(uploadHomeSlider.single('media_path')), verifyToken, authorizeResource('homeSlider'), homeSliderAdminController.update);
+router.delete('/admin/home-sliders/:id', verifyToken, authorizeResource('homeSlider'), homeSliderAdminController.delete);
 
 // Blog Admin API (React admin panel)
 const blogAdminController = require('../controllers/adminApi/blogController');
@@ -222,19 +223,19 @@ const uploadBlog = createUploader('uploads/blog');
 // Media Admin API (React admin panel)
 const mediaAdminController = require('../controllers/adminApi/mediaController');
 const uploadMedia = createUploader('uploads/media');
-router.get('/admin/blogs', verifyToken, blogAdminController.list);
-router.get('/admin/blogs/:id', verifyToken, blogAdminController.show);
-router.post('/admin/blogs', uploadBlog.single('media'), verifyToken, blogAdminController.store);
-router.put('/admin/blogs/:id', uploadBlog.single('media'), verifyToken, blogAdminController.update);
-router.delete('/admin/blogs/:id', verifyToken, blogAdminController.delete);
-router.get('/admin/tags', verifyToken, blogAdminController.listTags);
+router.get('/admin/blogs', verifyToken, authorizeResource('blog', { operation: 'read' }), blogAdminController.list);
+router.get('/admin/blogs/:id', verifyToken, authorizeResource('blog', { operation: 'read' }), blogAdminController.show);
+router.post('/admin/blogs', uploadBlog.single('media'), verifyToken, authorizeResource('blog', { operation: 'create' }), blogAdminController.store);
+router.put('/admin/blogs/:id', uploadBlog.single('media'), verifyToken, authorizeResource('blog'), blogAdminController.update);
+router.delete('/admin/blogs/:id', verifyToken, authorizeResource('blog'), blogAdminController.delete);
+router.get('/admin/tags', verifyToken, authorizeResource('blog', { operation: 'read' }), blogAdminController.listTags);
 
 // Media Admin Routes
-router.get('/admin/media', verifyToken, mediaAdminController.list);
-router.get('/admin/media/:id', verifyToken, mediaAdminController.show);
-router.post('/admin/media', uploadMedia.single('file'), verifyToken, mediaAdminController.store);
-router.put('/admin/media/:id', uploadMedia.single('file'), verifyToken, mediaAdminController.update);
-router.delete('/admin/media/:id', verifyToken, mediaAdminController.delete);
+router.get('/admin/media', verifyToken, authorizeResource('media', { operation: 'read' }), mediaAdminController.list);
+router.get('/admin/media/:id', verifyToken, authorizeResource('media', { operation: 'read' }), mediaAdminController.show);
+router.post('/admin/media', uploadMedia.single('file'), verifyToken, authorizeResource('media', { operation: 'create' }), mediaAdminController.store);
+router.put('/admin/media/:id', uploadMedia.single('file'), verifyToken, authorizeResource('media'), mediaAdminController.update);
+router.delete('/admin/media/:id', verifyToken, authorizeResource('media'), mediaAdminController.delete);
 
 // Contact Us Admin API (React admin panel)
 const contactUsAdminController = require('../controllers/adminApi/contactUsController');
@@ -244,10 +245,10 @@ const fitnessCategoryAdminController = require('../controllers/adminApi/fitnessC
 // Glimpse of Sports Admin Routes
 const glimpseOfSportsAdminController = require('../controllers/adminApi/glimpseOfSportsController');
 const uploadGlimpse = createUploader('uploads/glimpseOfSports');
-router.get('/admin/glimpse-of-sports', verifyToken, glimpseOfSportsAdminController.list);
-router.post('/admin/glimpse-of-sports', uploadGlimpse.single('image'), verifyToken, glimpseOfSportsAdminController.store);
-router.put('/admin/glimpse-of-sports/:id', uploadGlimpse.single('image'), verifyToken, glimpseOfSportsAdminController.update);
-router.delete('/admin/glimpse-of-sports/:id', verifyToken, glimpseOfSportsAdminController.delete);
+router.get('/admin/glimpse-of-sports', verifyToken, authorizeResource('glimpseOfSports', { operation: 'read' }), glimpseOfSportsAdminController.list);
+router.post('/admin/glimpse-of-sports', uploadGlimpse.single('image'), verifyToken, authorizeResource('glimpseOfSports', { operation: 'create' }), glimpseOfSportsAdminController.store);
+router.put('/admin/glimpse-of-sports/:id', uploadGlimpse.single('image'), verifyToken, authorizeResource('glimpseOfSports'), glimpseOfSportsAdminController.update);
+router.delete('/admin/glimpse-of-sports/:id', verifyToken, authorizeResource('glimpseOfSports'), glimpseOfSportsAdminController.delete);
 router.get('/glimpse-of-sports', glimpseOfSportsAdminController.publicList);
 
 // Fitness Category Admin Routes
@@ -288,16 +289,16 @@ router.delete('/admin/evaluation-results/:id', verifyToken, verifyAdminOrSuperAd
 router.post('/admin/fitness-evaluations/:id/delete-session', verifyToken, verifyAdminOrSuperAdmin, fitnessEvaluationAdminController.deleteSession);
 
 // CMS Admin Routes
-router.get('/admin/cms-pages', verifyToken, cmsAdminController.list);
-router.get('/admin/cms-pages/:id', verifyToken, cmsAdminController.show);
-router.post('/admin/cms-pages', verifyToken, cmsAdminController.store);
-router.put('/admin/cms-pages/:id', verifyToken, cmsAdminController.update);
-router.delete('/admin/cms-pages/:id', verifyToken, cmsAdminController.delete);
-router.put('/admin/cms-pages/:id/status', verifyToken, cmsAdminController.toggleStatus);
+router.get('/admin/cms-pages', verifyToken, authorizeResource('cmsPage', { operation: 'read' }), cmsAdminController.list);
+router.get('/admin/cms-pages/:id', verifyToken, authorizeResource('cmsPage', { operation: 'read' }), cmsAdminController.show);
+router.post('/admin/cms-pages', verifyToken, authorizeResource('cmsPage', { operation: 'create' }), cmsAdminController.store);
+router.put('/admin/cms-pages/:id', verifyToken, authorizeResource('cmsPage'), cmsAdminController.update);
+router.delete('/admin/cms-pages/:id', verifyToken, authorizeResource('cmsPage'), cmsAdminController.delete);
+router.put('/admin/cms-pages/:id/status', verifyToken, authorizeResource('cmsPage'), cmsAdminController.toggleStatus);
 
-router.get('/admin/contacts', verifyToken, contactUsAdminController.list);
-router.get('/admin/contacts/:id', verifyToken, contactUsAdminController.show);
-router.delete('/admin/contacts/:id', verifyToken, contactUsAdminController.delete);
+router.get('/admin/contacts', verifyToken, authorizeResource('contactUs', { operation: 'read' }), contactUsAdminController.list);
+router.get('/admin/contacts/:id', verifyToken, authorizeResource('contactUs', { operation: 'read' }), contactUsAdminController.show);
+router.delete('/admin/contacts/:id', verifyToken, authorizeResource('contactUs'), contactUsAdminController.delete);
 router.get('/faq', pageController.getFaq);
 router.get('/home-slider', pageController.getSlider);
 router.get('/home-event', pageController.getHomeEvent);

@@ -6,6 +6,7 @@ import InputField from "../component/Input/InputField";
 import AuthTitle from "./AuthTitle";
 import { adminLoginApi } from "../api/auth.api";
 import { setRefreshToken } from "../api/request";
+import { useAuth } from "../context/AuthContext";
 
 const UserIcon = () => (
   <svg
@@ -43,6 +44,7 @@ const LockIcon = () => (
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setAdminUser } = useAuth();
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -86,11 +88,6 @@ export default function Login() {
         password,
       });
 
-      console.log("Login response.data:", response.data);
-      console.log("Admin object:", response.data?.admin);
-      console.log("RoleId:", response.data?.admin?.roleId);
-      console.log("Permissions:", response.data?.admin?.permissions);
-
       const { token, refreshToken, admin, language } = response.data;
       if (!token) {
         throw new Error("Login response did not include a token.");
@@ -106,6 +103,9 @@ export default function Login() {
       if (language) {
         localStorage.setItem("adminLanguage", language);
       }
+
+      // Populate AuthContext with server-verified permissions and role
+      setAdminUser(admin);
 
       navigate("/dashboard");
     } catch (error) {

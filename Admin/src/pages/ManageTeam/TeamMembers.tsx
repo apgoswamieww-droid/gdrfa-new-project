@@ -38,7 +38,7 @@ const TeamMembers = () => {
     setLoading(true);
     try {
       const res = await getTeamMembersApi(parseInt(id));
-      console.log('API Response:', res);
+      // console.log('API Response:', res);
       if (res.status) {
         setTeam(res.data.team);
         setAllPlayers(res.data.allPlayers || []);

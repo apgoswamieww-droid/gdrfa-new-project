@@ -5,6 +5,7 @@ import Sidebar from './component/Sidebar/sidebar'
 import Topbar from './component/Topbar/topbar'
 import AppRoutes from './routes/AppRoutes';
 import { useLanguage } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -60,7 +61,7 @@ function App() {
   }, [location.pathname, isAuthPage, isLoggedIn, navigate]);
 
   return (
-    <>
+    <AuthProvider>
       <Toaster position="top-right" reverseOrder={false} />
       {isAuthPage ? (
         // ✅ Auth pages — no Sidebar or Topbar, just the form
@@ -80,7 +81,7 @@ function App() {
           </div>
         </div>
       )}
-    </>
+    </AuthProvider>
   )
 }
 

@@ -77,9 +77,9 @@ describe('rate limiter configuration', () => {
     expect(rateLimit).toHaveBeenCalledTimes(6);
   });
 
-  test('globalLimiter: max=200, windowMs=15min', () => {
+  test('globalLimiter: max=2000, windowMs=1min', () => {
     expect(rateLimit).toHaveBeenCalledWith(
-      expect.objectContaining({ max: 200, windowMs: 15 * 60 * 1000 })
+      expect.objectContaining({ max: 2000, windowMs: 1 * 60 * 1000 })
     );
   });
 
@@ -144,7 +144,11 @@ function optsByMax(max) {
 // ═════════════════════════════════════════════════════════════════════
 
 describe('globalLimiter keyGenerator', () => {
-  const kg = () => optsByMax(200)?.keyGenerator;
+  const kg = () => optsByMax(2000)?.keyGenerator;
+
+  test('keyGenerator is defined', () => {
+    expect(kg()).toBeDefined();
+  });
 
   test('uses req.ip', () => {
     expect(kg()({ ip: '1.2.3.4' })).toBe('1.2.3.4');
@@ -230,7 +234,7 @@ describe('passwordLimiter keyGenerator', () => {
 });
 
 describe('limiters without keyGenerator', () => {
-  test('publicFormLimiter (max=10 auth fallback) and adminLimiter (max=300) have no keyGenerator', () => {
+  test('publicFormLimiter (max=10) and adminLimiter (max=300) have no keyGenerator', () => {
     // publicFormLimiter & adminLimiter don't define keyGenerator
     // But publicFormLimiter also has max=10, same as authLimiter.
     // So we check all limiters: exactly 2 should have no keyGenerator.

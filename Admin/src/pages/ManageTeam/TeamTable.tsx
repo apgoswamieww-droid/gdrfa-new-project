@@ -113,7 +113,7 @@ export default function TeamTable({ searchTerm, onEdit, onDelete }: TeamTablePro
     try {
       // 1. Fetch Teams
       const response = await getTeamsApi({ search: searchTerm });
-      console.log("Teams API Response:", response);
+      // console.log("Teams API Response:", response);
 
       if (response.status) {
         let teamsArray: Team[] = [];

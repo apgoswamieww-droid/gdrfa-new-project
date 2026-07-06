@@ -317,7 +317,7 @@ describe('POST /api/admin/refresh-token', () => {
 
     expect(res.status).toBe(401);
     expect(res.body.status).toBe(false);
-    expect(res.body.message).toMatch(/token refresh failed/i);
+    expect(res.body.message).toBe("Unauthorized");
   });
 
   test('returns 401 when CIAM returns value without accessToken', async () => {
@@ -333,7 +333,7 @@ describe('POST /api/admin/refresh-token', () => {
 
     expect(res.status).toBe(401);
     expect(res.body.status).toBe(false);
-    expect(res.body.message).toMatch(/token refresh failed/i);
+    expect(res.body.message).toBe("Unauthorized");
   });
 
   test('returns 401 when CIAM throws an exception', async () => {
