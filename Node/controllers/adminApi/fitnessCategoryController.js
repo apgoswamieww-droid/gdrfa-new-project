@@ -40,7 +40,7 @@ class FitnessCategoryController {
       });
     } catch (error) {
       console.error('Error in list Fitness Categories:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -63,7 +63,7 @@ class FitnessCategoryController {
       });
     } catch (error) {
       console.error('Error in show Fitness Category:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -107,7 +107,7 @@ class FitnessCategoryController {
       return res.json({ status: true, message: 'Fitness Category created successfully' });
     } catch (error) {
       console.error('Error in store Fitness Category:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -159,7 +159,7 @@ class FitnessCategoryController {
       return res.json({ status: true, message: 'Fitness Category updated successfully' });
     } catch (error) {
       console.error('Error in update Fitness Category:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -180,7 +180,7 @@ class FitnessCategoryController {
       return res.json({ status: true, message: 'Fitness Category deleted successfully' });
     } catch (error) {
       console.error('Error in delete Fitness Category:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -192,7 +192,7 @@ class FitnessCategoryController {
       return res.json({ status: true, message: 'Status updated successfully' });
     } catch (error) {
       console.error('Error in toggleStatus:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -220,7 +220,7 @@ class FitnessCategoryController {
       return res.json({ status: true, data: data || [] });
     } catch (error) {
       console.error('Error listing age groups:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -233,7 +233,7 @@ class FitnessCategoryController {
       }
       return res.json({ status: true, data: group });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -271,7 +271,7 @@ class FitnessCategoryController {
       return res.json({ status: true, message: 'Age Group created successfully' });
     } catch (error) {
       console.error('Error storing age group:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -312,7 +312,7 @@ class FitnessCategoryController {
 
       return res.json({ status: true, message: 'Age Group updated successfully' });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -336,7 +336,7 @@ class FitnessCategoryController {
       await db.query('DELETE FROM fitness_age_groups WHERE id = ?', [id]);
       return res.json({ status: true, message: 'Age Group deleted successfully' });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -399,7 +399,7 @@ class FitnessCategoryController {
       });
     } catch (error) {
       console.error('Error listing score matrix:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -474,7 +474,7 @@ class FitnessCategoryController {
       return res.json({ status: true, message: 'Score matrix entry created successfully' });
     } catch (error) {
       console.error('Error storing score matrix:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -522,7 +522,7 @@ class FitnessCategoryController {
 
       return res.json({ status: true, message: 'Score matrix entry updated successfully' });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -536,7 +536,7 @@ class FitnessCategoryController {
       await db.query('DELETE FROM fitness_score_matrix WHERE id = ?', [id]);
       return res.json({ status: true, message: 'Score matrix entry deleted successfully' });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -598,7 +598,7 @@ class FitnessCategoryController {
           imported++;
         } catch (err) {
           console.error(`[Bulk Import Row ${i + 1}] SQL Error:`, err.message, JSON.stringify(row));
-          errors.push({ row: i + 1, message: err.message, data: row });
+          errors.push({ row: i + 1, message: 'Failed to import this row' });
         }
       }
 
@@ -609,7 +609,7 @@ class FitnessCategoryController {
       });
     } catch (error) {
       console.error('Error in bulk import:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -687,7 +687,7 @@ class FitnessCategoryController {
       });
     } catch (error) {
       console.error('Error storing fitness test:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 }

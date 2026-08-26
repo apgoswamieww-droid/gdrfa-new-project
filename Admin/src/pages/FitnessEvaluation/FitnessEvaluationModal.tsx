@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import type { FitnessEvaluation } from "../../api/fitnessEvaluation.api";
 import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
+import toast from "react-hot-toast";
 
 interface FitnessEvaluationModalProps {
   isOpen: boolean;
@@ -57,9 +58,20 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
 
   if (!isOpen) return null;
 
+  const REQUIRED_COLUMNS = ["rank", "grp", "employee_name", "sector", "fitness_status", "year"];
+  const REQUIRED_LABELS = ["rank / Rank", "grp / Grp / GRP", "employee_name / Employee Name", "sector / Sector", "fitness_status / Fitness Status", "year / Year"];
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file type
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!ext || !["xlsx", "xls"].includes(ext)) {
+      toast.error("Only Excel files (.xlsx, .xls) are allowed.");
+      e.target.value = "";
+      return;
+    }
 
     setParsing(true);
     setParseProgress(0);
@@ -71,17 +83,89 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
     }, 200);
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
         if (progressTimerRef.current) clearInterval(progressTimerRef.current);
         setParseProgress(90);
 
-        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
+        const data = evt.target?.result as ArrayBuffer;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
         setParseProgress(95);
 
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet) {
+          setParsing(false);
+          setParseProgress(0);
+          toast.error("The Excel file appears to be empty or invalid.");
+          e.target.value = "";
+          return;
+        }
+
+        // Extract headers from first row
+        const headerRow = worksheet.getRow(1);
+        const headerValues = (headerRow.values as any[]) || [];
+        const headers: string[] = headerValues.slice(1).map((v: any) => String(v ?? '').toLowerCase().trim());
+
+        if (headers.length === 0 || headers.every(h => !h)) {
+          setParsing(false);
+          setParseProgress(0);
+          toast.error("The Excel file is missing a header row. Please ensure the first row contains column names.");
+          e.target.value = "";
+          return;
+        }
+
+        // Extract data rows (starting from row 2)
+        const jsonData: any[] = [];
+        worksheet.eachRow((row, rowIndex) => {
+          if (rowIndex === 1) return;
+          const values = (row.values as any[]) || [];
+          const rowObj: any = {};
+          headers.forEach((h, i) => {
+            const cellVal = values[i + 1];
+            rowObj[h] = cellVal !== undefined && cellVal !== null ? cellVal : "";
+          });
+          jsonData.push(rowObj);
+        });
+
+        if (jsonData.length === 0) {
+          setParsing(false);
+          setParseProgress(0);
+          toast.error("The Excel file is empty. Please upload a file with data.");
+          e.target.value = "";
+          return;
+        }
+
+        // Validate required columns
+        const fileColumns = headers;
+
+        const columnMapping: Record<string, string[]> = {
+          rank: ["rank"],
+          grp: ["grp", "group"],
+          employee_name: ["employee_name", "employee name", "employeename", "name"],
+          sector: ["sector"],
+          fitness_status: ["fitness_status", "fitness status", "fitnessstatus"],
+          year: ["year"],
+        };
+
+        const missingColumns: string[] = [];
+        for (const col of REQUIRED_COLUMNS) {
+          const variants = columnMapping[col];
+          const found = variants.some(v => fileColumns.includes(v));
+          if (!found) missingColumns.push(col);
+        }
+
+        if (missingColumns.length > 0) {
+          setParsing(false);
+          setParseProgress(0);
+          const missingLabels = missingColumns.map(c => {
+            const idx = REQUIRED_COLUMNS.indexOf(c);
+            return REQUIRED_LABELS[idx];
+          });
+          toast.error(`Missing required columns: ${missingLabels.join(", ")}`);
+          e.target.value = "";
+          return;
+        }
 
         setParseProgress(100);
 
@@ -89,9 +173,9 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         const records = jsonData.map((row: any) => ({
           rank: row.rank || row.Rank || row.RANK || null,
           grp: row.grp || row.Grp || row.GRP || row.Group || row.group || null,
-          employee_name: row.employee_name || row.Employee_name || row.EmployeeName || row.employeeName || row["Employee Name"] || row.name || row.Name || null,
+          employee_name: row.employee_name || row.Employee_name || row.EmployeeName || row.employeeName || row["employee name"] || row.name || row.Name || null,
           sector: row.sector || row.Sector || row.SECTOR || null,
-          fitness_status: row.fitness_status || row.Fitness_status || row.FitnessStatus || row.fitnessStatus || row["Fitness Status"] || null,
+          fitness_status: row.fitness_status || row.Fitness_status || row.FitnessStatus || row.fitnessStatus || row["fitness status"] || null,
           year: row.year || row.Year || row.YEAR ? parseInt(String(row.year || row.Year || row.YEAR)) : null,
         }));
 
@@ -104,14 +188,16 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         if (progressTimerRef.current) clearInterval(progressTimerRef.current);
         setParsing(false);
         setParseProgress(0);
-        setErrors({ file: "Failed to parse Excel file: " + (err.message || "Invalid format") });
+        toast.error("Failed to parse Excel file: " + (err.message || "Invalid format"));
+        e.target.value = "";
       }
     };
     reader.onerror = () => {
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       setParsing(false);
       setParseProgress(0);
-      setErrors({ file: "Failed to read file" });
+      toast.error("Failed to read file");
+      e.target.value = "";
     };
     reader.readAsArrayBuffer(file);
   };
@@ -157,7 +243,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
           <input
             ref={fileInputRef}
             type="file"
-            accept=".xlsx,.xls,.csv"
+            accept=".xlsx,.xls"
             onChange={handleFileUpload}
             className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
           />

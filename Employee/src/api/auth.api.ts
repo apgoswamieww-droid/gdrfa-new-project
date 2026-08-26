@@ -27,3 +27,10 @@ export const getProfileApi = () => {
     method: "GET",
   });
 };
+
+export const logoutApi = () => {
+  return apiRequest({
+    url: "/logout",
+    method: "GET",
+  });
+};

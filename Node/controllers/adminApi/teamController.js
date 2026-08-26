@@ -138,7 +138,7 @@ class TeamController {
       });
     } catch (error) {
       console.error("Error in list teams:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -166,7 +166,7 @@ class TeamController {
       });
     } catch (error) {
       console.error('Error in listAll teams:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -213,7 +213,7 @@ class TeamController {
       return res.json({ status: true, message: "Team created successfully" });
     } catch (error) {
       console.error("Error in store team:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -273,7 +273,7 @@ class TeamController {
       return res.json({ status: true, message: "Team updated successfully" });
     } catch (error) {
       console.error("Error in update team:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -294,7 +294,7 @@ class TeamController {
       return res.json({ status: true, message: "Team deleted successfully" });
     } catch (error) {
       console.error("Error in delete team:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -519,7 +519,7 @@ class TeamController {
       });
     } catch (error) {
       console.error("Error in show team:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -535,7 +535,7 @@ class TeamController {
       );
       return res.json({ status: true, data: activityResults });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -560,7 +560,7 @@ class TeamController {
         : [];
       return res.json({ status: true, data: staffUsers });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -707,7 +707,7 @@ class TeamController {
       });
     } catch (error) {
       console.error("Error in getTeamMembersData:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -776,7 +776,7 @@ class TeamController {
       });
     } catch (error) {
       console.error("Error in addMemberStore:", error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
   // ==================== GET TEAM EVENTS ====================
@@ -864,9 +864,7 @@ class TeamController {
       });
     } catch (error) {
       console.error("Error in getTeamEvents:", error);
-      return res
-        .status(500)
-        .json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 }

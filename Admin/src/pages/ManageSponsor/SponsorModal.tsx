@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
 import { useTranslation } from "../../hooks/useTranslation";
+import toast from "react-hot-toast";
 
 interface SponsorModalProps {
   isOpen: boolean;
@@ -66,11 +67,25 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setLogo(file);
-      setLogoPreview(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Only image files (JPG, PNG, GIF, WebP) are allowed.");
+      e.target.value = "";
+      return;
     }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setLogo(file);
+    setLogoPreview(URL.createObjectURL(file));
   };
 
   return (

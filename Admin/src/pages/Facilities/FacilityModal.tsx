@@ -57,12 +57,18 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
 
   if (!isOpen) return null;
 
+  const hasHtml = (val: string) => /<[^>]*>/g.test(val);
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = "Title (EN) is required";
+    else if (hasHtml(formData.title)) newErrors.title = "HTML tags are not allowed";
     if (!formData.title_ar.trim()) newErrors.title_ar = "Title (AR) is required";
+    else if (hasHtml(formData.title_ar)) newErrors.title_ar = "HTML tags are not allowed";
     if (!formData.description.trim()) newErrors.description = "Description (EN) is required";
+    else if (hasHtml(formData.description)) newErrors.description = "HTML tags are not allowed";
     if (!formData.description_ar.trim()) newErrors.description_ar = "Description (AR) is required";
+    else if (hasHtml(formData.description_ar)) newErrors.description_ar = "HTML tags are not allowed";
     if (!initialData && !image) newErrors.image = "Image is required";
     if (imageError) newErrors.image = imageError;
     

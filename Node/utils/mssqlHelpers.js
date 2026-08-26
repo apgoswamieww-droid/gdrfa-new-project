@@ -16,9 +16,16 @@ const { Sequelize } = require('sequelize');
  * @param {string} columnName - The column name containing comma-separated values
  * @returns {object} Sequelize literal for MSSQL compatibility
  */
+function escapeSql(val) {
+    if (typeof val === 'string') {
+        return val.replace(/'/g, "''");
+    }
+    return String(val);
+}
+
 function findInSetMSSQL(searchValue, columnName) {
     // Convert to string to handle both string and numeric values
-    const valueStr = String(searchValue);
+    const valueStr = escapeSql(searchValue);
     
     // Use CHARINDEX to find the value surrounded by commas
     // Add commas to both ends to handle edge cases
@@ -65,7 +72,8 @@ function fieldMSSQL(columnName, values) {
     
     let caseStatement = 'CASE ';
     values.forEach((value, index) => {
-        caseStatement += `WHEN ${formattedColumn} = ${typeof value === 'string' ? `'${value}'` : value} THEN ${index + 1} `;
+        const escaped = typeof value === 'string' ? `'${escapeSql(value)}'` : value;
+        caseStatement += `WHEN ${formattedColumn} = ${escaped} THEN ${index + 1} `;
     });
     caseStatement += 'ELSE 0 END';
     
@@ -94,7 +102,7 @@ function fieldNotInListMSSQL(columnName, values) {
     }
     
     // Create condition: CASE WHEN column NOT IN (values) THEN 1 ELSE 0 END
-    const valuesList = values.map(v => typeof v === 'string' ? `'${v}'` : v).join(',');
+    const valuesList = values.map(v => typeof v === 'string' ? `'${escapeSql(v)}'` : v).join(',');
     return Sequelize.literal(`CASE WHEN ${formattedColumn} NOT IN (${valuesList}) THEN 1 ELSE 0 END`);
 }
 

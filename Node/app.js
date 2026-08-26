@@ -55,7 +55,14 @@ const serverPort = Number(process.env.PORT || 3000);
 //    rather than relying on Helmet to strip it after the fact.
 app.disable('x-powered-by');
 
-// 1. Remove any Server header set by the HTTP server / reverse proxy.
+// 1. Trust the first upstream proxy (IIS ARR, NGINX, load balancer).
+//    Required so that req.hostname / req.protocol reflect the original
+//    client-facing values, which Content-Security-Policy 'self' depends on.
+//    Without this, CSP 'self' on a proxied server may resolve to an
+//    internal hostname and block legitimate resources.
+app.set('trust proxy', 1);
+
+// 2. Remove any Server header set by the HTTP server / reverse proxy.
 //    Express/Node.js don't set Server by default, but NGINX, IIS ARR,
 //    and cloud load balancers may add it.  This catch-all ensures it's
 //    stripped even if added by upstream infrastructure.
@@ -65,20 +72,39 @@ app.use((req, res, next) => {
   next();
 });
 
-// 2. Host header validation – prevents Host Header Injection attacks.
+// 3. Host header validation – prevents Host Header Injection attacks.
 //    Rejects requests with unrecognized Host headers immediately.
 const validateHost = require('./middlewares/hostValidation');
 app.use(validateHost);
 
-// 3. Helmet – sets various HTTP security headers.
-//    hidePoweredBy is included by default in Helmet v8 and removes any
-//    remaining X-Powered-By header that might have been set downstream.
+// 4. Helmet – sets various HTTP security headers.
+//    Content-Security-Policy is now ENABLED with directives that work for
+//    both the API/React frontends and the Swagger UI documentation page.
+//    - 'unsafe-inline' on styles is required by both React and Swagger UI
+//    - 'unsafe-inline' on scripts is required by Swagger UI's inline init
+//    - 'self' restricts everything else to the same origin
+//    - frame-ancestors 'none' prevents clickjacking
+//    - object-src 'none' blocks Flash/Java plugin execution
+//    - upgrade-insecure-requests forces HTTPS in modern browsers
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
-    contentSecurityPolicy: false, // Disabled to allow Swagger UI and inline styles
-    // hidePoweredBy is enabled by default; being explicit here for clarity:
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        fontSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        frameAncestors: ["'none'"],
+        formAction: ["'self'"],
+        baseUri: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
     hidePoweredBy: true,
   })
 );
@@ -196,23 +222,51 @@ app.use(responseFormatter);
 app.use(i18nextMiddleware.handle(i18next));
 app.use(require('./middlewares/languageMiddleware'));
 
-// ─── Static files (uploads only) ──────────────────────────────────────
+// ─── Static files (uploads & assets) ──────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// Custom route for PPTX files
+// Secure file serving — validates extension and sets safe headers
+const { isDangerousExtension } = require('./utils/fileTypeConfig');
+
+const MIME_MAP = {
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png':  'image/png',
+  '.gif':  'image/gif',
+  '.webp': 'image/webp',
+  '.bmp':  'image/bmp',
+  '.mp4':  'video/mp4',
+  '.webm': 'video/webm',
+  '.ogg':  'video/ogg',
+  '.mov':  'video/quicktime',
+  '.avi':  'video/x-msvideo',
+  '.pdf':  'application/pdf',
+  '.doc':  'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xls':  'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.ppt':  'application/vnd.ms-powerpoint',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+};
+
 app.get('/uploads/:filename', (req, res) => {
   const filename = req.params.filename;
+  const ext = path.extname(filename).toLowerCase();
+
+  if (!ext || isDangerousExtension(filename)) {
+    return res.status(403).json({ status: false, message: 'File type not allowed' });
+  }
+
   const filePath = path.join(__dirname, 'uploads', filename);
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ status: false, message: 'File not found' });
   }
-  const ext = path.extname(filename).toLowerCase();
-  if (ext === '.pptx') {
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.sendFile(filePath);
-  }
+
+  const contentType = MIME_MAP[ext] || 'application/octet-stream';
+  res.setHeader('Content-Type', contentType);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
   return res.sendFile(filePath);
 });
 
@@ -250,6 +304,10 @@ app.use('/api-docs', swaggerAuth, swaggerUi.serve, swaggerUi.setup(swaggerSpec, 
     showCommonExtensions: true,
   },
 }));
+
+// ─── XSS Sanitization Middleware ─────────────────────────────────────
+const { xssSanitize } = require('./utils/sanitize');
+app.use(xssSanitize);
 
 // ─── API Routes with global rate limiting ────────────────────────────
 const { globalLimiter } = require('./middlewares/rateLimiter');

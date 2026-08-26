@@ -39,7 +39,7 @@ class CMSController {
             });
         } catch (error) {
             console.error('Error in list CMS Pages:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -63,7 +63,7 @@ class CMSController {
             });
         } catch (error) {
             console.error('Error in show CMS Page:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -91,7 +91,7 @@ class CMSController {
             return res.json({ status: true, message: 'CMS Page created successfully' });
         } catch (error) {
             console.error('Error in store CMS Page:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -125,7 +125,7 @@ class CMSController {
             return res.json({ status: true, message: 'CMS Page updated successfully' });
         } catch (error) {
             console.error('Error in update CMS Page:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -144,7 +144,7 @@ class CMSController {
             return res.json({ status: true, message: 'CMS Page deleted successfully' });
         } catch (error) {
             console.error('Error in delete CMS Page:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -158,7 +158,7 @@ class CMSController {
             return res.json({ status: true, message: 'Status updated successfully' });
         } catch (error) {
             console.error('Error in toggleStatus:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

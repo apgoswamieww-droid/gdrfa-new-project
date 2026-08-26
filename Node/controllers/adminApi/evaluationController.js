@@ -21,7 +21,7 @@ class EvaluationController {
       });
     } catch (error) {
       console.error('Error fetching categories:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -107,7 +107,7 @@ class EvaluationController {
 
     } catch (error) {
       console.error('Error storing evaluation:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -177,7 +177,7 @@ class EvaluationController {
       });
     } catch (error) {
       console.error('Error fetching user evaluations:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -240,7 +240,7 @@ class EvaluationController {
       });
     } catch (error) {
       console.error('Error calculating scores:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -274,7 +274,7 @@ class EvaluationController {
       });
     } catch (error) {
       console.error('Error fetching evaluation details:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 }

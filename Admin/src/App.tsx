@@ -5,22 +5,52 @@ import Sidebar from './component/Sidebar/sidebar'
 import Topbar from './component/Topbar/topbar'
 import AppRoutes from './routes/AppRoutes';
 import { useLanguage } from './context/LanguageContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import { attemptTokenRefreshOnLoad, getAccessToken } from './api/request';
 
-function App() {
+function AppContent() {
   const [active, setActive] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { restoreSession, adminUser } = useAuth();
   useLanguage();
 
   // ✅ Define auth routes where layout should be hidden
   const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
   const isAuthPage = authRoutes.includes(location.pathname);
-  const isLoggedIn = Boolean(localStorage.getItem("adminToken"));
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      // Try to refresh the access token from the httpOnly cookie
+      await attemptTokenRefreshOnLoad();
+
+      const token = getAccessToken();
+
+      if (token) {
+        // Valid session — restore user data from the server (not localStorage!)
+        await restoreSession();
+      }
+
+      if (!cancelled) {
+        setSessionReady(true);
+      }
+    }
+
+    init();
+    return () => { cancelled = true; };
+  }, [restoreSession]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    const token = getAccessToken();
+    const isLoggedIn = Boolean(token && adminUser);
+
     if (isAuthPage && isLoggedIn) {
       navigate("/dashboard", { replace: true });
       return;
@@ -58,18 +88,30 @@ function App() {
     } else if (path.startsWith("/cms")) {
       setActive("cms");
     }
-  }, [location.pathname, isAuthPage, isLoggedIn, navigate]);
+  }, [location.pathname, isAuthPage, sessionReady, adminUser, navigate]);
+
+  if (!sessionReady) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+          <p className="text-sm font-medium text-secondary/60">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const token = getAccessToken();
+  const isLoggedIn = Boolean(token && adminUser);
 
   return (
-    <AuthProvider>
+    <>
       <Toaster position="top-right" reverseOrder={false} />
-      {isAuthPage ? (
+      {isAuthPage || !isLoggedIn ? (
         // ✅ Auth pages — no Sidebar or Topbar, just the form
         <AppRoutes />
       ) : (
         // ✅ Normal pages — full layout with Sidebar & Topbar
-        // Using logical properties (ms-* = margin-inline-start, me-* = margin-inline-end)
-        // These automatically flip in RTL mode
         <div className="flex h-screen overflow-hidden">
           <Sidebar active={active} setActive={setActive} open={sidebarOpen} setOpen={setSidebarOpen} />
           {/* Main area */}
@@ -81,8 +123,16 @@ function App() {
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
-  )
+  );
 }
 
 export default App

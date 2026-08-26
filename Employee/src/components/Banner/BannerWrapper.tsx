@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { useLocation } from "react-router-dom";
 import {
   HeroFirst,
@@ -26,7 +26,7 @@ const defaultSlides: BannerSlide[] = [
 ];
 
 const BannerWrapper = () => {
-  const { token } = useAuthStore();
+  const token = getAccessToken();
   const [activeSlide, setActiveSlide] = useState(0);
   const [slides, setSlides] = useState<BannerSlide[]>(defaultSlides);
 
@@ -61,7 +61,7 @@ const BannerWrapper = () => {
     if (token) {
       // Token-dependent hero behavior can be added here when event data is wired.
     }
-  }, [token]);
+  }, []);
 
   const location = useLocation();
 

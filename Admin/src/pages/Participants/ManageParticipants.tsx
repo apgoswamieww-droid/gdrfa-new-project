@@ -102,10 +102,6 @@ const ManageParticipants = () => {
     navigate(`/participant-requests/view/${data.id}`);
   };
 
-  const handleEvaluate = (data: Participant) => {
-    navigate(`/participant-requests/evaluation/${data.id}`);
-  };
-
   return (
     <div className="p-4 2xl:space-y-8 space-y-6 flex flex-col h-full">
       <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
@@ -135,7 +131,6 @@ const ManageParticipants = () => {
           data={participants}
           onView={handleView}
           onStatusChange={handleStatusChange}
-          onEvaluate={handleEvaluate}
           onDelete={handleDelete}
         />
       </div>

@@ -1,3 +1,4 @@
+const { getFullAssetUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const imagePath = require('../../utils/imagePath');
 const fs = require('fs');
@@ -34,13 +35,10 @@ class HomeSliderController {
                 [...params, start, length]
             );
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
             const formatted = data.map(s => ({
                 ...s,
                 status: s.status === "1" ? "1" : "0",
-                media_url: s.media_path
-                    ? (s.media_path.startsWith('http') ? s.media_path : `${baseUrl}/${s.media_path}`)
-                    : ''
+                media_url: getFullAssetUrl(s.media_path) || ''
             }));
 
             return res.json({
@@ -50,7 +48,7 @@ class HomeSliderController {
             });
         } catch (error) {
             console.error('Error in list home sliders:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -135,7 +133,7 @@ class HomeSliderController {
             return res.json({ status: true, message: 'Home slider created successfully' });
         } catch (error) {
             console.error('Error in store home slider:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -231,7 +229,7 @@ class HomeSliderController {
             return res.json({ status: true, message: 'Home slider updated successfully' });
         } catch (error) {
             console.error('Error in update home slider:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -262,7 +260,7 @@ class HomeSliderController {
             return res.json({ status: true, message: 'Home slider deleted successfully' });
         } catch (error) {
             console.error('Error in delete home slider:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

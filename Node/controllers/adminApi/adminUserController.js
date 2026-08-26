@@ -37,7 +37,7 @@ class AdminUserController {
             });
         } catch (error) {
             console.error('[CIAM Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -52,7 +52,7 @@ class AdminUserController {
             });
         } catch (error) {
             console.error('[Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

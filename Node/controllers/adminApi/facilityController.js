@@ -42,7 +42,7 @@ class FacilityController {
             });
         } catch (error) {
             console.error('Error in list facilities:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -69,7 +69,7 @@ class FacilityController {
             return res.json({ status: true, message: 'Facility created successfully' });
         } catch (error) {
             console.error('Error in store facility:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -106,7 +106,7 @@ class FacilityController {
             return res.json({ status: true, message: 'Facility updated successfully' });
         } catch (error) {
             console.error('Error in update facility:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -125,7 +125,7 @@ class FacilityController {
             return res.json({ status: true, message: 'Facility deleted successfully' });
         } catch (error) {
             console.error('Error in delete facility:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -139,7 +139,7 @@ class FacilityController {
             return res.json({ status: true, message: 'Status updated successfully' });
         } catch (error) {
             console.error('Error in toggleStatus:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 

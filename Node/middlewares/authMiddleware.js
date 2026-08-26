@@ -47,8 +47,7 @@ module.exports = {
     res.redirect('/vendor/login');
   },
   verifyToken: async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies?.accessToken || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
     if (!token) return res.status(401).json({ status: false, message: req.t('Token required') });
 
     const MAX_RETRIES = 3;

@@ -1,5 +1,4 @@
-import { apiRequest } from "./request";
-import { useAuthStore } from "../store/store";
+import { apiRequest, getAccessToken } from "./request";
 
 export async function getSponsors() {
   return apiRequest({
@@ -232,11 +231,11 @@ export async function downloadCertificateImage(certId: number) {
 }
 
 async function downloadCertificate(certId: number, format: "pdf" | "png") {
-  const state = useAuthStore.getState();
-  const token = state.accessToken || state.token;
   const baseUrl = (import.meta.env.VITE_BASE_URL || "https://localhost:3000/api").replace(/\/$/, "");
+  const token = getAccessToken();
   const response = await fetch(`${baseUrl}/certificates/${certId}/download?format=${format}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!response.ok) throw new Error("Download failed");
   const blob = await response.blob();

@@ -57,7 +57,6 @@ describe('POST /api/auth/refresh-token', () => {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe(true);
     expect(res.body.data.accessToken).toBe(mockRefreshedAccessToken);
-    expect(res.body.data.refreshToken).toBe(mockNewRefreshToken);
     expect(res.body.data.accessTokenExpiry).toBe('2027-06-01T00:00:00Z');
     expect(ciamService.authRefreshToken).toHaveBeenCalledWith(
       mockValidAccessToken,
@@ -235,7 +234,6 @@ describe('POST /api/auth/refresh-token', () => {
       message: expect.any(String),
       data: {
         accessToken: expect.any(String),
-        refreshToken: expect.any(String),
         accessTokenExpiry: expect.any(String),
       },
     });
@@ -282,10 +280,9 @@ describe('POST /api/admin/refresh-token', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe(true);
-    expect(res.body.data.token).toBe(mockRefreshedAccessToken);
-    expect(res.body.data.refreshToken).toBe(mockNewRefreshToken);
+    expect(res.body.data.accessToken).toBe(mockRefreshedAccessToken);
     expect(res.body.data.accessTokenExpiry).toBe('2027-06-01T00:00:00Z');
-    // Admin endpoint maps token differently: { token, refreshToken, accessTokenExpiry }
+    // Admin endpoint returns { accessToken, accessTokenExpiry } (no refreshToken in response data)
     expect(ciamService.authRefreshToken).toHaveBeenCalledWith(
       mockValidAccessToken,
       mockRefreshToken,
@@ -368,8 +365,7 @@ describe('POST /api/admin/refresh-token', () => {
       status: true,
       message: expect.any(String),
       data: {
-        token: expect.any(String),
-        refreshToken: expect.any(String),
+        accessToken: expect.any(String),
         accessTokenExpiry: expect.any(String),
       },
     });

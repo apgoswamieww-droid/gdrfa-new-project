@@ -1,4 +1,5 @@
 const multer = require('multer');
+const { sanitizeObject } = require('./sanitize');
 
 function wrapMulter(uploadMiddleware) {
   return (req, res, next) => {
@@ -12,6 +13,7 @@ function wrapMulter(uploadMiddleware) {
       if (err) {
         return res.status(400).json({ status: false, message: err.message });
       }
+      sanitizeObject(req.body);
       next();
     });
   };

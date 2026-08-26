@@ -37,7 +37,7 @@ class PlanController {
             });
         } catch (error) {
             console.error('[DB Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -68,7 +68,7 @@ class PlanController {
             return res.json({ status: true, message: 'Plan created successfully' });
         } catch (error) {
             console.error('[DB Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -120,7 +120,7 @@ class PlanController {
             return res.json({ status: true, message: 'Plan updated successfully' });
         } catch (error) {
             console.error('[DB Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -131,7 +131,7 @@ class PlanController {
             return res.json({ status: true, message: 'Plan deleted successfully' });
         } catch (error) {
             console.error('[DB Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -145,7 +145,7 @@ class PlanController {
             });
         } catch (error) {
             console.error('[DB Error]', error.message);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

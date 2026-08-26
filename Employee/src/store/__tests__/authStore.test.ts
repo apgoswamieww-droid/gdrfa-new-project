@@ -4,11 +4,9 @@ import { useAuthStore } from "../store";
 describe("Auth Store – gdrfa-landing-page", () => {
   beforeEach(() => {
     localStorage.clear();
-    // Reset store to initial defaults
     useAuthStore.setState({
       user: null,
-      token: null,
-      accessToken: null,
+      data: null,
       fcmToken: null,
       currentLanguage: "en",
     });
@@ -21,62 +19,12 @@ describe("Auth Store – gdrfa-landing-page", () => {
       expect(useAuthStore.getState().user).toBeNull();
     });
 
-    it("has null token", () => {
-      expect(useAuthStore.getState().token).toBeNull();
-    });
-
-    it("has null accessToken", () => {
-      expect(useAuthStore.getState().accessToken).toBeNull();
-    });
-
     it("has null fcmToken", () => {
       expect(useAuthStore.getState().fcmToken).toBeNull();
     });
 
     it("has 'en' as default language", () => {
       expect(useAuthStore.getState().currentLanguage).toBe("en");
-    });
-  });
-
-  // ── setToken ───────────────────────────────────────────────────────
-
-  describe("setToken", () => {
-    it("sets the token value", () => {
-      const token = "eyJhbGciOiJIUzI1NiJ9.test-token";
-      useAuthStore.getState().setToken(token);
-      expect(useAuthStore.getState().token).toBe(token);
-    });
-
-    it("sets token to null", () => {
-      useAuthStore.getState().setToken("some-token");
-      useAuthStore.getState().setToken(null);
-      expect(useAuthStore.getState().token).toBeNull();
-    });
-
-    it("handles undefined token", () => {
-      useAuthStore.getState().setToken(undefined);
-      expect(useAuthStore.getState().token).toBeUndefined();
-    });
-  });
-
-  // ── setAccessToken ─────────────────────────────────────────────────
-
-  describe("setAccessToken", () => {
-    it("sets the accessToken value", () => {
-      const accessToken = "eyJhbGciOiJIUzI1NiJ9.test-access";
-      useAuthStore.getState().setAccessToken(accessToken);
-      expect(useAuthStore.getState().accessToken).toBe(accessToken);
-    });
-
-    it("sets accessToken to null", () => {
-      useAuthStore.getState().setAccessToken("some-token");
-      useAuthStore.getState().setAccessToken(null);
-      expect(useAuthStore.getState().accessToken).toBeNull();
-    });
-
-    it("handles undefined accessToken", () => {
-      useAuthStore.getState().setAccessToken(undefined);
-      expect(useAuthStore.getState().accessToken).toBeUndefined();
     });
   });
 
@@ -150,20 +98,14 @@ describe("Auth Store – gdrfa-landing-page", () => {
   // ── removeAll ──────────────────────────────────────────────────────
 
   describe("removeAll", () => {
-    it("clears token, user, accessToken, and data", () => {
-      // Populate all fields
-      useAuthStore.getState().setToken("test-token");
-      useAuthStore.getState().setAccessToken("test-access");
+    it("clears user and data", () => {
       useAuthStore.getState().setUser({ id: "test", name: "Test" });
 
-      // Reset
       useAuthStore.getState().removeAll();
 
-      // Auth fields cleared
       const state = useAuthStore.getState();
-      expect(state.token).toBeNull();
-      expect(state.accessToken).toBeNull();
       expect(state.user).toBeNull();
+      expect(state.data).toBeNull();
     });
 
     it("does NOT clear currentLanguage", () => {
@@ -182,30 +124,11 @@ describe("Auth Store – gdrfa-landing-page", () => {
   // ── State Persistence (localStorage) ───────────────────────────────
 
   describe("persistence to localStorage", () => {
-    it("persists token under 'auth' key", () => {
-      useAuthStore.getState().setToken("persisted-token");
+    it("persists currentLanguage under 'auth' key", () => {
+      useAuthStore.getState().setCurrentLanguage("ar");
       const raw = localStorage.getItem("auth");
       expect(raw).not.toBeNull();
       const parsed = JSON.parse(raw!);
-      expect(parsed.state.token).toBe("persisted-token");
-    });
-
-    it("persists accessToken", () => {
-      useAuthStore.getState().setAccessToken("persisted-access");
-      const parsed = JSON.parse(localStorage.getItem("auth")!);
-      expect(parsed.state.accessToken).toBe("persisted-access");
-    });
-
-    it("persists user", () => {
-      const user = { id: "u1", name: "Persisted User" };
-      useAuthStore.getState().setUser(user);
-      const parsed = JSON.parse(localStorage.getItem("auth")!);
-      expect(parsed.state.user).toEqual(user);
-    });
-
-    it("persists currentLanguage", () => {
-      useAuthStore.getState().setCurrentLanguage("ar");
-      const parsed = JSON.parse(localStorage.getItem("auth")!);
       expect(parsed.state.currentLanguage).toBe("ar");
     });
 
@@ -215,28 +138,22 @@ describe("Auth Store – gdrfa-landing-page", () => {
       expect(parsed.state.fcmToken).toBe("fcm-persisted");
     });
 
-    it("persists removed state after removeAll", () => {
-      useAuthStore.getState().setToken("some-token");
-      useAuthStore.getState().removeAll();
+    it("does NOT persist user", () => {
+      const user = { id: "u1", name: "Persisted User" };
+      useAuthStore.getState().setUser(user);
       const parsed = JSON.parse(localStorage.getItem("auth")!);
-      expect(parsed.state.token).toBeNull();
-      expect(parsed.state.accessToken).toBeNull();
-      expect(parsed.state.user).toBeNull();
+      expect(parsed.state.user).toBeUndefined();
     });
   });
 
   // ── Rehydration from localStorage ──────────────────────────────────
 
   describe("rehydration from localStorage", () => {
-    it("rehydrates token, accessToken, user, and language from stored auth", async () => {
-      // Simulate stored auth data (as if user had logged in previously)
+    it("rehydrates language and fcmToken from stored auth", async () => {
       localStorage.setItem(
         "auth",
         JSON.stringify({
           state: {
-            user: { id: "hydrated", name: "Hydrated User" },
-            token: "hydrated-token",
-            accessToken: "hydrated-access",
             currentLanguage: "ar",
             fcmToken: "hydrated-fcm",
           },
@@ -244,20 +161,15 @@ describe("Auth Store – gdrfa-landing-page", () => {
         }),
       );
 
-      // Reset modules so Zustand persist re-reads from localStorage
       vi.resetModules();
       const { useAuthStore: freshStore } = await import("../store");
 
-      // Zustand persist rehydrates on next tick
       await new Promise((r) => setTimeout(r, 50));
 
       const state = freshStore.getState();
-      expect(state.token).toBe("hydrated-token");
-      expect(state.accessToken).toBe("hydrated-access");
-      expect(state.user?.id).toBe("hydrated");
-      expect(state.user?.name).toBe("Hydrated User");
       expect(state.currentLanguage).toBe("ar");
       expect(state.fcmToken).toBe("hydrated-fcm");
+      expect(state.user).toBeNull();
     });
 
     it("starts with defaults when localStorage has no auth key", async () => {
@@ -269,8 +181,6 @@ describe("Auth Store – gdrfa-landing-page", () => {
       await new Promise((r) => setTimeout(r, 50));
 
       const state = freshStore.getState();
-      expect(state.token).toBeNull();
-      expect(state.accessToken).toBeNull();
       expect(state.user).toBeNull();
       expect(state.currentLanguage).toBe("en");
     });
@@ -283,9 +193,7 @@ describe("Auth Store – gdrfa-landing-page", () => {
 
       await new Promise((r) => setTimeout(r, 50));
 
-      // Should fall back to defaults
       const state = freshStore.getState();
-      expect(state.token).toBeNull();
       expect(state.user).toBeNull();
       expect(state.currentLanguage).toBe("en");
     });
@@ -300,41 +208,25 @@ describe("Auth Store – gdrfa-landing-page", () => {
       email: "cmamer@dnrd.ae",
       image: "/src/assets/images/avatar.jpg",
     };
-    const mockToken = "eyJhbGciOiJIUzI1NiJ9.real-jwt-token";
 
-    it("simulates login → stored correctly", () => {
+    it("simulates login → user stored correctly", () => {
       useAuthStore.getState().setUser(mockUser);
-      useAuthStore.getState().setToken(mockToken);
-      useAuthStore.getState().setAccessToken(mockToken);
 
       const state = useAuthStore.getState();
       expect(state.user).toEqual(mockUser);
-      expect(state.token).toBe(mockToken);
-      expect(state.accessToken).toBe(mockToken);
       expect(state.currentLanguage).toBe("en");
-
-      // Verify persistence
-      const persisted = JSON.parse(localStorage.getItem("auth")!);
-      expect(persisted.state.user).toEqual(mockUser);
-      expect(persisted.state.token).toBe(mockToken);
     });
 
-    it("simulates logout → auth cleared, language/fcm preserved", () => {
-      // Login
+    it("simulates logout → user/data cleared, language/fcm preserved", () => {
       useAuthStore.getState().setUser(mockUser);
-      useAuthStore.getState().setToken(mockToken);
-      useAuthStore.getState().setAccessToken(mockToken);
       useAuthStore.getState().setCurrentLanguage("ar");
       useAuthStore.getState().setFCMToken("device-fcm-token");
 
-      // Logout
       useAuthStore.getState().removeAll();
 
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
-      expect(state.token).toBeNull();
-      expect(state.accessToken).toBeNull();
-      // Preserved
+      expect(state.data).toBeNull();
       expect(state.currentLanguage).toBe("ar");
       expect(state.fcmToken).toBe("device-fcm-token");
     });

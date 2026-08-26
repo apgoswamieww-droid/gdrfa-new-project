@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MenuIcon, UserImg } from "../../assets/images/images";
 import { adminLogoutApi } from "../../api/auth.api";
+import { setAccessToken, apiRequest } from "../../api/request";
 import { Heading, Text } from "../Typography/Typography";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 import {
   getAdminNotifications,
   clearAllAdminNotifications,
@@ -36,6 +38,7 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const fetchUnreadCount = useCallback(async () => {
     try {
@@ -69,6 +72,20 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
       clearInterval(interval);
     };
   }, [fetchUnreadCount]);
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const res: any = await apiRequest({ url: "/api/profile-image" });
+        if (res?.data?.image) {
+          setProfileImage(res.data.image);
+        }
+      } catch {
+        // silently fail, default image will be used
+      }
+    };
+    fetchProfileImage();
+  }, []);
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -111,12 +128,14 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
   };
 
   const [, setSearchInput] = useState<boolean>(false);
+  const { clearAdminUser } = useAuth();
 
   const clearAdminSession = () => {
-    localStorage.removeItem("adminToken");
+    setAccessToken(null);
+    setProfileImage(null);
     localStorage.removeItem("adminUser");
     localStorage.removeItem("adminRememberMe");
-    localStorage.removeItem("adminRefreshToken");
+    clearAdminUser();
   };
 
   const handleLogout = async () => {
@@ -141,7 +160,13 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
   }, []);
 
   const userName = adminUser?.name || "Admin";
-  const userImage = adminUser?.image || UserImg;
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
+  const rawImage = profileImage || adminUser?.image || null;
+  const userImage = rawImage
+    ? rawImage.startsWith("http")
+      ? rawImage
+      : `${IMAGE_BASE_URL}${rawImage}`
+    : UserImg;
 
   return (
     <>

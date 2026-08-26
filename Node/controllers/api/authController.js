@@ -1,3 +1,4 @@
+const { getServerBaseUrl } = require('../../utils/baseUrl');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../../config/dbDirect');
@@ -78,7 +79,7 @@ class ApiController {
                 data: {
                     title: 'Welcome to Our Platform!',
                     username: name || 'User',
-                    logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                    logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                     resetLink: `${process.env.APP_URL}/dashboard`,
                     buttonText: 'Get Started',
                     role: 'user'
@@ -147,10 +148,25 @@ class ApiController {
                 path: '/'
             });
 
+            // Set JWT and refresh tokens as HTTP-only cookies
+            res.cookie('accessToken', responseOfUser.value.accessToken, {
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+            });
+            res.cookie('refreshToken', responseOfUser.value.refreshToken, {
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+            });
+
             return res.success(
                 {
-                    jwtToken: responseOfUser.value.accessToken,
-                    refreshToken: responseOfUser.value.refreshToken,
+                    accessToken: responseOfUser.value.accessToken,
                     accessTokenExpiry: responseOfUser.value.accessTokenExpirationUtcDateTime,
                     user: {
                         assignedTo: user.currentManagerUserDomain,
@@ -294,6 +310,20 @@ class ApiController {
             //     [userId]
             // );
 
+            // Clear auth cookies (must match same options as when set)
+            res.clearCookie('accessToken', {
+              httpOnly: true,
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+              path: '/',
+            });
+            res.clearCookie('refreshToken', {
+              httpOnly: true,
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+              path: '/',
+            });
+
             return res.success({}, getLocalizedMessage(req, 'Logged out successfully'));
         } catch (error) {
             console.error('Error logging out:', error.message);
@@ -401,7 +431,7 @@ class ApiController {
                 [userId]
             );
 
-            const BASE_URL = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+            const BASE_URL = process.env.BASE_URL || getServerBaseUrl();
 
             const responseData = {
                 id: updatedUser.id,
@@ -433,12 +463,12 @@ class ApiController {
     // POST /api/auth/refresh-token
     static async refreshToken(req, res) {
         try {
-            const { refreshToken } = req.body || {};
+            const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
             if (!refreshToken) {
                 return res.status(401).json({ status: false, message: getLocalizedMessage(req, 'Refresh token required') });
             }
 
-            const currentToken = req.headers.authorization?.split(' ')[1];
+            const currentToken = req.cookies?.accessToken || req.headers.authorization?.split(' ')[1];
 
             const result = await ciamService.authRefreshToken(currentToken, refreshToken);
 
@@ -446,9 +476,24 @@ class ApiController {
                 return res.status(401).json({ status: false, message: getLocalizedMessage(req, 'Token refresh failed') });
             }
 
+            // Set new tokens as HTTP-only cookies
+            res.cookie('accessToken', result.value.accessToken, {
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+            });
+            res.cookie('refreshToken', result.value.refreshToken, {
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+            });
+
             return res.success({
                 accessToken: result.value.accessToken,
-                refreshToken: result.value.refreshToken,
                 accessTokenExpiry: result.value.accessTokenExpirationUtcDateTime,
             }, getLocalizedMessage(req, 'Token refreshed successfully'));
         } catch (error) {
@@ -542,7 +587,7 @@ class ApiController {
                 data: {
                     resetLink,
                     title: 'Reset Your Password',
-                    logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                    logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                     username: user.name || 'User',
                     buttonText: 'Reset Password',
                     role: 'user'
@@ -712,7 +757,7 @@ class ApiController {
                 );
             }
 
-            const BASE_URL = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+            const BASE_URL = process.env.BASE_URL || getServerBaseUrl();
             return res.success(
                 { image: `${BASE_URL}/${image}` },
                 getLocalizedMessage(req, 'Profile image updated successfully')
@@ -735,7 +780,7 @@ class ApiController {
                 return res.success({ image: null }, getLocalizedMessage(req, 'No profile image found'));
             }
 
-            const BASE_URL = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+            const BASE_URL = process.env.BASE_URL || getServerBaseUrl();
             return res.success(
                 { image: `${BASE_URL}/${record.user_image}` },
                 getLocalizedMessage(req, 'Profile image fetched successfully')

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getMyEvents, getCertificates } from "../../api/page.api";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 
 import { Navigate, Link } from "react-router-dom";
 import { CertificateImg } from "../../assets/images/images";
@@ -78,8 +78,7 @@ function flattenEvents(data: any): ParticipatedEvent[] {
 
 export default function Achievements() {
   const { t, i18n } = useTranslation();
-  const { token } = useAuthStore();
-  const isLoggedIn = Boolean(token);
+  const isLoggedIn = Boolean(getAccessToken());
 
   const [events, setEvents] = useState<ParticipatedEvent[]>([]);
   const [certs, setCerts] = useState<CertDisplay[]>([]);

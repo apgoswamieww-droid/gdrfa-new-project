@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 import { LogoImage, SidebarBg } from "../../assets/images/images";
 import { Text } from "../Typography/Typography";
 import { adminLogoutApi } from "../../api/auth.api";
-import { hasAnyPermission, permissionsBypassEnabled } from "../../utils/permissions";
+import { setAccessToken } from "../../api/request";
+import { hasAnyPermission } from "../../utils/permissions";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useNavigationGuard } from "../../hooks/useNavigationGuard";
@@ -175,8 +176,8 @@ const NAV_PERMISSIONS: Record<string, string[]> = {
 
 function filterNavItems(items: NavItem[], contextPermissions: string[], contextIsAdminOrSuperAdmin: boolean): NavItem[] {
   return items.reduce<NavItem[]>((acc, item) => {
-    // Restrict audit-history and eval modules to Admin / Super Admin only (unless bypass is on)
-    if (!permissionsBypassEnabled() && (item.key === "audit-history" || item.key === "eval")) {
+    // Restrict audit-history and eval modules to Admin / Super Admin only
+    if (item.key === "audit-history" || item.key === "eval") {
       if (!contextIsAdminOrSuperAdmin) return acc;
     }
 
@@ -271,7 +272,7 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
 }) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { permissions: authPermissions, isAdminOrSuperAdmin: authIsAdminOrSuperAdmin } = useAuth();
+  const { permissions: authPermissions, isAdminOrSuperAdmin: authIsAdminOrSuperAdmin, clearAdminUser } = useAuth();
 
   // Use the navigation guard hook for safe navigation
   const { navigateWithGuard, isNavigating } = useNavigationGuard();
@@ -347,14 +348,17 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
   };
 
   const clearAdminSession = () => {
-    localStorage.removeItem("adminToken"); localStorage.removeItem("adminUser"); localStorage.removeItem("adminRememberMe"); localStorage.removeItem("adminRefreshToken");
+    setAccessToken(null);
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("adminRememberMe");
+    clearAdminUser();
   };
   const handleLogout = async () => {
     if (isNavigating) return; // Prevent double-click on logout
     setOpen(false);
     try { await adminLogoutApi(); } catch (error) { console.warn("Admin logout API failed:", error); } finally { clearAdminSession(); navigateWithGuard("logout", "/login", { replace: true }); }
   };
-  const filteredNavItems = filterNavItems(navItems, authPermissions, authIsAdminOrSuperAdmin);
+  const filteredNavItems = filterNavItems(navItems, authPermissions, authIsAdminOrSuperAdmin());
   const allItems = [...filteredNavItems, ...bottomNav];
   const allSubs = allItems.flatMap((i) => i.children ?? []);
   const matchedSub = allSubs.find((s) => location.pathname === s.href || location.pathname.startsWith(s.href + "/"));

@@ -1,3 +1,4 @@
+const { getServerBaseUrl } = require('../utils/baseUrl');
 const utilsDeleteRecord = require('../utils/deleteRecord');
 const utilsChangeStatus = require('../utils/changeStatus');
 const Evaluation = require('../models/Evaluation');
@@ -545,7 +546,7 @@ class CommonController {
               activityName: activityData?.activityName || 'N/A',
               activityType: activityData?.activityTypeName || 'N/A',
               rejectionReason: 'Your registration has been cancelled by the event administrator.',
-              logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`
+              logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`
             }
           });
         } catch (emailErr) {
@@ -610,7 +611,7 @@ class CommonController {
               activityName: activityData?.activityName || 'N/A',
               activityType: activityData?.activityTypeName || 'N/A',
               rejectionReason: 'Your registration has been re-approved by the event administrator.',
-              logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`
+              logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`
             }
           });
         } catch (e) {
@@ -691,7 +692,7 @@ class CommonController {
                 activityName: activityDetails?.name || 'N/A',
                 activityType: activityDetails?.activityTypeName || 'N/A',
                 rejectionReason: isFullyApproved ? '' : 'Your request has been forwarded to the next approver.',
-                logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
               },
             });
           }
@@ -730,7 +731,7 @@ class CommonController {
                       managerData: { name: approverData.nameEn || nextRecord.approver_id },
                       userData: { name: userCiam?.nameEn || employeeDomain, email: userCiam?.emailAddress || '', mobile: userCiam?.mobile || '' },
                       eventData: eventDetails || { name: 'N/A' },
-                      logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                      logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                     },
                   });
                 }
@@ -829,7 +830,7 @@ class CommonController {
                 activityName: activityDetails?.name || 'N/A',
                 activityType: activityDetails?.activityTypeName || 'N/A',
                 rejectionReason: rejectComment || 'Your request was not approved.',
-                logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
               },
             });
           }
@@ -908,7 +909,7 @@ class CommonController {
             facilityName,
             facilityStatus,
             approvedDate,
-            logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`
+            logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`
           }
         });
       } catch (emailErr) {

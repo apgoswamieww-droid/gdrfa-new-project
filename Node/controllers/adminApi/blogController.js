@@ -1,3 +1,4 @@
+const { getFullAssetUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const fs = require('fs');
 const path = require('path');
@@ -31,13 +32,10 @@ class BlogController {
                 [...params, start, length]
             );
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
             const formatted = data.map(b => ({
                 ...b,
                 status: b.status === "1" ? "1" : "0",
-                media_url: b.media
-                    ? (b.media.startsWith('http') ? b.media : `${baseUrl}/${b.media}`)
-                    : ''
+                media_url: getFullAssetUrl(b.media) || ''
             }));
 
             const blogIds = formatted.map(b => b.id);
@@ -67,7 +65,7 @@ class BlogController {
             });
         } catch (error) {
             console.error('Error in list blog posts:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -158,7 +156,7 @@ class BlogController {
             return res.json({ status: true, message: 'Blog post created successfully' });
         } catch (error) {
             console.error('Error in store blog post:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -259,7 +257,7 @@ class BlogController {
             return res.json({ status: true, message: 'Blog post updated successfully' });
         } catch (error) {
             console.error('Error in update blog post:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -275,8 +273,6 @@ class BlogController {
                 return res.status(404).json({ status: false, message: 'Blog post not found' });
             }
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-
             const tags = await db.query(
                 `SELECT t.id, t.name FROM tags t
                  INNER JOIN post_tags pt ON t.id = pt.tagId
@@ -288,9 +284,7 @@ class BlogController {
             const formatted = {
                 ...post,
                 status: post.status === "1" ? "1" : "0",
-                media_url: post.media
-                    ? (post.media.startsWith('http') ? post.media : `${baseUrl}/${post.media}`)
-                    : '',
+                media_url: getFullAssetUrl(post.media) || '',
                 tags: tags || []
             };
 
@@ -301,7 +295,7 @@ class BlogController {
             });
         } catch (error) {
             console.error('Error in show blog post:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -332,7 +326,7 @@ class BlogController {
             return res.json({ status: true, message: 'Blog post deleted successfully' });
         } catch (error) {
             console.error('Error in delete blog post:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -344,7 +338,7 @@ class BlogController {
             return res.json({ status: true, data: tags || [] });
         } catch (error) {
             console.error('Error in list tags:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

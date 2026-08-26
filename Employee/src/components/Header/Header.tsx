@@ -9,12 +9,14 @@ import {
   MenuIcon,
 } from "../../assets/images/images";
 import { useAuthStore } from "../../store/store";
+import { setAccessToken, getAccessToken } from "../../api/request";
 import {
   getNotifications,
   clearAllNotifications,
   getUnreadCount,
 } from "../../api/notification.api";
 import { getProfileImage } from "../../api/page.api";
+import { logoutApi } from "../../api/auth.api";
 import LanguageToggle from "./LanguageToggle";
 import NavLinkItem from "./NavLinkItem";
 
@@ -43,15 +45,24 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { user, accessToken, token, removeAll } = useAuthStore();
+  const { user, removeAll } = useAuthStore();
 
   // Navigation guard to prevent rapid clicks and cancel pending requests
   const { navigateWithGuard, isNavigating } = useNavigationGuard();
 
-  const isLoggedIn = Boolean(accessToken ?? token);
+  // Check authentication using the in-memory access token (from httpOnly cookie),
+  // NOT from the Zustand store (which is not persisted to localStorage for security).
+  // This prevents privilege escalation via localStorage manipulation.
+  const isLoggedIn = Boolean(getAccessToken());
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (isNavigating) return;
+    try {
+      await logoutApi();
+    } catch {
+      // Server cookie clearing may fail silently; clear local state regardless
+    }
+    setAccessToken(null);
     removeAll();
     localStorage.removeItem("rememberMe");
     setNotificationActive(false);

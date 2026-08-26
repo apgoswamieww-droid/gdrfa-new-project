@@ -28,12 +28,17 @@ const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalPro
   if (!isOpen) return null;
 
   const validate = () => {
-    if (!name.trim()) {
+    const val = name.trim();
+    if (!val) {
       setError("KPI Name is required");
       return false;
     }
-    if (name.trim().length < 3) {
+    if (val.length < 3) {
       setError("KPI Name must be at least 3 characters long");
+      return false;
+    }
+    if (/<[^>]*>/g.test(val)) {
+      setError("HTML tags are not allowed");
       return false;
     }
     setError("");

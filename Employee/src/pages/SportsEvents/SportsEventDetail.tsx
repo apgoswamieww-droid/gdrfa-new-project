@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { ArrowIcon } from "./SportsEventList";
 import { getEventById, postParticipant } from "../../api/page.api";
 import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { useTranslation } from "react-i18next";
 import Toast from "../../components/ui/Toast";
 
@@ -15,7 +16,8 @@ export default function SportsEventDetail() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
   const [showTeamModal, setShowTeamModal] = useState(false);
-  const { user, token } = useAuthStore();
+  const { user } = useAuthStore();
+  const token = getAccessToken();
   const navigate = useNavigate();
   const [selectedActivityId, setSelectedActivityId] = useState<number | undefined>(undefined);
   const [selectedActivityObject, setSelectedActivityObject] = useState<any>(null);

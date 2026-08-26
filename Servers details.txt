@@ -1,0 +1,117 @@
+Sports: 
+
+QA
+MEYQASPRTSAPP -   192.168.209.229
+MEYQASPRTSWEB - 192.168.209.230
+DNS / URL QA: 
+https://meyqasprtsweb.gdrfad.gov.ae/sports
+https://meyqasprtsweb.gdrfad.gov.ae/admin
+
+Staging
+MEYSTGSPRTSAPP -   10.70.60.230
+MEYSTGSPRTSWEB - 10.70.61.230
+DNS / URL Staging: 
+https://mtest.dnrd.ae:8443/sports/
+https://mtest.dnrd.ae:8443/sports.admin
+
+Production
+MEYPRDSPRTSAPP -   10.70.10.130
+MEYPRDSPRTSWEB - 192.168.211.230
+
+DR
+MRHPRDSPRTSAPP - 10.60.10.130
+MRHPRDSPRTSWEB - 192.168.133.230
+
+----------------------------------------------------------------
+
+Esnaad:
+
+QA 
+MEYQAAPP01 - 192.168.209.129
+MEYQAWEB01 - 192.168.209.126
+DNS / URL Staging: 
+https://meyqaweb01.gdrfad.gov.ae/esnaad-portal/
+
+Staging
+MEYSTGESNDAPP01 - 10.70.60.122
+MEYSTGESNDWeb01 - 10.70.61.212
+DNS / URL Staging: 
+https://esnaadportal.gdrfad.gov.ae/esnaad-portal/
+
+Production
+MEYPRDESNDAPP01 - 10.70.130.228
+MEYPRDESNDWEB01 - 192.168.211.212
+
+DR
+MRHDRESNDAPP01 - 10.60.10.228
+MRHDRESNDWEB01 - 192.168.133.212
+
+----------------------------------------------------------------
+
+Camping:
+
+QA 
+MEYQAAPP01 - 192.168.209.129
+MEYQAWEB01 - 192.168.209.126
+DNS / URL:
+https://meyqaweb01.gdrfad.gov.ae/camping/
+
+Staging
+MEYSTGCMPAPP01- 10.70.60.121
+MEYSTGCMPWEB01 - 10.70.61.122
+DNS / URL:
+https://stgcamp.gdrfad.gov.ae/camping/
+
+Production
+MEYPRDCMPAPP01- 10.70.130.227
+MEYPRDCMPWEB01 - 192.168.211.228
+
+DR
+MRHDRCMPAPP01- 10.60.10.227
+MRHDRCMPWEB01 - 192.168.133.228
+
+----------------------------------------------------------------
+
+Group Wedding: 
+
+QA 
+MEYQAAPP01 - 192.168.209.129
+MEYQAWEB01 - 192.168.209.126
+DNS / URL:
+https://meyqaweb01.gdrfad.gov.ae/group-wedding/
+
+Staging
+MEYSTGGPWDWEB01 - 10.70.61.97
+MEYSTGGPWDAPP01 - 10.70.60.97
+
+Production
+MEYPRDGPWDWEB01 - 192.168.211.106
+MEYPRDGPWDAPP01 - 10.70.130.94
+
+DR
+MRHDRGPWEDWEB01 - 192.168.133.106
+MRHDRGPWEDAPP01 - 10.60.10.94
+
+----------------------------------------------------------------
+
+LMS: 
+
+QA 
+MEYQAAPP01 - 192.168.209.129
+MEYQAWEB01 - 192.168.209.126
+DNS / URL:
+https://meyqaweb01.gdrfad.gov.ae/e-learning
+
+Staging
+MEYSTGGPWDWEB01 - 10.70.61.97
+MEYSTGGPWDAPP01 - 10.70.60.97
+DNS / URL:
+https://meystglrngweb.gdrfad.gov.ae/e-learning
+
+Production
+MEYPRDGPWDWEB01 - 192.168.211.106
+MEYPRDGPWDAPP01 - 10.70.130.94
+
+DR
+MRHDRGPWEDWEB01 - 192.168.133.106
+MRHDRGPWEDAPP01 - 10.60.10.94

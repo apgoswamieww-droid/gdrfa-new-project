@@ -1,3 +1,4 @@
+const { getServerBaseUrl, getFullAssetUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const imagePath = require('../../utils/imagePath');
 const fs = require('fs');
@@ -32,11 +33,10 @@ class SponsorController {
                 [...params, start, length]
             );
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
             const formatted = data.map(s => ({
                 ...s,
                 status: s.status ? "1" : "0",
-                logo_url: s.logo ? (s.logo.startsWith('http') ? s.logo : `${baseUrl}/${s.logo}`) : ''
+                logo_url: getFullAssetUrl(s.logo) || ''
             }));
 
             return res.json({
@@ -46,7 +46,7 @@ class SponsorController {
             });
         } catch (error) {
             console.error('Error in list sponsors:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -72,7 +72,7 @@ class SponsorController {
             return res.json({ status: true, message: 'Sponsor created successfully' });
         } catch (error) {
             console.error('Error in store sponsor:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -110,7 +110,7 @@ class SponsorController {
             return res.json({ status: true, message: 'Sponsor updated successfully' });
         } catch (error) {
             console.error('Error in update sponsor:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -141,7 +141,7 @@ class SponsorController {
             return res.json({ status: true, message: 'Sponsor deleted successfully' });
         } catch (error) {
             console.error('Error in delete sponsor:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

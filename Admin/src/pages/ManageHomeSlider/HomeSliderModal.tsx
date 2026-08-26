@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
 import { useTranslation } from "../../hooks/useTranslation";
+import toast from "react-hot-toast";
 
 interface HomeSliderModalProps {
   isOpen: boolean;
@@ -74,11 +75,20 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
   };
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setMedia(file);
-      setMediaPreview(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+      toast.error("Only image and video files are allowed.");
+      e.target.value = "";
+      return;
     }
+
+    setMedia(file);
+    setMediaPreview(URL.createObjectURL(file));
   };
 
   return (

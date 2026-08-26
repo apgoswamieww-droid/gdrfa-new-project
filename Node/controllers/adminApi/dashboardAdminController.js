@@ -47,7 +47,7 @@ class DashboardAdminController {
       });
     } catch (error) {
       console.error('Error in dashboard stats:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -64,7 +64,7 @@ class DashboardAdminController {
       });
     } catch (error) {
       console.error('Error in dashboard profile:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -74,13 +74,15 @@ class DashboardAdminController {
       const currentUserRoleId = String(req.user?.roleId || req.session?.admin?.roleId || '');
       const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '');
 
-      let whereCondition = 'e.deletedAt IS NULL';
+      const conditions = ['e.deletedAt IS NULL'];
+      const params = [];
 
       if (currentUserRoleId !== SUPER_ADMIN_ROLE_ID) {
-        whereCondition += ` AND (e.userId = '${currentUserId}' 
-          OR e.eventAdmins LIKE '%${currentUserId}%' 
-          OR e.eventCoordinators LIKE '%${currentUserId}%')`;
+        conditions.push('(e.userId = ? OR e.eventAdmins LIKE ? OR e.eventCoordinators LIKE ?)');
+        params.push(currentUserId, `%${currentUserId}%`, `%${currentUserId}%`);
       }
+
+      const whereCondition = conditions.join(' AND ');
 
       const events = await db.query(`
         SELECT TOP 5
@@ -89,7 +91,7 @@ class DashboardAdminController {
         FROM events e
         WHERE ${whereCondition}
         ORDER BY e.createdAt DESC
-      `);
+      `, params);
 
       const mapped = Array.isArray(events) ? events.map(e => ({
         id: e.id,
@@ -110,7 +112,7 @@ class DashboardAdminController {
       });
     } catch (error) {
       console.error('Error in getLatestEvents:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -169,7 +171,7 @@ class DashboardAdminController {
       });
     } catch (error) {
       console.error('Error in getLatestParticipants:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 }

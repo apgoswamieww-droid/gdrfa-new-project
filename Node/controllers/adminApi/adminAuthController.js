@@ -1,3 +1,4 @@
+const { getServerBaseUrl } = require('../../utils/baseUrl');
 const ciamService = require('../../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../../utils/ciamTokenHelper');
 const { decryptRole } = require('../../config/role-decryption');
@@ -56,10 +57,25 @@ class AdminAuthController {
       console.log("[Admin Login] roleId:", roleId);
       console.log("[Admin Login] permissions count:", permissions?.length);
 
+      // Set JWT and refresh tokens as HTTP-only cookies
+      res.cookie('accessToken', user.accessToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      });
+      res.cookie('refreshToken', user.refreshToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      });
+
       return res.success(
         {
-          token: user.accessToken,
-          refreshToken: user.refreshToken,
+          accessToken: user.accessToken,
           accessTokenExpiry: user.accessTokenExpirationUtcDateTime,
           admin: {
             id: user.userDomain,
@@ -81,12 +97,12 @@ class AdminAuthController {
 
   static async refreshToken(req, res) {
     try {
-      const { refreshToken } = req.body || {};
+      const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
       if (!refreshToken) {
         return res.status(401).json({ status: false, message: req.t ? req.t('Refresh token required') : 'Refresh token required' });
       }
 
-      const currentToken = req.headers.authorization?.split(' ')[1];
+      const currentToken = req.cookies?.accessToken || req.headers.authorization?.split(' ')[1];
 
       const result = await ciamService.authRefreshToken(currentToken, refreshToken);
     
@@ -96,9 +112,24 @@ class AdminAuthController {
            .json({ status: false, message: "Unauthorized" });
       }
 
+      // Set new tokens as HTTP-only cookies
+      res.cookie('accessToken', result.value.accessToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      });
+      res.cookie('refreshToken', result.value.refreshToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      });
+
       return res.success({
-        token: result.value.accessToken,
-        refreshToken: result.value.refreshToken,
+        accessToken: result.value.accessToken,
         accessTokenExpiry: result.value.accessTokenExpirationUtcDateTime,
       }, req.t ? req.t('Token refreshed successfully') : 'Token refreshed successfully');
     } catch (error) {
@@ -113,10 +144,43 @@ class AdminAuthController {
         req.session.admin = null;
       }
 
+      // Clear auth cookies
+      res.clearCookie('accessToken', { path: '/' });
+      res.clearCookie('refreshToken', { path: '/' });
+
       return res.success({}, req.t ? req.t('Logged out successfully') : 'Logged out successfully');
     } catch (error) {
       console.error('Admin API logout error:', error);
       return res.error(req.t ? req.t('Unable to logout') : 'Unable to logout');
+    }
+  }
+
+  // ── Admin Get Current User (session verification) ──
+  static async getCurrentUser(req, res) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ status: false, message: 'Unauthorized' });
+      }
+
+      let userImage = null;
+      try {
+        let userInfoForImg = await ciamService.getUserImageByDomainId([req.user.id], req.user.token);
+        userImage = userInfoForImg?.isError || userInfoForImg == null ? null : userInfoForImg.value?.[0]?.img || null;
+      } catch (imageError) {
+        console.warn('getCurrentUser image lookup failed:', imageError.message);
+      }
+
+      return res.success({
+        id: req.user.id,
+        name: req.user.nameEn,
+        email: req.user.email,
+        roleId: req.user.roleId,
+        image: userImage,
+        permissions: req.user.permissions || [],
+      }, 'User fetched successfully');
+    } catch (error) {
+      console.error('Error in getCurrentUser:', error);
+      return res.status(500).json({ status: false, message: 'Internal server error' });
     }
   }
 
@@ -152,7 +216,7 @@ class AdminAuthController {
       });
 
       // Send email with reset link (pointing to admin frontend)
-      const adminUrl = process.env.ADMIN_APP_URL || `${req.protocol}://${req.get('host')}/admin`;
+      const adminUrl = process.env.ADMIN_APP_URL || `${getServerBaseUrl()}/admin`;
       const resetLink = `${adminUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
 
       await sendEmail({
@@ -162,7 +226,7 @@ class AdminAuthController {
         data: {
           resetLink,
           title: 'Reset Your Admin Password',
-          logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+          logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
           username: userName,
           buttonText: 'Reset Password',
           role: 'admin'

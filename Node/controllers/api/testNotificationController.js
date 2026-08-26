@@ -41,17 +41,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testSingleUser:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send test notification',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Test sending notification to multiple users
-     */
     static async testMultipleUsers(req, res) {
         try {
             const errors = validationResult(req);
@@ -83,17 +76,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testMultipleUsers:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send bulk test notification',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Test sending notification to users by role
-     */
     static async testByRole(req, res) {
         try {
             const errors = validationResult(req);
@@ -125,17 +111,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testByRole:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send role-based test notification',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Test broadcast notification
-     */
     static async testBroadcast(req, res) {
         try {
             const { title, body, titleAr, bodyAr, data } = req.body;
@@ -157,17 +136,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testBroadcast:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send broadcast test notification',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Test event notification
-     */
     static async testEventNotification(req, res) {
         try {
             const errors = validationResult(req);
@@ -181,7 +153,6 @@ class TestNotificationController {
 
             const { userIds, eventId, notificationType, additionalData } = req.body;
 
-            // Mock event object for testing (in real scenario, fetch from database)
             const mockEvent = {
                 id: eventId || 1,
                 name: 'Test Football Tournament 2025',
@@ -209,17 +180,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testEventNotification:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send event test notification',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Test team notification
-     */
     static async testTeamNotification(req, res) {
         try {
             const errors = validationResult(req);
@@ -233,7 +197,6 @@ class TestNotificationController {
 
             const { userIds, teamId, notificationType, additionalData } = req.body;
 
-            // Mock team object for testing (in real scenario, fetch from database)
             const mockTeam = {
                 id: teamId || 1,
                 name: 'Test Eagles Football Team',
@@ -260,17 +223,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testTeamNotification:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send team test notification',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Get users with FCM tokens for testing
-     */
     static async getUsersWithTokens(req, res) {
         try {
             // const users = await User.findAll({
@@ -295,17 +251,10 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in getUsersWithTokens:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to get users with tokens',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 
-    /**
-     * Quick test with current user
-     */
     static async testCurrentUser(req, res) {
         try {
             const userId = req.user?.id;
@@ -338,11 +287,7 @@ class TestNotificationController {
 
         } catch (error) {
             console.error('Error in testCurrentUser:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send test notification to current user',
-                error: error.message
-            });
+            return res.serverError(error);
         }
     }
 }

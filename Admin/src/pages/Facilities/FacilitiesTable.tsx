@@ -37,14 +37,14 @@ export default function FacilitiesTable({
   const columns: Column<Facility>[] = useMemo(() => [
     {
       key: "id",
-      label: "ID",
+      label: t.facility.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value,
     },
     {
       key: "image",
-      label: "Image",
+      label: t.facility.image,
       className: "w-20",
       render: (value) => (
         <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden border border-gray-200">
@@ -67,21 +67,21 @@ export default function FacilitiesTable({
     },
     {
       key: "title",
-      label: "Title (EN)",
+      label: t.facility.title,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/light text-base/light min-w-40",
       render: (value) => value,
     },
     {
       key: "title_ar",
-      label: "Title (AR)",
+      label: t.facility.titleAr,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/light text-base/light min-w-40 text-right",
       render: (value) => value,
     },
     {
       key: "status",
-      label: "Status",
+      label: t.facility.status,
       sortable: true,
       className: "text-center",
       render: (value, row) => {
@@ -93,14 +93,14 @@ export default function FacilitiesTable({
             ${isActive ? "bg-primary-green/8 text-primary-green hover:bg-primary-green/10" : "bg-red-50 text-red-600 hover:bg-red-100"}`}
           >
             <span className={`w-2 h-2 rounded-full ${isActive ? "bg-primary-green" : "bg-red-500"}`} />
-            {isActive ? "Active" : "Inactive"}
+            {isActive ? t.facility.active : t.facility.inactive}
           </button>
         );
       },
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t.facility.createdAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),

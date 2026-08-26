@@ -44,7 +44,21 @@ function createProductionLikeApp() {
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        fontSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        frameAncestors: ["'none'"],
+        formAction: ["'self'"],
+        baseUri: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
     hidePoweredBy: true,
   }));
 
@@ -150,6 +164,7 @@ describe('Only expected headers are present', () => {
 
     // These headers are set by Helmet/supertest and are acceptable
     const ALLOWED_HEADERS = new Set([
+      'content-security-policy',
       'x-dns-prefetch-control',
       'x-frame-options',
       'strict-transport-security',
@@ -235,7 +250,21 @@ describe('CORS preflight', () => {
       next();
     });
     app.use(helmet({
-      contentSecurityPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'blob:'],
+          fontSrc: ["'self'", 'data:'],
+          connectSrc: ["'self'"],
+          frameAncestors: ["'none'"],
+          formAction: ["'self'"],
+          baseUri: ["'self'"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
       hidePoweredBy: true,
     }));
     app.use(require('cors')());

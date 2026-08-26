@@ -1,3 +1,4 @@
+const { getServerBaseUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const ciamService = require('../../ciam/ciam.service');
 const approvalWorkflow = require('../../services/approvalWorkflowService');
@@ -139,7 +140,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in list participants:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -313,7 +314,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in show participant:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -421,7 +422,7 @@ class ParticipantController {
                                         activityName: activityDetails?.name || 'N/A',
                                         activityType: activityDetails?.activityTypeName || 'N/A',
                                         rejectionReason: '',
-                                        logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                                        logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                     },
                                 });
                             }
@@ -522,7 +523,7 @@ class ParticipantController {
                                     activityName: activityDetails?.name || 'N/A',
                                     activityType: activityDetails?.activityTypeName || 'N/A',
                                     rejectionReason: comment || 'Your request was not approved.',
-                                    logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                                    logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                 },
                             });
                         }
@@ -551,7 +552,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in updateStatus:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -581,7 +582,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in delete participant:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -616,7 +617,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in deleteTeam:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -682,7 +683,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in manualRegister:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -777,7 +778,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in manualRegisterTeam:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -844,7 +845,7 @@ class ParticipantController {
 
         } catch (error) {
             console.error('Error in getApprovalHistory:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

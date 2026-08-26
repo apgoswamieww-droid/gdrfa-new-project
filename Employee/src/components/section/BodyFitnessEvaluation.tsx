@@ -8,20 +8,21 @@ import "swiper/css";
 import { useRef, useState, useEffect } from "react";
 import CustomChart from "../Chart/CustomChart";
 import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { getFitnessCategory } from "../../api/page.api";
 import { useTranslation } from "react-i18next";
 
 export default function BodyFitnessEvaluationYo() {
     const { t } = useTranslation();
     const swiperRef = useRef<SwiperType | null>(null);
-    const { token, currentLanguage } = useAuthStore();
+    const { currentLanguage } = useAuthStore();
     const isRTL = currentLanguage === "ar";
     const [categories, setCategories] = useState<any>([]);
     const [filterType, setFilterType] = useState("yearly");
 
     const [loading, setLoading] = useState(true);
 
-    const isLoggedIn = Boolean(token);
+    const isLoggedIn = Boolean(getAccessToken());
 
     useEffect(() => {
         if (!isLoggedIn) {

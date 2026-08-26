@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { getHomeEvents, getMyEvents } from "../../api/page.api";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 export default function AllEventSec() {
   const { t, i18n } = useTranslation();
-  const { token } = useAuthStore();
+  const token = getAccessToken();
   const [activeTab, setActiveTab] = useState<'allEvent' | 'myEvent'>('allEvent');
   const [allYearData, setAllYearData] = useState<any>([]);
   const [myYearData, setMyYearData] = useState<any>([]);
@@ -74,7 +74,11 @@ export default function AllEventSec() {
     };
 
     fetchData();
-  }, [token]);
+  }, []);
+
+
+
+
 
   // Handle tab switching and year/month synchronization
   useEffect(() => {

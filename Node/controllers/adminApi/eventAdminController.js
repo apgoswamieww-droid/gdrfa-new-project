@@ -1,3 +1,4 @@
+const { getServerBaseUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const path = require('path');
 const fs = require('fs');
@@ -28,23 +29,28 @@ class EventAdminController {
             const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '');
 
             // Build where condition based on role
-            let whereCondition = 'e.deletedAt IS NULL';
+            const conditions = ['e.deletedAt IS NULL'];
+            const params = [];
             
             if (currentUserRoleId !== SUPER_ADMIN_ROLE_ID) {
                 // Non-super admins can only see their own events or those they're assigned to
-                whereCondition += ` AND (e.userId = '${currentUserId}' 
-                    OR e.eventAdmins LIKE '%${currentUserId}%' 
-                    OR e.eventCoordinators LIKE '%${currentUserId}%')`;
+                conditions.push('(e.userId = ? OR e.eventAdmins LIKE ? OR e.eventCoordinators LIKE ?)');
+                params.push(currentUserId, `%${currentUserId}%`, `%${currentUserId}%`);
             }
 
             // Add search filter
             if (search) {
-                whereCondition += ` AND (e.name LIKE '%${search}%' OR e.location LIKE '%${search}%')`;
+                conditions.push('(e.name LIKE ? OR e.location LIKE ?)');
+                params.push(`%${search}%`, `%${search}%`);
             }
+
+            const whereCondition = conditions.join(' AND ');
+            const allParams = [...params, start, length];
 
             // Get total count
             const totalResult = await db.queryOne(
-                `SELECT COUNT(*) as total FROM events e WHERE ${whereCondition}`
+                `SELECT COUNT(*) as total FROM events e WHERE ${whereCondition}`,
+                params
             );
             const totalRecords = totalResult?.total || 0;
 
@@ -91,8 +97,8 @@ class EventAdminController {
                 FROM events e
                 WHERE ${whereCondition}
                 ORDER BY e.createdAt DESC
-                OFFSET ${start} ROWS FETCH NEXT ${length} ROWS ONLY
-            `);
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+            `, allParams);
 
             return res.json({
                 status: true,
@@ -106,7 +112,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in list Events:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -156,7 +162,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in getById Event:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -262,7 +268,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in store Event:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -391,7 +397,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in update Event:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -414,7 +420,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in delete Event:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -430,7 +436,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error fetching years:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -449,7 +455,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error fetching sport activities:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -465,7 +471,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error fetching teams:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -496,7 +502,7 @@ class EventAdminController {
             return res.json({ status: true, data });
         } catch (error) {
             console.error('Error fetching event coordinators:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -590,7 +596,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in getActivities:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -781,7 +787,7 @@ class EventAdminController {
                                             targetType: 'competitive',
                                             teamName: info.teamName || '',
                                             isCaptain: info.isCaptain || '0',
-                                            logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                                            logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                         },
                                     }).catch(err => console.error(`[updateActivities] Failed to send email to ${domain}:`, err.message));
                                 }
@@ -821,7 +827,7 @@ class EventAdminController {
                                             targetType: 'ragular',
                                             teamName: '',
                                             isCaptain: '0',
-                                            logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                                            logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                         },
                                     }).catch(err => console.error(`[updateActivities] Failed to send email to ${domain}:`, err.message));
                                 }
@@ -860,7 +866,7 @@ class EventAdminController {
                                             targetType: 'ragular',
                                             teamName: '',
                                             isCaptain: '0',
-                                            logoUrl: `${req.protocol}://${req.get('host')}/assets/images/Group.png`,
+                                            logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                         },
                                     }).catch(err => console.error(`[updateActivities] Failed to send email to ${domain}:`, err.message));
                                 }
@@ -882,7 +888,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in updateActivities:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -944,7 +950,7 @@ class EventAdminController {
             return res.json({ status: true, data: responseData });
         } catch (error) {
             console.error('Error in getParticipants:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -1029,7 +1035,7 @@ class EventAdminController {
             return res.json({ status: true, message });
         } catch (error) {
             console.error('Error in markComplete:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -1048,7 +1054,7 @@ class EventAdminController {
             return res.json({ status: true, message: 'Activity marked as complete successfully' });
         } catch (error) {
             console.error('Error in markActivityComplete:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -1122,7 +1128,7 @@ class EventAdminController {
             });
         } catch (error) {
             console.error('Error in getWinners:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -1174,7 +1180,7 @@ class EventAdminController {
 
         } catch (error) {
             console.error('Error in updateEventStatus:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

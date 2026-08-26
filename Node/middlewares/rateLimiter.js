@@ -31,8 +31,8 @@ function rateLimitExceeded(req, res) {
 
 // ─── Global fallback (applied to all API routes) ────────────────────
 const globalLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 15 minutes
-  max: 2000,                  // 200 requests per window per IP
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 2000,                  // 2000 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
   handler: rateLimitExceeded,

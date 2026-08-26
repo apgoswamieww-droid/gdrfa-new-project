@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import InputField from "../../component/Input/InputField";
 import Selectfield from "../../component/Input/Selectfield";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
@@ -107,11 +108,25 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Only image files (JPG, PNG, GIF, WebP) are allowed.");
+      e.target.value = "";
+      return;
     }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   return (

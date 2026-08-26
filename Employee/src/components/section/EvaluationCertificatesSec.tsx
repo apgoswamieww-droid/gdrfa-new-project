@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import { useRef, useEffect, useState, useCallback } from "react";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { getCertificates, downloadCertificateImage } from "../../api/page.api";
 import Toast from "../ui/Toast";
 
@@ -17,11 +17,12 @@ import "swiper/css/effect-fade";
 export default function EvaluationCertificatesSec(){
     const { t } = useTranslation();
     const swiperRef = useRef<SwiperType | null>(null);
-    const { token } = useAuthStore();
     const [certificates, setCertificates] = useState<any>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+    const isLoggedIn = Boolean(getAccessToken());
 
     const handleDownload = useCallback(async (id: number) => {
         try {
@@ -30,8 +31,6 @@ export default function EvaluationCertificatesSec(){
             setToast({ message: "Download failed", type: "error" });
         }
     }, []);
-
-    const isLoggedIn = Boolean(token);
 
     useEffect(() => {
         if (!isLoggedIn) return;

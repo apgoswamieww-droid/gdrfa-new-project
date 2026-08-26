@@ -12,6 +12,7 @@
  */
 
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import { apiRequest } from "../api/request";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -47,6 +48,8 @@ interface AuthContextValue {
   setAdminUser: (user: AdminUser) => void;
   /** Clear the auth context on logout. */
   clearAdminUser: () => void;
+  /** Restore session from server on page load (calls /api/admin/me). */
+  restoreSession: () => Promise<void>;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────
@@ -71,6 +74,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearAdminUser = useCallback(() => {
     setAdminUserState(null);
+    sessionStorage.removeItem("adminSession");
+  }, []);
+
+  /**
+   * Restore the user session from the server on page load.
+   * Calls /api/admin/me which returns the authenticated user's
+   * profile and permissions — verified server-side via JWT + CIAM.
+   * This is the secure alternative to reading spoofable localStorage.
+   */
+  const restoreSession = useCallback(async (): Promise<void> => {
+    try {
+      const response = await apiRequest({ url: "/api/admin/me", method: "GET" });
+      if (response?.status && response?.data) {
+        let permissions = Array.isArray(response.data.permissions) ? response.data.permissions : [];
+        let roleId = response.data.roleId;
+
+        // If API didn't return permissions/roleId, fall back to sessionStorage
+        // (populated at login time). This handles backends where /api/admin/me
+        // omits these fields but the login endpoint provides them.
+        if (!permissions.length || !roleId) {
+          try {
+            const cached = sessionStorage.getItem("adminSession");
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (!permissions.length && Array.isArray(parsed.permissions)) {
+                permissions = parsed.permissions;
+              }
+              if (!roleId && parsed.roleId) {
+                roleId = parsed.roleId;
+              }
+            }
+          } catch { /* ignore */ }
+        }
+
+        setAdminUserState({
+          id: response.data.id,
+          name: response.data.name,
+          email: response.data.email,
+          roleId,
+          image: response.data.image,
+          permissions,
+        });
+
+        // Sync only display-safe fields to localStorage for Topbar/Profile use
+        try {
+          const existing = localStorage.getItem("adminUser");
+          const parsed = existing ? JSON.parse(existing) : {};
+          localStorage.setItem("adminUser", JSON.stringify({
+            ...parsed,
+            id: response.data.id,
+            name: response.data.name,
+            email: response.data.email,
+            image: response.data.image,
+            // ⚠️ Do NOT store permissions/roleId in localStorage — they come from the server
+          }));
+        } catch { /* ignore localStorage write errors */ }
+      }
+    } catch {
+      // Session not valid — user stays null, App.tsx will redirect to login
+      setAdminUserState(null);
+    }
   }, []);
 
   const permissions = useMemo(() => adminUser?.permissions ?? [], [adminUser]);
@@ -118,6 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdminOrSuperAdmin,
       setAdminUser,
       clearAdminUser,
+      restoreSession,
     }),
     [
       adminUser,
@@ -130,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdminOrSuperAdmin,
       setAdminUser,
       clearAdminUser,
+      restoreSession,
     ]
   );
 

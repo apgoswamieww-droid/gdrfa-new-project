@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getCertificates, downloadCertificateImage } from "../../api/page.api";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { CertificateImg } from "../../assets/images/images";
 import Toast from "../../components/ui/Toast";
 
@@ -22,8 +22,7 @@ function fmtDate(d: Date): string {
 export default function Certificates() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { token } = useAuthStore();
-  const isLoggedIn = Boolean(token);
+  const isLoggedIn = Boolean(getAccessToken());
 
   const [certs, setCerts] = useState<CertDisplay[]>([]);
   const [loading, setLoading] = useState(true);

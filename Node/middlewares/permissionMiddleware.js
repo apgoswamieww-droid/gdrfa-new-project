@@ -13,14 +13,7 @@ module.exports = function (requiredPermission) {
       });
     }
 
-    // Toggle permission bypass via environment variable (set PERMISSIONS_BYPASS=true in .env to enable)
-    const PERMISSIONS_BYPASS = process.env.PERMISSIONS_BYPASS === 'true';
-    if (PERMISSIONS_BYPASS) {
-      // All permissions granted (testing/dev only)
-      return next();
-    }
-
-    // ✅ SuperAdmin bypass (roleId === process.env.SUPERADMINROLEID.toString())
+    // SuperAdmin bypass (roleId === process.env.SUPERADMINROLEID.toString())
     if (user.roleId === process.env.SUPERADMINROLEID) {
       return next(); // Full access for SuperAdmin
     }

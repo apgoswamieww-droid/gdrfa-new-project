@@ -32,7 +32,7 @@ class EventActivityController {
             });
         } catch (error) {
             console.error('Error in list Event Activities:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -68,7 +68,7 @@ class EventActivityController {
             });
         } catch (error) {
             console.error('Error in store Event Activity:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -110,7 +110,7 @@ class EventActivityController {
             return res.json({ status: true, message: 'Event Activity updated successfully' });
         } catch (error) {
             console.error('Error in update Event Activity:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -121,7 +121,7 @@ class EventActivityController {
             return res.json({ status: true, message: 'Event Activity deleted successfully' });
         } catch (error) {
             console.error('Error in delete Event Activity:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -134,7 +134,7 @@ class EventActivityController {
             });
         } catch (error) {
             console.error('Error fetching activity types:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

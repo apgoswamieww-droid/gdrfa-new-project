@@ -17,7 +17,7 @@ class EventTypeController {
             });
         } catch (error) {
             console.error('Error in list Event Types:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -43,7 +43,7 @@ class EventTypeController {
             });
         } catch (error) {
             console.error('Error in store Event Type:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -79,7 +79,7 @@ class EventTypeController {
             return res.json({ status: true, message: 'Event Type updated successfully' });
         } catch (error) {
             console.error('Error in update Event Type:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -90,7 +90,7 @@ class EventTypeController {
             return res.json({ status: true, message: 'Event Type deleted successfully' });
         } catch (error) {
             console.error('Error in delete Event Type:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

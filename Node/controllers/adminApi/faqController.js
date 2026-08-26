@@ -39,7 +39,7 @@ class FaqController {
             });
         } catch (error) {
             console.error('Error in list FAQs:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -61,7 +61,7 @@ class FaqController {
             return res.json({ status: true, message: 'FAQ created successfully' });
         } catch (error) {
             console.error('Error in store FAQ:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -89,7 +89,7 @@ class FaqController {
             return res.json({ status: true, message: 'FAQ updated successfully' });
         } catch (error) {
             console.error('Error in update FAQ:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -108,7 +108,7 @@ class FaqController {
             return res.json({ status: true, message: 'FAQ deleted successfully' });
         } catch (error) {
             console.error('Error in delete FAQ:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -122,7 +122,7 @@ class FaqController {
             return res.json({ status: true, message: 'Status updated successfully' });
         } catch (error) {
             console.error('Error in toggleStatus:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

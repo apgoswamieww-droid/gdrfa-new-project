@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { FooterBg, LogoImage } from "../../assets/images/images";
 import { useScroll } from "../../utils/ScrollContext";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { Link, useNavigate } from "react-router-dom";
 
 const Footer = () => {
   const { setScrollToId } = useScroll();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const token = useAuthStore((s) => s.token);
+  const token = getAccessToken();
 
   const allLinks = [
     { label: `${t("Home")}`, href: "/" },

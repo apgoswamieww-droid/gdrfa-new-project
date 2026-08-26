@@ -104,15 +104,21 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
     setErrors({});
   }, [initialData]);
 
+  const hasHtml = (val: string) => /<[^>]*>/g.test(val);
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name?.trim()) {
       newErrors.name = t.events?.nameRequired || "Event name is required";
+    } else if (hasHtml(formData.name)) {
+      newErrors.name = "HTML tags are not allowed";
     }
 
     if (!formData.name_ar?.trim()) {
       newErrors.name_ar = t.events?.nameArRequired || "Arabic event name is required";
+    } else if (hasHtml(formData.name_ar)) {
+      newErrors.name_ar = "HTML tags are not allowed";
     }
 
     if (!formData.startDate) {
@@ -157,10 +163,14 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
 
     if (!formData.eventDescription?.trim()) {
       newErrors.eventDescription = t.events?.descriptionRequired || "Description is required";
+    } else if (hasHtml(formData.eventDescription)) {
+      newErrors.eventDescription = "HTML tags are not allowed";
     }
 
     if (!formData.eventDescription_ar?.trim()) {
       newErrors.eventDescription_ar = t.events?.descriptionArRequired || "Arabic description is required";
+    } else if (hasHtml(formData.eventDescription_ar)) {
+      newErrors.eventDescription_ar = "HTML tags are not allowed";
     }
 
     if (!formData.eventCoordinators || formData.eventCoordinators.length === 0) {
@@ -169,6 +179,8 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
 
     if (!formData.location?.trim()) {
       newErrors.location = t.events?.locationRequired || "Location is required";
+    } else if (hasHtml(formData.location)) {
+      newErrors.location = "HTML tags are not allowed";
     }
 
     if (!formData.year) {
@@ -226,10 +238,24 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Only image files (JPG, PNG, GIF, WebP) are allowed.");
+      e.target.value = "";
+      return;
     }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleCoordinatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

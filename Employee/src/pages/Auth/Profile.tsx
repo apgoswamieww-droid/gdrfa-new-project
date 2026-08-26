@@ -4,9 +4,11 @@ import { Navigate, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AvtarImage } from "../../assets/images/images";
 import { useAuthStore } from "../../store/store";
+import { setAccessToken, getAccessToken, sessionReady } from "../../api/request";
 import { getMyFacilityRequests, uploadProfileImage, getProfileImage, getMyFitnessEvaluations } from "../../api/page.api";
 import { getNotifications, getUnreadCount } from "../../api/notification.api";
-import { getProfileApi } from "../../api/auth.api";
+import { getProfileApi, logoutApi } from "../../api/auth.api";
+import Toast from "../../components/ui/Toast";
 
 type DetailItem = {
   label: string;
@@ -38,11 +40,28 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notificationsRef = useRef<HTMLElement>(null);
   const requestsRef = useRef<HTMLElement>(null);
-  const { user, token, accessToken, setUser, removeAll } = useAuthStore();
+  const { user, setUser, removeAll } = useAuthStore();
   const [isUploading, setIsUploading] = useState(false);
-  const authToken = token || accessToken;
+  const [sessionChecking, setSessionChecking] = useState(true);
 
-  const isLoggedIn = Boolean(authToken);
+  // Check authentication using the in-memory access token (from httpOnly cookie),
+  // NOT from the Zustand store (which is not persisted to localStorage for security).
+  // This prevents privilege escalation via localStorage manipulation.
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Wait for the initial token refresh to complete (triggered in App.tsx mount),
+    // then check the in-memory access token.
+    // Using `sessionReady` promise avoids fragile setTimeout workarounds.
+    sessionReady.then(() => {
+      if (cancelled) return;
+      const hasToken = Boolean(getAccessToken());
+      setIsLoggedIn(hasToken || Boolean(user));
+      setSessionChecking(false);
+    });
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     const view = searchParams.get("view");
@@ -64,10 +83,13 @@ export default function Profile() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [evaluations, setEvaluations] = useState<any[]>([]);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [evaluationsLoading, setEvaluationsLoading] = useState(true);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!authToken) return;
+    if (!user || fetchedRef.current) return;
+    fetchedRef.current = true;
     let cancelled = false;
     const fetchAll = async () => {
       try {
@@ -121,7 +143,7 @@ export default function Profile() {
     fetchAll();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authToken]);
+  }, [user]);
 
   const profile = useMemo(() => {
     return {
@@ -167,6 +189,20 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      setToast({ message: "Only JPG and PNG files are allowed.", type: "error" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setToast({ message: "File size must be less than 10 MB.", type: "error" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setIsUploading(true);
     try {
       const formData = new FormData();
@@ -183,11 +219,28 @@ export default function Profile() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Server cookie clearing may fail silently; clear local state regardless
+    }
+    setAccessToken(null);
     removeAll();
     localStorage.removeItem("rememberMe");
     navigate("/");
   };
+
+  if (sessionChecking) {
+    return (
+      <section className="h-screen flex items-center justify-center bg-red-light">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+          <p className="text-sm font-medium text-secondary/60">Loading...</p>
+        </div>
+      </section>
+    );
+  }
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
@@ -195,6 +248,9 @@ export default function Profile() {
 
   return (
     <section className="relative xl:pt-34 lg:pt-28 pt-24 xl:pb-24 lg:pb-16 pb-10 overflow-hidden bg-[linear-gradient(180deg,#FFF3F3_0%,#FFFFFF_48%,#F7FAFD_100%)]">
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
       <div className="absolute top-20 -inset-s-20 w-80 h-80 rounded-full bg-primary/8 blur-3xl" />
       <div className="absolute bottom-20 -inset-e-16 w-80 h-80 rounded-full bg-secondary/8 blur-3xl" />
 

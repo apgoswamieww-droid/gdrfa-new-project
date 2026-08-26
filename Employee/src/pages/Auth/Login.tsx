@@ -6,6 +6,7 @@ import { AvtarImage, HeroBanner, LogoImage, RunningPerson } from "../../assets/i
 import LanguageToggle from "../../components/Header/LanguageToggle";
 import { useAuthStore } from "../../store/store";
 import { loginApi } from "../../api/auth.api";
+import { setAccessToken } from "../../api/request";
 
 type LoginErrors = {
   username?: string;
@@ -17,7 +18,7 @@ type LoginErrors = {
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setUser, setToken, setAccessToken, setCurrentLanguage } = useAuthStore();
+  const { setUser, setCurrentLanguage } = useAuthStore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
@@ -54,12 +55,11 @@ export default function Login() {
         username: username.trim(),
         password,
       });
-      const token = response.data?.jwtToken;
-      const refreshToken = response.data?.refreshToken;
       const user = response.data?.user;
+      const accessToken = response.data?.accessToken;
 
-      if (!token) {
-        throw new Error("Login response did not include a token.");
+      if (accessToken) {
+        setAccessToken(accessToken);
       }
 
       const authPayload = {
@@ -67,12 +67,9 @@ export default function Login() {
         username: username.trim(),
         avatar: user?.image || AvtarImage,
         image: user?.image || AvtarImage,
-        refreshToken
       };
 
       setUser(authPayload);
-      setToken(token);
-      setAccessToken(token);
       if (response.data.language) {
         setCurrentLanguage(response.data.language);
       }

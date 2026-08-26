@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AccordionImgOne } from "../../assets/images/images";
 import PrimaryBtn from "../common/PrimaryBtn";
-import { useAuthStore } from "../../store/store";
+import { getAccessToken } from "../../api/request";
 import { getFacilities } from "../../api/page.api";
 import { slugify } from "../../utils/slug";
 import { useTranslation } from "react-i18next";
@@ -13,8 +13,7 @@ export default function AccordionSec() {
     const [facilities, setFacilities] = useState<any>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { token } = useAuthStore();
-    const isLoggedIn = Boolean(token);
+    const isLoggedIn = Boolean(getAccessToken());
 
     useEffect(() => {
         let cancelled = false;

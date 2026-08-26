@@ -48,7 +48,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in list fitness evaluations:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -82,7 +82,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in show fitness evaluation:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -135,7 +135,7 @@ class FitnessEvaluationController {
           );
           imported++;
         } catch (err) {
-          errors.push({ row: i + 1, message: err.message, data: row });
+          errors.push({ row: i + 1, message: 'Failed to import this row' });
           console.error(`[FitnessEval Import Row ${i + 1}] Error:`, err.message);
         }
       }
@@ -151,7 +151,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in store fitness evaluations:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -280,7 +280,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in update fitness evaluation:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -310,7 +310,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in delete fitness evaluation:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
   // ── GET distinct years for filter dropdown ────────────────────────
@@ -326,7 +326,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error fetching evaluation years:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -390,7 +390,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in lookupUserByGrp:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -432,7 +432,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in updateResult:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -461,7 +461,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in deleteResult:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 
@@ -508,7 +508,7 @@ class FitnessEvaluationController {
       });
     } catch (error) {
       console.error('Error in deleteSession:', error);
-      return res.status(500).json({ status: false, message: error.message });
+      return res.serverError(error);
     }
   }
 }

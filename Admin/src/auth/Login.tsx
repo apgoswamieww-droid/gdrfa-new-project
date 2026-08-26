@@ -5,7 +5,7 @@ import AuthBanner from "./AuthBanner";
 import InputField from "../component/Input/InputField";
 import AuthTitle from "./AuthTitle";
 import { adminLoginApi } from "../api/auth.api";
-import { setRefreshToken } from "../api/request";
+import { setAccessToken } from "../api/request";
 import { useAuth } from "../context/AuthContext";
 
 const UserIcon = () => (
@@ -88,23 +88,36 @@ export default function Login() {
         password,
       });
 
-      const { token, refreshToken, admin, language } = response.data;
-      if (!token) {
-        throw new Error("Login response did not include a token.");
+      const { accessToken, admin, language } = response.data;
+
+      if (accessToken) {
+        setAccessToken(accessToken);
       }
 
-      if (refreshToken) {
-        setRefreshToken(refreshToken);
-      }
-
-      localStorage.setItem("adminToken", token);
-      localStorage.setItem("adminUser", JSON.stringify(admin));
+      // ⚠️ Store ONLY display-safe fields in localStorage (name, image, email).
+      // Do NOT store permissions or roleId in localStorage — they can be spoofed.
+      // Authorization decisions must use AuthContext (populated via setAdminUser below).
+      localStorage.setItem("adminUser", JSON.stringify({
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        image: admin.image,
+        // permissions and roleId intentionally excluded from localStorage
+      }));
       localStorage.setItem("adminRememberMe", JSON.stringify(rememberMe));
+
+      // Store permissions/roleId in sessionStorage (cleared on tab close)
+      // so page refresh can restore them if /api/admin/me omits them.
+      sessionStorage.setItem("adminSession", JSON.stringify({
+        permissions: admin.permissions,
+        roleId: admin.roleId,
+      }));
       if (language) {
         localStorage.setItem("adminLanguage", language);
       }
 
       // Populate AuthContext with server-verified permissions and role
+      // This is the ONLY source of truth for authorization decisions.
       setAdminUser(admin);
 
       navigate("/dashboard");

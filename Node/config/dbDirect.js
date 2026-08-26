@@ -1,5 +1,6 @@
 require('dotenv').config();
 const sql = require('msnodesqlv8');
+const { logError } = require('../utils/errorLogger');
 
 /**
  * Decode UTF-8 encoded strings properly
@@ -167,8 +168,10 @@ function query(queryString, params = []) {
               // Driver cleanup error - ignore if we got results
               resolve(processResultRows(rows || []));
             } else {
-              console.error('❌ [DB Error]', err.message);
-              reject(err);
+              // Log full database error securely, then reject with sanitized message
+              logError(err, { extra: { query: queryString.substring(0, 200), queryParams: finalParams } });
+              const sanitized = new Error('Database query failed');
+              reject(sanitized);
             }
           } else {
             // Process rows to ensure proper UTF-8 handling
@@ -184,8 +187,10 @@ function query(queryString, params = []) {
               // Driver cleanup error - ignore if we got results
               resolve(processResultRows(rows || []));
             } else {
-              console.error('❌ [DB Error]', err.message);
-              reject(err);
+              // Log full database error securely, then reject with sanitized message
+              logError(err, { extra: { query: queryString.substring(0, 200), queryParams: finalParams } });
+              const sanitized = new Error('Database query failed');
+              reject(sanitized);
             }
           } else {
             // Process rows to ensure proper UTF-8 handling
@@ -195,8 +200,9 @@ function query(queryString, params = []) {
       }
     } catch (error) {
       clearTimeout(timeout);
-      console.error('[DB Query Error]', error);
-      reject(error);
+      logError(error, { extra: { query: queryString.substring(0, 200), queryParams: finalParams, handler: 'db.query catch' } });
+      const sanitized = new Error('Database query failed');
+      reject(sanitized);
     }
   });
 }
@@ -214,13 +220,30 @@ function queryOne(queryString, params = []) {
 }
 
 /**
+ * Validate that a table or column name only contains safe characters
+ * (alphanumeric and underscore). This prevents SQL injection via
+ * dynamically constructed table/column names.
+ */
+function isValidIdentifier(name) {
+  return typeof name === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
+}
+
+/**
  * Execute an INSERT query
  * @param {string} table - Table name
  * @param {object} data - Object with column names as keys
  * @returns {Promise<object>} - Last inserted identity and affected rows
  */
 async function insert(table, data) {
+  if (!isValidIdentifier(table)) {
+    throw new Error(`Invalid table name: "${table}"`);
+  }
   const columns = Object.keys(data);
+  for (const col of columns) {
+    if (!isValidIdentifier(col)) {
+      throw new Error(`Invalid column name: "${col}"`);
+    }
+  }
   const values = Object.values(data);
   const placeholders = columns.map((_, i) => `@p${i + 1}`).join(',');
   const columnList = columns.join(',');
@@ -251,7 +274,15 @@ async function insert(table, data) {
  * @returns {Promise<object>} - Number of affected rows
  */
 async function update(table, data, whereClause, whereParams = []) {
+  if (!isValidIdentifier(table)) {
+    throw new Error(`Invalid table name: "${table}"`);
+  }
   const columns = Object.keys(data);
+  for (const col of columns) {
+    if (!isValidIdentifier(col)) {
+      throw new Error(`Invalid column name: "${col}"`);
+    }
+  }
   const values = Object.values(data);
   
   const setClause = columns.map((col, i) => `${col} = @p${i + 1}`).join(',');
@@ -281,6 +312,9 @@ async function update(table, data, whereClause, whereParams = []) {
  * @returns {Promise<object>} - Number of affected rows
  */
 async function deleteRecord(table, whereClause, whereParams = []) {
+  if (!isValidIdentifier(table)) {
+    throw new Error(`Invalid table name: "${table}"`);
+  }
   const deleteQuery = `DELETE FROM ${table} WHERE ${whereClause}`;
   
   return new Promise((resolve, reject) => {

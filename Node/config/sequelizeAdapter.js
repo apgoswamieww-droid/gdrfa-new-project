@@ -93,7 +93,10 @@ class SequelizeAdapter {
     const { where = {}, attributes, limit, offset = 0, order = [], include = [] } = options;
     const conditions = this._buildWhereClause(where, include.length > 0 ? this.tableName : null);
     const orderClause = this._buildOrderClause(order);
-    const limitClause = limit ? ` OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY` : '';
+    // Validate offset and limit as positive integers to prevent SQL injection in OFFSET/FETCH
+    const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, Math.floor(Number(offset))) : 0;
+    const safeLimit = Number.isFinite(Number(limit)) ? Math.max(0, Math.floor(Number(limit))) : 0;
+    const limitClause = safeLimit > 0 ? ` OFFSET ${safeOffset} ROWS FETCH NEXT ${safeLimit} ROWS ONLY` : '';
 
     let joinClause = '';
     let selectFields = [];
@@ -298,11 +301,10 @@ class SequelizeAdapter {
       // Add new permissions with timestamps
       if (permissionIds && permissionIds.length > 0) {
         const now = new Date().toISOString();
-        const values = permissionIds.map(permissionId =>
-          `(${roleId}, ${permissionId}, '${now}', '${now}')`
-        ).join(', ');
-        const sql = `INSERT INTO RolePermissions (roleId, permissionId, createdAt, updatedAt) VALUES ${values}`;
-        await db.query(sql, []);
+        const placeholders = permissionIds.map(() => '(?, ?, ?, ?)').join(', ');
+        const flatParams = permissionIds.flatMap(permissionId => [roleId, permissionId, now, now]);
+        const sql = `INSERT INTO RolePermissions (roleId, permissionId, createdAt, updatedAt) VALUES ${placeholders}`;
+        await db.query(sql, flatParams);
       }
 
       return true;
@@ -442,12 +444,42 @@ class SequelizeAdapter {
 
   _buildSelectClause(attributes) {
     if (!attributes || attributes.length === 0) return '*';
-    return Array.isArray(attributes) ? attributes.join(', ') : attributes;
+    if (Array.isArray(attributes)) {
+      return attributes
+        .filter(attr => this._isValidColumnName(attr))
+        .join(', ');
+    }
+    // If it's a string, validate it too
+    if (typeof attributes === 'string' && this._isValidColumnName(attributes)) {
+      return attributes;
+    }
+    return '*';
   }
 
+  /**
+   * Allowed column name pattern: only alphanumeric, underscore, and dots for table.column references.
+   */
+  _isValidColumnName(name) {
+    return typeof name === 'string' && /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(name);
+  }
+
+  /**
+   * Build ORDER BY clause with column name validation to prevent SQL injection.
+   * Only allows alphanumeric column names with optional table prefix (table.column).
+   */
   _buildOrderClause(order) {
     if (!order || order.length === 0) return '';
-    const orderParts = order.map(([column, direction]) => `${column} ${direction || 'ASC'}`);
+    const orderParts = [];
+    for (const [column, direction] of order) {
+      if (!this._isValidColumnName(column)) {
+        console.warn(`[sequelizeAdapter] Invalid ORDER BY column name: "${column}" — skipping`);
+        continue;
+      }
+      const dir = String(direction || 'ASC').toUpperCase();
+      const validDir = dir === 'DESC' ? 'DESC' : 'ASC';
+      orderParts.push(`${column} ${validDir}`);
+    }
+    if (orderParts.length === 0) return '';
     return `ORDER BY ${orderParts.join(', ')}`;
   }
 }

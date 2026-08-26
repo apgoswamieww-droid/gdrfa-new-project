@@ -34,7 +34,7 @@ class ContactUsController {
             });
         } catch (error) {
             console.error('Error in list contacts:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -57,7 +57,7 @@ class ContactUsController {
             });
         } catch (error) {
             console.error('Error in show contact:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -81,7 +81,7 @@ class ContactUsController {
             return res.json({ status: true, message: 'Contact deleted successfully' });
         } catch (error) {
             console.error('Error in delete contact:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

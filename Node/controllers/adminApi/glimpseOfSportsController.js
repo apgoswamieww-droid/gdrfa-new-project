@@ -1,3 +1,4 @@
+const { getFullAssetUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const fs = require('fs');
 const path = require('path');
@@ -31,13 +32,10 @@ class GlimpseOfSportsController {
                 [...params, start, length]
             );
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
             const formatted = data.map(g => ({
                 ...g,
                 status: g.status === "1" ? "1" : "0",
-                image_url: g.image
-                    ? (g.image.startsWith('http') ? g.image : `${baseUrl}/${g.image}`)
-                    : ''
+                image_url: getFullAssetUrl(g.image) || ''
             }));
 
             return res.json({
@@ -47,7 +45,7 @@ class GlimpseOfSportsController {
             });
         } catch (error) {
             console.error('Error in list glimpse:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -96,7 +94,7 @@ class GlimpseOfSportsController {
             return res.json({ status: true, message: 'Glimpse image created successfully' });
         } catch (error) {
             console.error('Error in store glimpse:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -165,7 +163,7 @@ class GlimpseOfSportsController {
             return res.json({ status: true, message: 'Glimpse image updated successfully' });
         } catch (error) {
             console.error('Error in update glimpse:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -196,15 +194,13 @@ class GlimpseOfSportsController {
             return res.json({ status: true, message: 'Glimpse image deleted successfully' });
         } catch (error) {
             console.error('Error in delete glimpse:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
     // Public: get active images for the website
     static async publicList(req, res) {
         try {
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-
             const data = await db.query(
                 `SELECT id, image, description, description_ar
                  FROM glimpse_of_sports 
@@ -216,9 +212,7 @@ class GlimpseOfSportsController {
                 id: g.id,
                 description: g.description,
                 description_ar: g.description_ar,
-                image_url: g.image
-                    ? (g.image.startsWith('http') ? g.image : `${baseUrl}/${g.image}`)
-                    : ''
+                image_url: getFullAssetUrl(g.image) || ''
             }));
 
             return res.json({
@@ -228,7 +222,7 @@ class GlimpseOfSportsController {
             });
         } catch (error) {
             console.error('Error in public glimpse list:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

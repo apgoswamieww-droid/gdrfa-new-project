@@ -77,9 +77,9 @@ describe('rate limiter configuration', () => {
     expect(rateLimit).toHaveBeenCalledTimes(6);
   });
 
-  test('globalLimiter: max=2000, windowMs=1min', () => {
+  test('globalLimiter: max=2000, windowMs=15min', () => {
     expect(rateLimit).toHaveBeenCalledWith(
-      expect.objectContaining({ max: 2000, windowMs: 1 * 60 * 1000 })
+      expect.objectContaining({ max: 2000, windowMs: 15 * 60 * 1000 })
     );
   });
 

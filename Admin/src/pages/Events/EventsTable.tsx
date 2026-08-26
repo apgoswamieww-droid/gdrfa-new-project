@@ -5,7 +5,8 @@ import { getEventsApi, deleteEventApi, changeEventStatusApi, updateEventStatusAp
 import toast from "react-hot-toast";
 import { useTranslation } from "../../hooks/useTranslation";
 import { formatDate } from "../../utils/dateUtils";
-import { hasPermission, getAdminRoleId } from "../../utils/permissions";
+import { hasPermission } from "../../utils/permissions";
+import { useAuth } from "../../context/AuthContext";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
 
@@ -74,10 +75,10 @@ export default function EventsTable({ searchTerm, onRefresh }: { searchTerm: str
   const [error, setError] = useState(false);
   const [statusModalEvent, setStatusModalEvent] = useState<any | null>(null);
 
+  const { roleId, permissions: authPermissions } = useAuth();
   const ADMIN_ROLE_ID = import.meta.env.VITE_ADMINROLEID || "3C440A49-C079-479E-9747-53296DEC4D29";
   const EVENT_COORDINATOR_ROLE_ID = import.meta.env.VITE_EVENTCOORDINATORROLEID || "93F59035-41A2-4A4A-A7D8-189EE28197E3";
-  const currentRoleId = getAdminRoleId();
-  const canApproveEvent = hasPermission("approve-event") || currentRoleId === ADMIN_ROLE_ID || currentRoleId === EVENT_COORDINATOR_ROLE_ID;
+  const canApproveEvent = hasPermission("approve-event", authPermissions) || roleId === ADMIN_ROLE_ID || roleId === EVENT_COORDINATOR_ROLE_ID;
 
   const handleEventStatusChange = async (id: number, eventStatus: "0" | "1" | "2") => {
     setStatusModalEvent(null);

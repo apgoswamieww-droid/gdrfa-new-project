@@ -1,3 +1,4 @@
+const { getFullAssetUrl } = require('../../utils/baseUrl');
 const db = require('../../config/dbDirect');
 const fs = require('fs');
 const path = require('path');
@@ -31,8 +32,6 @@ class MediaController {
                 [...params, start, length]
             );
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-
             const ids = data.map(d => d.id);
             let tagsMap = {};
             if (ids.length > 0) {
@@ -52,9 +51,7 @@ class MediaController {
             const formatted = data.map(d => ({
                 ...d,
                 status: d.status === "1" ? "1" : "0",
-                file_url: d.file
-                    ? (d.file.startsWith('http') ? d.file : `${baseUrl}/${d.file}`)
-                    : '',
+                file_url: getFullAssetUrl(d.file) || '',
                 tags: tagsMap[d.id] || []
             }));
 
@@ -65,7 +62,7 @@ class MediaController {
             });
         } catch (error) {
             console.error('Error in list media:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -153,7 +150,7 @@ class MediaController {
             return res.json({ status: true, message: 'Media created successfully' });
         } catch (error) {
             console.error('Error in store media:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -169,8 +166,6 @@ class MediaController {
                 return res.status(404).json({ status: false, message: 'Media not found' });
             }
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-
             const tags = await db.query(
                 `SELECT t.id, t.name FROM tags t
                  INNER JOIN media_tags mt ON t.id = mt.tagId
@@ -182,9 +177,7 @@ class MediaController {
             const formatted = {
                 ...media,
                 status: media.status === "1" ? "1" : "0",
-                file_url: media.file
-                    ? (media.file.startsWith('http') ? media.file : `${baseUrl}/${media.file}`)
-                    : '',
+                file_url: getFullAssetUrl(media.file) || '',
                 tags: tags || []
             };
 
@@ -195,7 +188,7 @@ class MediaController {
             });
         } catch (error) {
             console.error('Error in show media:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -293,7 +286,7 @@ class MediaController {
             return res.json({ status: true, message: 'Media updated successfully' });
         } catch (error) {
             console.error('Error in update media:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 
@@ -324,7 +317,7 @@ class MediaController {
             return res.json({ status: true, message: 'Media deleted successfully' });
         } catch (error) {
             console.error('Error in delete media:', error);
-            return res.status(500).json({ status: false, message: error.message });
+            return res.serverError(error);
         }
     }
 }

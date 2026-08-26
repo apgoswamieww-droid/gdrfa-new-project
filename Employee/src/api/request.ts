@@ -29,52 +29,30 @@ function getCookie(name: string) {
   return parts.pop()?.split(";").shift();
 }
 
-function getAuthToken() {
-  const state = useAuthStore.getState();
-  return state.accessToken || state.token;
+let inMemoryAccessToken: string | null = null;
+
+// Shared promise that resolves when the initial token refresh completes.
+// Components can await this before checking authentication state,
+// avoiding fragile setTimeout-based workarounds.
+let _sessionResolve: () => void;
+export const sessionReady: Promise<void> = new Promise((resolve) => {
+  _sessionResolve = resolve;
+});
+
+export function getAccessToken(): string | null {
+  return inMemoryAccessToken;
 }
 
-// ===================== REFRESH TOKEN LOGIC =====================
-
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (err: unknown) => void;
-}> = [];
-
-function processQueue(error: unknown, token: string | null = null) {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error);
-    else resolve(token!);
-  });
-  failedQueue = [];
-}
-
-function getRefreshToken(): string | null {
-  const state = useAuthStore.getState();
-  return state.user.refreshToken || '';
-}
-
-function setTokens(accessToken: string, refreshToken?: string): void {
-  const state = useAuthStore.getState();
-  state.setAccessToken(accessToken);
-  state.setToken(accessToken);
-
-  const user = useAuthStore.getState().user;
-  user.refreshToken = refreshToken;
-  state.setUser(user);
+export function setAccessToken(token: string | null): void {
+  inMemoryAccessToken = token;
 }
 
 async function refreshAccessToken(): Promise<string> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) throw new Error("No refresh token");
-
   const baseUrl = getBaseUrl();
-  const exToken = getAuthToken();
   const response = await fetch(`${baseUrl}/auth/refresh-token`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${exToken}` },
-    body: JSON.stringify({ refreshToken }),
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
   });
 
@@ -82,68 +60,81 @@ async function refreshAccessToken(): Promise<string> {
 
   const payload = await response.json();
   const newAccessToken = payload.data.accessToken;
-  const newRefreshToken = payload.data.refreshToken;
 
-  setTokens(newAccessToken, newRefreshToken || refreshToken);
+  setAccessToken(newAccessToken);
   return newAccessToken;
 }
 
-async function handle401Response(
-  url: string,
-  method: string,
-  body: BodyInit | undefined,
-  headers: Record<string, string>,
-  signal?: AbortSignal
-): Promise<ApiResponse> {
-  if (!getRefreshToken()) {
-    // No refresh token available — throw the error without logging out.
-    // The user stays on the page; calling code can handle the 401 as needed.
-    throw new Error("Session expired");
+export async function attemptTokenRefreshOnLoad(): Promise<void> {
+  if (inMemoryAccessToken) {
+    _sessionResolve();
+    return;
   }
-
-  if (isRefreshing) {
-    const newToken = await new Promise<string>((resolve, reject) => {
-      failedQueue.push({ resolve, reject });
-    });
-    headers["Authorization"] = `Bearer ${newToken}`;
-    return executeFetch(url, method, body, headers, signal);
-  }
-
-  isRefreshing = true;
-
   try {
-    const newToken = await refreshAccessToken();
-    processQueue(null, newToken);
-    isRefreshing = false;
-
-    headers["Authorization"] = `Bearer ${newToken}`;
-    return executeFetch(url, method, body, headers, signal);
-  } catch (error) {
-    processQueue(error, null);
-    isRefreshing = false;
-    // Do NOT clear auth or redirect on refresh failure.
-    // The user stays on the page; the error propagates to the calling code.
-    throw new Error("Session expired. Please try again.");
+    await refreshAccessToken();
+  } catch {
+    setAccessToken(null);
+  } finally {
+    _sessionResolve();
   }
 }
 
-async function executeFetch(
-  url: string,
-  method: string,
-  body: BodyInit | undefined,
-  headers: Record<string, string>,
-  signal?: AbortSignal
-): Promise<ApiResponse> {
+export async function apiRequest({
+  url,
+  method = "GET",
+  body,
+  headers,
+  signal,
+}: ApiRequestOptions): Promise<ApiResponse<any>> {
+  const language = getCookie("i18next") || useAuthStore.getState().currentLanguage || "en";
+  const token = getAccessToken();
+
+  const fetchHeaders: Record<string, string> = {
+    Accept: "application/json",
+    "Accept-Language": language,
+    ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...headers,
+  };
+
+  const fetchBody = body instanceof FormData ? body : body ? JSON.stringify(body) : undefined;
+
   const response = await fetch(`${getBaseUrl()}${url}`, {
     method,
     signal,
-    headers,
-    body,
+    headers: fetchHeaders,
+    body: fetchBody,
+    credentials: "include",
     cache: "no-store",
   });
 
-  if (response.status === 401) {
-    return handle401Response(url, method, body, headers, signal);
+  if (response.status === 401 && token) {
+    try {
+      const newToken = await refreshAccessToken();
+      fetchHeaders["Authorization"] = `Bearer ${newToken}`;
+      const retryResponse = await fetch(`${getBaseUrl()}${url}`, {
+        method,
+        signal,
+        headers: fetchHeaders,
+        body: fetchBody,
+        credentials: "include",
+        cache: "no-store",
+      });
+      const retryPayload = await parseResponse(retryResponse);
+      if (!retryResponse.ok) {
+        const msg = typeof retryPayload === "object" && retryPayload && "message" in retryPayload
+          ? String((retryPayload as { message?: string }).message)
+          : "Something went wrong";
+        throw new Error(msg);
+      }
+      if (typeof retryPayload !== "object" || retryPayload === null) throw new Error("Invalid API response");
+      const apiPayload = retryPayload as ApiResponse;
+      if (!apiPayload.status) throw new Error(apiPayload.message || "Something went wrong");
+      return apiPayload;
+    } catch {
+      setAccessToken(null);
+      throw new Error("Session expired");
+    }
   }
 
   const payload = await parseResponse(response);
@@ -177,27 +168,4 @@ async function parseResponse(response: Response) {
   }
 
   return response.text();
-}
-
-export async function apiRequest({
-  url,
-  method = "GET",
-  body,
-  headers,
-  signal,
-}: ApiRequestOptions): Promise<ApiResponse<any>> {
-  const authToken = getAuthToken();
-  const language = getCookie("i18next") || useAuthStore.getState().currentLanguage || "en";
-
-  const fetchHeaders: Record<string, string> = {
-    Accept: "application/json",
-    "Accept-Language": language,
-    ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    ...headers,
-  };
-
-  const fetchBody = body instanceof FormData ? body : body ? JSON.stringify(body) : undefined;
-
-  return executeFetch(url, method, fetchBody, fetchHeaders, signal);
 }
