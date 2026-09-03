@@ -580,6 +580,31 @@ const changeStatus = async (req, modelName, id, statusField = 'status', newStatu
       return { success: true, message: req.t ? req.t('Status updated successfully') : 'Status updated successfully' };
     }
 
+    // Handle SocialLink model specifically with direct SQL (super admin only, no soft delete)
+    if (modelName === 'SocialLink') {
+      const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
+      const currentRoleId = String(req.user?.roleId || '').trim();
+      if (currentRoleId !== SUPER_ADMIN_ROLE_ID) {
+        return { success: false, message: 'Access denied. Only Super Admin can access this module.' };
+      }
+
+      const record = await db.queryOne(
+        `SELECT * FROM social_links WHERE id = ?`,
+        [id]
+      );
+
+      if (!record) {
+        return { success: false, message: req.t ? req.t('Record not found') : 'Record not found' };
+      }
+
+      await db.query(
+        `UPDATE social_links SET ${statusField} = ?, updatedAt = GETDATE() WHERE id = ?`,
+        [newStatus, id]
+      );
+
+      return { success: true, message: req.t ? req.t('Status updated successfully') : 'Status updated successfully' };
+    }
+
     // For other models, we would need to add them as needed
     return { success: false, message: 'Unsupported model for direct SQL update' };
 

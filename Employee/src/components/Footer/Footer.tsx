@@ -3,17 +3,32 @@ import { FooterBg, LogoImage } from "../../assets/images/images";
 import { useScroll } from "../../utils/ScrollContext";
 import { getAccessToken } from "../../api/request";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getSocialLinks, type SocialLink } from "../../api/page.api";
+
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || import.meta.env.VITE_BASE_URL || "https://localhost:3000/";
+
+function resolveImageUrl(image: string): string {
+  if (!image) return "";
+  if (image.startsWith("http")) return image;
+  return `${IMAGE_BASE_URL.replace(/\/$/, "")}/${image.replace(/^\//, "")}`;
+}
 
 const Footer = () => {
   const { setScrollToId } = useScroll();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const token = getAccessToken();
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    getSocialLinks().then(setSocialLinks).catch(() => setSocialLinks([]));
+  }, []);
 
   const allLinks = [
     { label: `${t("Home")}`, href: "/" },
     { label: `${t("sportsEvent")}`, href: "/sport-activity-list" },
-    { label: `${t("achievements")}`, href: "/achievement", requiresAuth: true },
+    { label: `${t("Achievements")}`, href: "/achievement", requiresAuth: true },
     { label: `${t("Facilities")}`, href: "/facilities" },
   ];
 
@@ -22,10 +37,10 @@ const Footer = () => {
   const cmsLinks = [
     { label: `${t("contact us")}`, href: "/contact-us" },
     { label: `${t("faqs")}`, href: "/faq" },
-    { label: `${t("system User Guide")}`, href: "/system-user-guide" },
+    { label: `${t("system User Guide")}`, href: "/cms/system-user-guide" },
     {
-      label: `${t("end User Licence Agreement")}`,
-      href: "/end-user-licence-agreement",
+      label: `${t("End User License Agreement")}`,
+      href: "/cms/end-user-licence-agreement",
     },
   ];
   return (
@@ -161,107 +176,34 @@ const Footer = () => {
                     href="mailto:servicedesk@gdrfa.ae"
                     className="text-sm text-secondary hover:text-primary font-just font-bold transition-colors duration-300 ease-in-out"
                   >
-                    servicedesk@gdrfa.ae
+                    servicedesk@gdrfad.gov.ae
                   </a>
                 </li>
               </ul>
-              <ul className="flex items-center gap-1 md:justify-start justify-center w-full">
-                <li>
-                  <a
-                    href={"#"}
-                    target="_blank"
-                    className="group border border-primary hover:bg-primary rounded-full flex items-center justify-center xl:w-13 w-11 xl:h-13 h-11 xl:min-w-13 min-w-11 transition-colors duration-500 ease-in-out"
-                  >
-                    <svg
-                      className="xl:w-6 w-5 xl:h-6 h-5"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        className="group-hover:stroke-white"
-                        d="M3 21L10.5484 13.4516M10.5484 13.4516L3 3H8L13.4516 10.5484M10.5484 13.4516L16 21H21L13.4516 10.5484M21 3L13.4516 10.5484"
-                        stroke="#7A2530"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={"#"}
-                    target="_blank"
-                    className="group border border-primary hover:bg-primary rounded-full flex items-center justify-center xl:w-13 w-11 xl:h-13 h-11 xl:min-w-13 min-w-11 transition-colors duration-500 ease-in-out"
-                  >
-                    <svg
-                      className="xl:w-6 w-5 xl:h-6 h-5"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        className="group-hover:stroke-white"
-                        d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
-                        stroke="#7A2530"
-                        strokeWidth="1.5"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        className="group-hover:stroke-white"
-                        d="M16.5 12C16.5 14.4853 14.4853 16.5 12 16.5C9.51472 16.5 7.5 14.4853 7.5 12C7.5 9.51472 9.51472 7.5 12 7.5C14.4853 7.5 16.5 9.51472 16.5 12Z"
-                        stroke="#7A2530"
-                        strokeWidth="1.5"
-                      />
-                      <path
-                        className="group-hover:stroke-white"
-                        d="M17.509 6.5H17.5"
-                        stroke="#7A2530"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    target="_blank"
-                    className="group border border-primary hover:bg-primary rounded-full flex items-center justify-center xl:w-13 w-11 xl:h-13 h-11 xl:min-w-13 min-w-11 transition-colors duration-500 ease-in-out"
-                  >
-                    <svg
-                      className="xl:w-6 w-5 xl:h-6 h-5"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        className="group-hover:stroke-white"
-                        d="M7 8.5L9.94202 10.2394C11.6572 11.2535 12.3428 11.2535 14.058 10.2394L17 8.5"
-                        stroke="#7A2530"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        className="group-hover:stroke-white"
-                        d="M2.01577 13.4756C2.08114 16.5411 2.11383 18.0739 3.24496 19.2093C4.37609 20.3448 5.95034 20.3843 9.09884 20.4634C11.0393 20.5122 12.9607 20.5122 14.9012 20.4634C18.0497 20.3843 19.6239 20.3448 20.755 19.2093C21.8862 18.0739 21.9189 16.5411 21.9842 13.4756C22.0053 12.4899 22.0053 11.51 21.9842 10.5244C21.9189 7.45886 21.8862 5.92609 20.755 4.79066C19.6239 3.65523 18.0497 3.61568 14.9012 3.53657C12.9607 3.48781 11.0393 3.48781 9.09882 3.53656C5.95034 3.61566 4.37609 3.65521 3.24496 4.79065C2.11383 5.92608 2.08114 7.45885 2.01577 10.5243C1.99474 11.51 1.99474 12.4899 2.01577 13.4756Z"
-                        stroke="#7A2530"
-                        strokeWidth="1.5"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </a>
-                </li>
-              </ul>
+              {/* Dynamic Social Links from Admin Panel */}
+              {socialLinks.length > 0 && (
+                <ul className="flex items-center gap-1 md:justify-start justify-center w-full">
+                  {socialLinks.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group border border-primary hover:bg-primary rounded-full flex items-center justify-center xl:w-13 w-11 xl:h-13 h-11 xl:min-w-13 min-w-11 overflow-hidden transition-colors duration-500 ease-in-out"
+                      >
+                        <img
+                          src={resolveImageUrl(item.image)}
+                          alt="social link"
+                          className="xl:w-6 w-5 xl:h-6 h-5 object-contain"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="lg:col-span-1 md:col-span-3 flex md:flex-row flex-col items-end justify-end xl:gap-6 md:gap-4">
               {/* About */}
@@ -323,12 +265,12 @@ const Footer = () => {
         <div className="flex md:flex-nowrap flex-wrap-reverse xl:gap-4.5 md:gap-3 gap-4 xl:px-15 px-10">
           <div className="text-center w-full flex md:flex-nowrap flex-wrap-reverse items-center md:justify-between justify-center xl:gap-4 gap-2 gap-y-1">
             <p className="text-sm text-white font-just font-bold md:text-start text-center w-full">
-              {t("footer.copyright", { year: 2025 })}
+              {t("footer.copyright", { year: new Date().getFullYear() })}
             </p>
             <ul className="flex items-center md:justify-end justify-center xl:gap-6 gap-3 w-fit">
               <li className="relative after:content-[''] after:absolute after:xl:-inset-e-6 after:-inset-e-1.5 after:h-2.5 after:w-[1.5px] after:bg-primary after:top-1/2 after:-translate-y-1/2">
                 <Link
-                  to="/terms-condition"
+                  to="/cms/terms-conditions"
                   className="text-sm font-just font-medium text-white hover:underline transition-colors duration-300 ease-in-out whitespace-nowrap"
                 >
                   {t("footer.termsConditions")}
@@ -352,7 +294,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/privacy-policy"
+                  to="/cms/privacy-policy"
                   className="text-sm font-just font-medium text-white hover:underline transition-colors duration-300 ease-in-out whitespace-nowrap"
                 >
                   {t("footer.privacyPolicy")}

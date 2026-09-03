@@ -56,6 +56,7 @@
     "watch": "nodemon app.js",
     "prod": "node app.js",
     "test": "jest --detectOpenHandles --forceExit",
-    "migrate": "node misc/database_scripts/migrate.js"
+    "migrate": "node misc/database_scripts/migrate.js",
+    "seed:cms": "node scripts/seed-cms-pages.js"
   }
 }

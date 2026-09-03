@@ -6,6 +6,7 @@ import { setAccessToken, apiRequest } from "../../api/request";
 import { Heading, Text } from "../Typography/Typography";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
+import { useTranslation } from "../../hooks/useTranslation";
 import {
   getAdminNotifications,
   clearAllAdminNotifications,
@@ -35,6 +36,7 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const { language, toggleLanguage } = useLanguage();
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -77,7 +79,9 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
     const fetchProfileImage = async () => {
       try {
         const res: any = await apiRequest({ url: "/api/profile-image" });
-        if (res?.data?.image) {
+        // Only use uploaded image if CIAM login image is not available
+        const loginImage = adminUser?.image || null;
+        if (res?.data?.image && !loginImage) {
           setProfileImage(res.data.image);
         }
       } catch {
@@ -180,10 +184,10 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
           </button>
 
           <div className="sm:relative absolute sm:top-[unset] top-12">
-            <Text variant="textBase" className="text-black font-bold !text-xs">Hi, Good Morning!</Text>
+            <Text variant="textBase" className="text-black font-bold !text-xs">{t.dashboard.greeting}</Text>
             <Heading variant="h2" className="text-base/tight sm:text-lg/tight xl:text-xl/tight 2xl:text-2xl/tight font-bold">
-              <span className="text-primary">My Dashboard</span>{" "}
-              <span className="text-black">Insights</span>
+              <span className="text-primary">{t.dashboard.heading}</span>{" "}
+              <span className="text-black">{t.dashboard.headingSuffix}</span>
             </Heading>
           </div>
         </div>
@@ -198,7 +202,7 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
           </svg>
           <input
             className="bg-transparent text-[13px] text-secondary/60 placeholder-secondary/60 outline-none w-full"
-            placeholder="Search for Events, Participants & more..."
+            placeholder={t.topbar.searchPlaceholder}
           />
         </div>
 
@@ -305,7 +309,7 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
               className="text-slate-900 text-sm font-semibold flex items-center md:gap-2 gap-1 cursor-pointer transition-colors focus:outline-none"
             >
               <span className="xl:min-w-10 xl:w-10 sm:min-w-9 sm:w-9 min-w-8 w-8 xl:h-10 sm:h-9 h-8 rounded-full bg-primary p-0.5">
-                <img src={userImage} className="rounded-full shrink-0 aspect-[1/1]" alt="profile avatar" />
+                <img src={userImage} className="rounded-full shrink-0 aspect-[1/1]" alt="profile avatar" onError={(e) => { (e.currentTarget as HTMLImageElement).src = UserImg; }} />
                 {/* image */}
               </span>
 

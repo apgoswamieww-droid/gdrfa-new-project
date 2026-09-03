@@ -6,6 +6,9 @@ import { useAuth } from "../../context/AuthContext";
 
 const NO_ACCESS_PATHS = ["/login", "/register", "/forgot-password", "/"];
 
+const SUPER_ADMIN_ROLE_ID =
+  import.meta.env.VITE_SUPERADMINROLEID || "8B1FABC7-73AF-47F5-944C-3BA7FF049AAF";
+
 const ShieldIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -60,7 +63,7 @@ function AccessDenied() {
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const { permissions: authPermissions } = useAuth();
+  const { permissions: authPermissions, roleId: authRoleId } = useAuth();
 
   if (NO_ACCESS_PATHS.includes(location.pathname)) {
     return <>{children}</>;
@@ -68,6 +71,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   const required = matchRoutePermission(location.pathname);
   if (required.length === 0) return <>{children}</>;
+
+  // Restrict super-admin-only modules (e.g. Social Links) to Super Admin only
+  if (location.pathname === "/cms/social-links" && authRoleId !== SUPER_ADMIN_ROLE_ID) {
+    return <AccessDenied />;
+  }
 
   // Use AuthContext permissions (from server response), not localStorage
   if (!hasAnyPermission(required, authPermissions)) {

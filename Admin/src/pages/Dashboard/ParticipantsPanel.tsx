@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Heading, Text } from "../../component/Typography/Typography";
 import { getDashboardLatestParticipantsApi } from "../../api/dashboard.api";
 import { useTranslation } from "../../hooks/useTranslation";
+import { Link } from "react-router-dom";
 
 const ParticipantRow = ({ p }: { p: any }) => (
   <div className="flex items-start 2xl:gap-3.5 xl:gap-3 gap-2 group">
@@ -100,9 +101,9 @@ const ParticipantsPanel = () => {
         <Heading variant="h4" className="font-bold text-primary whitespace-nowrap">
           {t.dashboard?.latestParticipants || "Latest Participants"}
         </Heading>
-        <button className="xl:text-base/tight text-sm/tight text-secondary font-bold transition-colors whitespace-nowrap">
+        <Link to="/participant-requests" className="xl:text-base/tight text-sm/tight text-secondary font-bold transition-colors whitespace-nowrap">
           {t.dashboard.viewAll}
-        </button>
+        </Link>
       </div>
       <div className="h-0.5 2xl:my-4 my-4 bg-[linear-gradient(90deg,#364b9b1f_0%,#FFFFFF_100%)]"></div>
 

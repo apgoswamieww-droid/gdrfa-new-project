@@ -4,6 +4,7 @@ import { Heading, Text } from "../../component/Typography/Typography";
 import { UserImg } from "../../assets/images/images";
 import toast from "react-hot-toast";
 import { apiRequest } from "../../api/request";
+import { useAuth } from "../../context/AuthContext";
 
 type ProfileData = {
   name: string;
@@ -12,6 +13,7 @@ type ProfileData = {
 };
 
 const ProfilePage = () => {
+  const { roleId } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -22,7 +24,16 @@ const ProfilePage = () => {
 
     async function fetchProfile() {
       try {
-        
+        // Fetch roles to resolve roleId → role name
+        let roleName = "Administrator";
+        try {
+          const rolesRes: any = await apiRequest({ url: "/api/admin/roles" });
+          if (rolesRes?.status && Array.isArray(rolesRes.data)) {
+            const matched = rolesRes.data.find((r: any) => r.id === roleId);
+            if (matched?.name) roleName = matched.name;
+          }
+        } catch { /* fallback to default */ }
+
         const stored = localStorage.getItem("adminUser");
         let imageUrl: string | null = null;
         if (stored) {
@@ -30,14 +41,16 @@ const ProfilePage = () => {
           imageUrl = parsed.image || null;
           setProfile({
             name: parsed.name,
-            role: "Administrator",
+            role: roleName,
             image: parsed.image,
           });
         }
 
+        // Only fetch uploaded profile-image as enhancement;
+        // if CIAM image exists (from login), keep it.
         try {
           const imgRes: any = await apiRequest({ url: "/api/profile-image" });
-          if (imgRes?.data?.image) {
+          if (imgRes?.data?.image && !imageUrl) {
             imageUrl = imgRes.data.image;
           }
         } catch {
@@ -152,6 +165,7 @@ const ProfilePage = () => {
                 })()}
                 alt="Profile"
                 className="w-full h-full object-cover"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = UserImg; }}
               />
             </div>
             <button

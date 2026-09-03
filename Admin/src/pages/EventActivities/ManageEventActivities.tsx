@@ -10,7 +10,7 @@ const ManageEventActivities = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
-  const [editData, setEditData] = useState<{ id: number; name: string; activityType: number; isTeam: string } | null>(null);
+  const [editData, setEditData] = useState<{ id: number; name: string; name_ar?: string; activityType: number; isTeam: string } | null>(null);
   const [activityTypes, setActivityTypes] = useState<{ id: number; name: string }[]>([]);
 
   // Fetch activity types for dropdown
@@ -25,7 +25,7 @@ const ManageEventActivities = () => {
       .catch((err) => console.error("Failed to fetch activity types:", err));
   }, []);
 
-  const handleSubmit = async (data: { name: string; activityType: number; isTeam?: string }, id?: number) => {
+  const handleSubmit = async (data: { name: string; name_ar?: string; activityType: number; isTeam?: string }, id?: number) => {
     const loadingToast = toast.loading(
       id ? "Updating..." : "Creating..."
     );
@@ -45,7 +45,7 @@ const ManageEventActivities = () => {
     }
   };
 
-  const handleEdit = (data: { id: number; name: string; activityType: number; isTeam: string }) => {
+  const handleEdit = (data: { id: number; name: string; name_ar?: string; activityType: number; isTeam: string }) => {
     setEditData(data);
     setIsModalOpen(true);
   };

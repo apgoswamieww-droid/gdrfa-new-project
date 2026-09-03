@@ -1,8 +1,11 @@
 // const db = require('../config/dbDirect');
 const { getUserPermissions } = require('./../utils/permissionChecker');
+const { isPermissionsBypass } = require('./../utils/permissionsBypass');
 
 module.exports = function (requiredPermission) {
   return async function (req, res, next) {
+    if (isPermissionsBypass()) return next(); // PERMISSIONS_BYPASS
+
     const user = req.session.admin;
 
     if (!user) {

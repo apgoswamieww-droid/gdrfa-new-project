@@ -47,7 +47,7 @@ function processResultRows(rows) {
 function parseConnectionString(connectionString) {
   if (!connectionString) {
     return {
-      server: '192.168.1.211',
+      server: '192.168.1.65',
       database: 'Sports',
       trustedConnection: true
     };

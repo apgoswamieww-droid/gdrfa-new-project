@@ -31,6 +31,7 @@ export const ROUTE_PERMISSIONS: Record<string, string[]> = {
   "/cms": ["view-blog-list"],
   "/cms/faq": ["view-blog-list"],
   "/cms/sponsors": ["view-blog-list"],
+  "/cms/social-links": ["view-blog-list"],
   "/cms/home-slider": ["view-blog-list"],
   "/cms/blog": ["view-blog-list"],
   "/cms/blog/create": ["create-blog"],

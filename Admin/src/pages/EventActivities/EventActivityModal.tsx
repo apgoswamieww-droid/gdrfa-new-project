@@ -7,14 +7,15 @@ import PrimaryBtn from "../../component/Button/PrimaryButton";
 interface EventActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; activityType: number; isTeam?: string }, id?: number) => void;
-  initialData?: { id: number; name: string; activityType: number; isTeam: string } | null;
+  onSubmit: (data: { name: string; name_ar?: string; activityType: number; isTeam?: string }, id?: number) => void;
+  initialData?: { id: number; name: string; name_ar?: string; activityType: number; isTeam: string } | null;
   title: string;
   activityTypes: { id: number; name: string }[];
 }
 
 const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, activityTypes }: EventActivityModalProps) => {
   const [name, setName] = useState("");
+  const [nameAr, setNameAr] = useState("");
   const [activityType, setActivityType] = useState<number | "">("");
   const [isTeam, setIsTeam] = useState("0");
   const [errors, setErrors] = useState<{ name?: string; activityType?: string }>({});
@@ -25,6 +26,7 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
   useEffect(() => {
     if (isOpen) {
       setName(initialData?.name || "");
+      setNameAr(initialData?.name_ar || "");
       setActivityType(initialData?.activityType || "");
       setIsTeam(initialData?.isTeam || "0");
       setErrors({});
@@ -65,6 +67,7 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
       try {
         await onSubmit({ 
           name: name.trim(), 
+          name_ar: nameAr.trim(),
           activityType: activityType as number,
           isTeam 
         }, initialData?.id);
@@ -100,6 +103,15 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
               error={errors.name}
               required
               ref={nameInputRef}
+            />
+          </div>
+
+          <div>
+            <InputField
+              label="Activity Name (Arabic)"
+              placeholder="Enter Activity name in Arabic"
+              value={nameAr}
+              onChange={(e) => setNameAr(e.target.value)}
             />
           </div>
 

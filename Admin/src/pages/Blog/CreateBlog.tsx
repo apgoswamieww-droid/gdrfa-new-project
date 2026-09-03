@@ -18,21 +18,42 @@ const CreateBlog = () => {
   const [media, setMedia] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+  const [tagsAr, setTagsAr] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const editorEnRef = useRef<any>(null);
   const editorArRef = useRef<any>(null);
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
     if (!titleEn.trim()) newErrors.titleEn = "English title is required";
     if (!titleAr.trim()) newErrors.titleAr = "Arabic title is required";
     if (!descEn.trim()) newErrors.descEn = "English description is required";
     if (!descAr.trim()) newErrors.descAr = "Arabic description is required";
     if (!media) newErrors.media = "Media image is required";
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    if (field === "titleEn") setTitleEn(value);
+    else if (field === "titleAr") setTitleAr(value);
+    else if (field === "descEn") setDescEn(value);
+    else if (field === "descAr") setDescAr(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +104,7 @@ const CreateBlog = () => {
       formData.append("content", contentEnData);
       formData.append("content_ar", contentArData);
       formData.append("tags", JSON.stringify(tags));
+      formData.append("tags_ar", JSON.stringify(tagsAr));
       if (media) formData.append("media", media);
       await createBlogApi(formData);
       toast.success(t.blog.successCreate, { id: loadingToast });
@@ -152,7 +174,8 @@ const CreateBlog = () => {
               label={t.blog.title}
               placeholder={t.blog.titlePlaceholder}
               value={titleEn}
-              onChange={(e) => setTitleEn(e.target.value)}
+              onChange={(e) => handleFieldChange("titleEn", e.target.value)}
+              onBlur={() => handleBlur("titleEn")}
               error={errors.titleEn}
               required
             />
@@ -160,7 +183,8 @@ const CreateBlog = () => {
               label={t.blog.titleAr}
               placeholder={t.blog.titleArPlaceholder}
               value={titleAr}
-              onChange={(e) => setTitleAr(e.target.value)}
+              onChange={(e) => handleFieldChange("titleAr", e.target.value)}
+              onBlur={() => handleBlur("titleAr")}
               error={errors.titleAr}
               required
             />
@@ -171,7 +195,8 @@ const CreateBlog = () => {
               label={t.blog.shortDescription}
               placeholder={t.blog.descPlaceholder}
               value={descEn}
-              onChange={(e) => setDescEn(e.target.value)}
+              onChange={(e) => handleFieldChange("descEn", e.target.value)}
+              onBlur={() => handleBlur("descEn")}
               error={errors.descEn}
               required
             />
@@ -179,7 +204,8 @@ const CreateBlog = () => {
               label={t.blog.shortDescriptionAr}
               placeholder={t.blog.descArPlaceholder}
               value={descAr}
-              onChange={(e) => setDescAr(e.target.value)}
+              onChange={(e) => handleFieldChange("descAr", e.target.value)}
+              onBlur={() => handleBlur("descAr")}
               error={errors.descAr}
               required
             />
@@ -206,14 +232,31 @@ const CreateBlog = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="block text-xs font-semibold text-secondary/50">Tags</label>
-            <TagsInput
-              value={tags}
-              onChange={setTags}
-              placeholder="Type tag and press Enter"
-              error={errors.tags}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-xs font-semibold text-secondary/50">{t.blog.tags}</label>
+              <TagsInput
+                value={tags}
+                onChange={(newTags) => {
+                  setTags(newTags);
+                  if (errors.tags) setErrors((prev) => ({ ...prev, tags: "" }));
+                }}
+                placeholder={t.blog.tagsPlaceholder}
+                error={errors.tags}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-xs font-semibold text-secondary/50">{t.blog.tagsAr}</label>
+              <TagsInput
+                value={tagsAr}
+                onChange={(newTagsAr) => {
+                  setTagsAr(newTagsAr);
+                  if (errors.tagsAr) setErrors((prev) => ({ ...prev, tagsAr: "" }));
+                }}
+                placeholder={t.blog.tagsArPlaceholder}
+                error={errors.tagsAr}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">

@@ -34,7 +34,7 @@ const fallbackProfile = {
 };
 
 export default function Profile() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,7 +106,7 @@ export default function Profile() {
             gender: profileResp.data.gender || currentUser.gender,
             age: profileResp.data.age || currentUser.age,
             dob: profileResp.data.dob || currentUser.dob,
-            jobTitle: profileResp.data.jobTitleData?.name || profileResp.data.jobTitle || currentUser.jobTitle,
+            jobTitle: profileResp.data.jobTitleData || profileResp.data.jobTitle || currentUser.jobTitle,
             rank: profileResp.data.rankData || currentUser.rank,
             sector: profileResp.data.sectorData || currentUser.sector,
             department: profileResp.data.departmentData || currentUser.department,
@@ -157,7 +157,22 @@ export default function Profile() {
   // Normalize work detail values to display strings (some are objects from the API)
   const normalizeValue = (val: any): string => {
     if (val == null) return "";
-    if (typeof val === "object") return val.name || val.id || "";
+    if (typeof val === "object") {
+      if (i18n.language === 'ar') {
+        // Prefer the Arabic variants when available
+        const ar =
+          val.jobTitleAR ||
+          val.rankAR ||
+          val.sectorNameAR ||
+          val.deptNameAR ||
+          val.sectionNameAr ||
+          val.branchNameAR ||
+          val.nameAr ||
+          val.name_ar;
+        if (ar && String(ar).trim()) return String(ar);
+      }
+      return val.name || val.id || "";
+    }
     return String(val);
   };
 
@@ -165,18 +180,26 @@ export default function Profile() {
     { label: t("profile.username"), value: profile.username || fallbackProfile.username },
     { label: t("profile.email"), value: profile.email || fallbackProfile.email },
     { label: t("profile.mobile"), value: profile.mobile || fallbackProfile.mobile },
-    { label: t("profile.gender"), value: typeof profile.gender === "string" ? profile.gender : (profile.gender === "Male" ? "Male" : profile.gender === "Female" ? "Female" : fallbackProfile.gender) },
+    { label: t("profile.gender"), value: (typeof profile.gender === "string" ? (profile.gender === "Male" ? t("profile.male") : profile.gender === "Female" ? t("profile.female") : profile.gender) : profile.gender === "Male" ? t("profile.male") : profile.gender === "Female" ? t("profile.female") : fallbackProfile.gender) },
     { label: t("profile.age"), value: String(profile.age || fallbackProfile.age) },
   ];
 
+  const translateWorkSystem = (val: string): string => {
+    if (!val) return "";
+    const lower = val.trim().toLowerCase();
+    if (lower.includes("full")) return t("profile.workSystemFullTime");
+    if (lower.includes("part")) return t("profile.workSystemPartTime");
+    return val;
+  };
+
   const workDetails: DetailItem[] = [
-    { label: t("profile.jobTitle"), value: normalizeValue(profile.jobTitle) || fallbackProfile.jobTitle },
-    { label: t("profile.rank"), value: normalizeValue(profile.rank) || fallbackProfile.rank },
-    { label: t("profile.sector"), value: normalizeValue(profile.sector) || fallbackProfile.sector },
-    { label: t("profile.department"), value: normalizeValue(profile.department) || fallbackProfile.department },
-    { label: t("profile.section"), value: normalizeValue(profile.section) || fallbackProfile.section },
-    { label: t("profile.branch"), value: normalizeValue(profile.branch) || fallbackProfile.branch },
-    { label: t("profile.workSystem"), value: normalizeValue(profile.workSystem) || fallbackProfile.workSystem },
+    { label: t("profile.jobTitle"), value: normalizeValue(profile.jobTitle) || t("profile.fallbackJobTitle") },
+    { label: t("profile.rank"), value: normalizeValue(profile.rank) || t("profile.fallbackRank") },
+    { label: t("profile.sector"), value: normalizeValue(profile.sector) || t("profile.fallbackSector") },
+    { label: t("profile.department"), value: normalizeValue(profile.department) || t("profile.fallbackDepartment") },
+    { label: t("profile.section"), value: normalizeValue(profile.section) || t("profile.fallbackSection") },
+    { label: t("profile.branch"), value: normalizeValue(profile.branch) || t("profile.fallbackBranch") },
+    { label: t("profile.workSystem"), value: translateWorkSystem(normalizeValue(profile.workSystem)) || t("profile.fallbackWorkSystem") },
   ];
 
   
@@ -267,7 +290,7 @@ export default function Profile() {
                   {isUploading ? (
                     <span className="text-sm font-bold text-secondary/60">{t("profile.uploading")}</span>
                   ) : (
-                    <img src={profile.image || AvtarImage} alt={profile.name} className="w-full h-full object-cover" />
+                    <img src={profile.image || AvtarImage} alt={profile.name} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = AvtarImage; }} />
                   )}
                   <span className="absolute inset-x-0 bottom-0 bg-primary/90 text-white text-xs font-bold py-2 translate-y-full group-hover:translate-y-0 transition-transform">
                     {t("profile.changePhoto")}
@@ -276,7 +299,7 @@ export default function Profile() {
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
                 <h1 className="mt-5 text-secondary font-bold xl:text-3xl/tight text-2xl/tight">{profile.name}</h1>
-                <p className="mt-2 text-primary font-bold text-sm">{profile.jobTitle || fallbackProfile.jobTitle}</p>
+                <p className="mt-2 text-primary font-bold text-sm">{normalizeValue(profile.jobTitle) || t("profile.fallbackJobTitle")}</p>
                 <p className="mt-3 text-secondary/60 text-sm/tight font-medium max-w-80">{t("profile.readOnlyNote")}</p>
                 <Link to="/certificates" className="mt-5 block w-full rounded-2xl bg-primary text-white px-5 py-3 text-sm font-bold text-center hover:bg-primary/90 transition-colors">
                   {t("profile.viewCertificates")}
@@ -466,7 +489,7 @@ function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]
     sortedKeys.forEach((key, i) => {
       const items = map.get(key)!;
       const total = items.reduce((s: number, r: any) => s + Number(r.result || 0), 0);
-      groups.push({ key, label: i === 0 ? "Latest" : `Previous — ${key}`, results: items, total });
+      groups.push({ key, label: i === 0 ? t("profile.latest") : `${t("profile.previous")} — ${key}`, results: items, total });
     });
     return groups;
   }, [evaluations]);
@@ -484,11 +507,11 @@ function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="bg-primary/10 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
-            <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">Total Score</span>
+            <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">{t("profile.totalScore")}</span>
             <span className="block text-xl font-bold text-primary">{Math.round(overallTotal)}</span>
           </div>
           <div className="bg-primary/10 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
-            <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">Sessions</span>
+            <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">{t("profile.sessions")}</span>
             <span className="block text-xl font-bold text-primary">{groupedResults.length}</span>
           </div>
         </div>
@@ -509,11 +532,11 @@ function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]
         </div>
       ) : groupedResults.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {groupedResults.map((group, gi) => (
+          {groupedResults.map((group) => (
             <div key={group.key} className="rounded-lg border border-gray-100 bg-white shadow-sm overflow-hidden">
               <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-[11px] font-bold text-secondary/70">{gi === 0 ? "Latest" : group.label}</span>
-                <span className="text-[13px] font-bold text-primary">{group.total.toFixed(2).replace(/\.00$/, '')} pts</span>
+                <span className="text-[11px] font-bold text-secondary/70">{group.label}</span>
+                <span className="text-[13px] font-bold text-primary">{group.total.toFixed(2).replace(/\.00$/, '')} {t("profile.pts")}</span>
               </div>
               <div className="p-2 space-y-1.5">
                 {group.results.map((r: any) => (
@@ -538,17 +561,17 @@ function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]
   );
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: any): string {
   const now = Date.now();
   const date = new Date(dateStr).getTime();
   const diffMs = now - date;
   const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1) return t("profile.justNow") || "Just now";
+  if (diffMins < 60) return `${diffMins}${t("profile.minAgo") || "m ago"}`;
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return `${diffHours}${t("profile.hrAgo") || "h ago"}`;
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 7) return `${diffDays}${t("profile.dayAgo") || "d ago"}`;
   return new Date(dateStr).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 }
 
@@ -560,6 +583,7 @@ function detectNotificationType(title: string): "event" | "certificate" | "fitne
 }
 
 function NotificationRow({ item, index, compact = false }: { item: any; index: number; compact?: boolean }) {
+  const { t } = useTranslation();
   const nType = detectNotificationType(item.title);
   return (
     <div
@@ -576,9 +600,9 @@ function NotificationRow({ item, index, compact = false }: { item: any; index: n
           {!item.isRead && <span className="min-w-2 w-2 h-2 rounded-full bg-primary" />}
         </div>
         <p className={`${compact ? "text-xs/tight line-clamp-2" : "text-sm/tight"} mt-1 text-secondary/60 font-medium`}>{item.message}</p>
-        {compact && <span className="mt-2 block text-primary text-[11px] font-bold">{formatRelativeTime(item.createdAt)}</span>}
+        {compact && <span className="mt-2 block text-primary text-[11px] font-bold">{formatRelativeTime(item.createdAt, t)}</span>}
       </div>
-      {!compact && <span className="text-primary text-xs font-bold whitespace-nowrap">{formatRelativeTime(item.createdAt)}</span>}
+      {!compact && <span className="text-primary text-xs font-bold whitespace-nowrap">{formatRelativeTime(item.createdAt, t)}</span>}
     </div>
   );
 }

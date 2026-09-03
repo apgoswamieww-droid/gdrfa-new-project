@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import { getPageBySlug } from "../api/page.api";
 import { editorJsToHtml } from "../utils/editorJsToHtml";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-
-const slugTitleMap: Record<string, string> = {
-  "system-user-guide": "System User Guide",
-  "privacy-policy": "Privacy Policy",
-  "terms-conditions": "Terms & Conditions",
-  "end-user-licence-agreement": "End User Licence Agreement",
-};
+import { Link, useParams } from "react-router-dom";
 
 const slugIcons: Record<string, string> = {
   "system-user-guide": "📖",
@@ -20,7 +13,17 @@ const slugIcons: Record<string, string> = {
 
 const floatingIcons = ["⚽", "🏃", "🚴", "🏊", "🏆", "⏱", "🥇", "🎯"];
 
-export default function CmsPageWrapper({ slug }: { slug: string }) {
+function getIconForSlug(slug: string): string {
+  if (slugIcons[slug]) return slugIcons[slug];
+  if (slug.includes("guide") || slug.includes("manual")) return "📖";
+  if (slug.includes("privacy")) return "🛡️";
+  if (slug.includes("terms") || slug.includes("condition")) return "⚖️";
+  if (slug.includes("licence") || slug.includes("license") || slug.includes("agreement")) return "📄";
+  return "📋";
+}
+
+export default function CmsPageWrapper() {
+  const { slug } = useParams<{ slug: string }>();
   const { t } = useTranslation();
   const [page, setPage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +31,8 @@ export default function CmsPageWrapper({ slug }: { slug: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    async function fetch() {
+    async function fetchPage() {
+      if (!slug) return;
       setLoading(true);
       setNotFound(false);
       try {
@@ -40,15 +44,15 @@ export default function CmsPageWrapper({ slug }: { slug: string }) {
         if (!cancelled) setLoading(false);
       }
     }
-    fetch();
+    fetchPage();
     return () => { cancelled = true; };
   }, [slug]);
 
-  if (loading) return <LoadingState slug={slug} />;
+  if (loading) return <LoadingState />;
   if (notFound || !page) return <NotFoundState />;
 
-  const title = slugTitleMap[slug] || page.name;
-  const icon = slugIcons[slug] || "📋";
+  const title = page.name || slug;
+  const icon = getIconForSlug(slug || "");
   const htmlContent = editorJsToHtml(page.description);
 
   return (
@@ -60,7 +64,7 @@ export default function CmsPageWrapper({ slug }: { slug: string }) {
         <nav className="flex items-center gap-2.5 text-sm font-bold text-secondary/50 mb-6">
           <Link to="/" className="hover:text-primary transition-colors duration-300 flex items-center gap-1.5">
             <HomeIcon />
-            {t("home")}
+            {t("HOME")}
           </Link>
           <ChevronRightIcon />
           <span className="text-primary">{title}</span>
@@ -131,7 +135,7 @@ function AnimatedSportsBackground() {
   );
 }
 
-function LoadingState({ slug: _slug }: { slug: string }) {
+function LoadingState() {
   return (
     <section className="relative xl:pt-36 lg:pt-30 pt-24 xl:pb-24 lg:pb-16 pb-10 overflow-hidden bg-[linear-gradient(180deg,#FFF3F3_0%,#FFFFFF_48%,#F7FAFD_100%)] min-h-dvh">
       <div className="absolute inset-0 sports-detail-grid opacity-40" />

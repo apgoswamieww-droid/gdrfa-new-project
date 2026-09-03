@@ -15,10 +15,11 @@ const CreateMedia = () => {
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+  const [tagsAr, setTagsAr] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
     if (!title.trim()) newErrors.title = "Title is required";
     if (!titleAr.trim()) newErrors.titleAr = "Arabic title is required";
@@ -26,8 +27,28 @@ const CreateMedia = () => {
     if (!descriptionAr.trim()) newErrors.descriptionAr = "Arabic description is required";
     if (!file) newErrors.file = "Media file is required";
     if (tags.length === 0) newErrors.tags = "At least one tag is required";
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    if (field === "title") setTitle(value);
+    else if (field === "titleAr") setTitleAr(value);
+    else if (field === "description") setDescription(value);
+    else if (field === "descriptionAr") setDescriptionAr(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,6 +75,7 @@ const CreateMedia = () => {
       formData.append("description", description.trim());
       formData.append("description_ar", descriptionAr.trim());
       formData.append("tags", JSON.stringify(tags));
+      formData.append("tags_ar", JSON.stringify(tagsAr));
       if (file) formData.append("file", file);
       await createMediaApi(formData);
       toast.success("Media created successfully", { id: loadingToast });
@@ -87,7 +109,8 @@ const CreateMedia = () => {
               label="Title (English)"
               placeholder="Enter title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleFieldChange("title", e.target.value)}
+              onBlur={() => handleBlur("title")}
               error={errors.title}
               required
             />
@@ -95,7 +118,8 @@ const CreateMedia = () => {
               label="Title (Arabic)"
               placeholder="Enter Arabic title"
               value={titleAr}
-              onChange={(e) => setTitleAr(e.target.value)}
+              onChange={(e) => handleFieldChange("titleAr", e.target.value)}
+              onBlur={() => handleBlur("titleAr")}
               error={errors.titleAr}
               required
             />
@@ -106,7 +130,8 @@ const CreateMedia = () => {
               label="Description (English)"
               placeholder="Enter description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
+              onBlur={() => handleBlur("description")}
               error={errors.description}
               required
             />
@@ -114,20 +139,38 @@ const CreateMedia = () => {
               label="Description (Arabic)"
               placeholder="Enter Arabic description"
               value={descriptionAr}
-              onChange={(e) => setDescriptionAr(e.target.value)}
+              onChange={(e) => handleFieldChange("descriptionAr", e.target.value)}
+              onBlur={() => handleBlur("descriptionAr")}
               error={errors.descriptionAr}
               required
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="block text-xs font-semibold text-secondary/50">Tags</label>
-            <TagsInput
-              value={tags}
-              onChange={setTags}
-              placeholder="Type tag and press Enter"
-              error={errors.tags}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-xs font-semibold text-secondary/50">Tags (English)</label>
+              <TagsInput
+                value={tags}
+                onChange={(newTags) => {
+                  setTags(newTags);
+                  if (errors.tags) setErrors((prev) => ({ ...prev, tags: "" }));
+                }}
+                placeholder="Type tag and press Enter"
+                error={errors.tags}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-xs font-semibold text-secondary/50">Tags (Arabic)</label>
+              <TagsInput
+                value={tagsAr}
+                onChange={(newTagsAr) => {
+                  setTagsAr(newTagsAr);
+                  if (errors.tagsAr) setErrors((prev) => ({ ...prev, tagsAr: "" }));
+                }}
+                placeholder="اكتب الوسم بالعربي واضغط Enter"
+                error={errors.tagsAr}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">

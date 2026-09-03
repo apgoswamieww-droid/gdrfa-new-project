@@ -5,6 +5,9 @@ const { decryptRole } = require('../../config/role-decryption');
 const { getUserPermissions } = require('../../utils/permissionChecker');
 const crypto = require('crypto');
 const { sendEmail } = require('../../utils/emailService');
+const { isPermissionsBypass } = require('../../utils/permissionsBypass');
+
+const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
 
 // In-memory token store (password is managed by CIAM, not a local users table)
 const resetTokens = new Map();
@@ -29,15 +32,20 @@ class AdminAuthController {
 
       const user = responseOfAuth.value;
       const decryptedPermissionArray = await decryptRole(user.encryptedRoles);
-      const roleId = decryptedPermissionArray[0]?.ClientRoleId?.toString() || '';
+      let roleId = decryptedPermissionArray[0]?.ClientRoleId?.toString() || '';
 
       if (!roleId) {
         return res.error(req.t ? req.t('Your role does not have access to admin panel.') : 'Your role does not have access to admin panel.');
       }
 
+      // PERMISSIONS_BYPASS: override roleId to SuperAdmin so frontend shows all modules
+      if (isPermissionsBypass() && SUPER_ADMIN_ROLE_ID) {
+        roleId = SUPER_ADMIN_ROLE_ID;
+      }
+
       const permissions = await getUserPermissions(roleId, user.accessToken, user.userDomain);
 
-      if (roleId !== '1' && !permissions.includes('can-login')) {
+      if (!isPermissionsBypass() && roleId !== '1' && !permissions.includes('can-login')) {
         return res.error(req.t ? req.t('Your role does not have access to admin panel.') : 'Your role does not have access to admin panel.');
       }
 
@@ -170,13 +178,17 @@ class AdminAuthController {
         console.warn('getCurrentUser image lookup failed:', imageError.message);
       }
 
+      // PERMISSIONS_BYPASS: ensure both roleId and permissions reflect SuperAdmin access
+      const bypassRoleId = isPermissionsBypass() && SUPER_ADMIN_ROLE_ID ? SUPER_ADMIN_ROLE_ID : req.user.roleId;
+      const bypassPermissions = isPermissionsBypass() ? ['*'] : (req.user.permissions || []);
+
       return res.success({
         id: req.user.id,
         name: req.user.nameEn,
         email: req.user.email,
-        roleId: req.user.roleId,
+        roleId: bypassRoleId,
         image: userImage,
-        permissions: req.user.permissions || [],
+        permissions: bypassPermissions,
       }, 'User fetched successfully');
     } catch (error) {
       console.error('Error in getCurrentUser:', error);

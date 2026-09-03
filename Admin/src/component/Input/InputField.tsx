@@ -9,6 +9,7 @@ interface InputFieldProps {
   placeholder?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
   icon?: ReactNode;
   required?: boolean;
   disabled?: boolean;
@@ -42,6 +43,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
   placeholder,
   value,
   onChange,
+  onBlur,
   icon,
   required = false,
   disabled = false,
@@ -74,6 +76,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
           type={inputType}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           disabled={disabled}
           className={`transition-all duration-200 bg-white border rounded-lg py-1.5 w-full focus:outline-none text-[13px] text-gray-700 placeholder-gray-400 ${icon ? "ps-10" : "ps-3.5"} ${isPassword ? "pe-10" : "pe-3.5"} ${error && error !== "" ? "border-red-400 focus:ring-1 focus:ring-red-100" : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10"} ${disabled ? "opacity-50 cursor-not-allowed bg-gray-50" : ""}`}

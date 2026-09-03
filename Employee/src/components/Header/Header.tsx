@@ -374,6 +374,7 @@ const Header: React.FC = () => {
                   alt={t("alt.avatar")}
                   className="xl:min-w-15 xl:w-15 xl:h-15 md:min-w-11 md:w-11 md:h-11 min-w-8 w-8 h-8 rounded-xl object-cover cursor-pointer m-0.5 bg-white-light"
                   onClick={() => navigate("/profile")}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = AvtarImage; }}
                 />
                 <button
                   type="button"

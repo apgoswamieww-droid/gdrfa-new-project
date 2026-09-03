@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getSportEvents } from "../../api/page.api";
 import { useTranslation } from "react-i18next";
+import { SportsActivitiesOne } from "../../assets/images/images";
 
 export default function SportsEventList() {
   const { t, i18n } = useTranslation();
@@ -111,11 +112,12 @@ export default function SportsEventList() {
           ) : events.length > 0 ? (
             events.map((event: any) => (
               <Link
+                key={event.id}
                 to={`/sport-activity-list/${event.id}`}>
-                <article key={event.id} className="group flex flex-col" >
+                <article className="group flex flex-col" >
                   <div className="lg:rounded-3xl rounded-2xl lg:h-100 sm:h-78 h-68 overflow-hidden bg-[linear-gradient(360deg,#2E0006_0%,rgba(148,1,20,0)_100%)] p-[0.2px] relative shadow-[0_22px_70px_rgba(10,34,64,0.12)]">
                     <div className="lg:rounded-3xl rounded-2xl h-full overflow-hidden">
-                      <img src={event.image || ""} alt={i18n.language === 'ar' ? event.name_ar || event.name : event.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={event.image || SportsActivitiesOne} alt={i18n.language === 'ar' ? event.name_ar || event.name : event.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     </div>
                     <div className="md:p-2 p-1 flex flex-col justify-between absolute inset-0 z-20 items-start bg-[linear-gradient(360deg,#2E0006_0%,rgba(148,1,20,0)_100%)]">
                       <div className="flex gap-2 flex-wrap">
@@ -156,13 +158,12 @@ export default function SportsEventList() {
 
                   <div className="xl:mt-5 mt-3 lg:px-3.5 px-2.5 flex xl:gap-5 gap-2 items-center text-start">
                     <p className="md:text-sm/tight text-xs/tight font-medium opacity-60 text-secondary line-clamp-3 flex-1">{i18n.language === 'ar' ? event.eventDescription_ar || event.eventDescription : event.eventDescription}</p>
-                    <Link
-                      to={`/sport-activity-list/${event.id}`}
+                    <span
                       className="group/link xl:min-w-10 xl:w-10 min-w-8 w-8 text-white hover:text-primary aspect-square border border-primary rounded-full bg-primary transition-all duration-300 hover:bg-transparent flex justify-center items-center"
                       aria-label={i18n.language === 'ar' ? `View ${event.name_ar || event.name}` : `View ${event.name}`}
                     >
                       <ArrowIcon />
-                    </Link>
+                    </span>
                   </div>
                 </article>
               </Link>

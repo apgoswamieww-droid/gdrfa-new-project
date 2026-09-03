@@ -68,6 +68,7 @@ export default function EventActivitiesTable({ searchTerm, onEdit, onRefresh }: 
     if (!searchTerm) return data;
     return data.filter((activity) =>
       activity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (activity.name_ar || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (activity.activityTypeName || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [data, searchTerm]);
@@ -143,6 +144,13 @@ export default function EventActivitiesTable({ searchTerm, onEdit, onRefresh }: 
       sortable: true,
       className: "font-medium text-black 2xl:text-base/tight text-base/tight",
       render: (value) => value,
+    },
+    {
+      key: "name_ar",
+      label: t.eventActivity?.nameAr || "Activity Name (Arabic)",
+      sortable: true,
+      className: "text-[#898B8E] 2xl:text-base/tight text-base/tight",
+      render: (value) => value || "—",
     },
     {
       key: "activityType",

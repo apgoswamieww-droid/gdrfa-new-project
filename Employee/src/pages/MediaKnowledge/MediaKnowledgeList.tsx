@@ -3,11 +3,13 @@ import { useMedia } from "../../hooks/useMedia";
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { SportsActivitiesOne } from "../../assets/images/images";
 
 export default function MediaKnowledgeList() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { items: blogItems, loading: blogLoading } = useBlogs(1, 100);
   const { items: mediaItems, loading: mediaLoading } = useMedia(1, 100);
+  const lang = i18n.language;
   const [activeType, setActiveType] = useState<"blog" | "media">("blog");
   const [activeCategory, setActiveCategory] = useState("All");
 
@@ -17,17 +19,18 @@ export default function MediaKnowledgeList() {
 
   const categories = useMemo(() => {
     const relevantData = allItems.filter((item) => item.type === activeType);
-    const uniqueCategories = Array.from(new Set(relevantData.map((item) => item.category)));
+    const uniqueCategories = Array.from(new Set(relevantData.map((item) => lang === 'ar' ? (item.categoryAr || item.category) : item.category)));
     return ["All", ...uniqueCategories];
-  }, [allItems, activeType]);
+  }, [allItems, activeType, lang]);
 
   const filteredData = useMemo(() => {
     return allItems.filter((item) => {
       const matchesType = item.type === activeType;
-      const matchesCategory = activeCategory === "All" || item.category === activeCategory;
+      const itemCategory = lang === 'ar' ? (item.categoryAr || item.category) : item.category;
+      const matchesCategory = activeCategory === "All" || itemCategory === activeCategory;
       return matchesType && matchesCategory;
     });
-  }, [allItems, activeType, activeCategory]);
+  }, [allItems, activeType, activeCategory, lang]);
 
   return (
     <section className="relative xl:pt-36 lg:pt-30 pt-24 xl:pb-24 lg:pb-16 pb-10 overflow-hidden bg-[linear-gradient(180deg,#FFF3F3_0%,#FFFFFF_48%,#F7FAFD_100%)]">
@@ -88,7 +91,7 @@ export default function MediaKnowledgeList() {
                   : "bg-white/70 text-secondary border-secondary/10 hover:border-primary hover:text-primary"
               }`}
             >
-              {cat === "All" ? t("mediaKnowledge.all") : cat}
+              {cat === "All" ? t("mediaKnowledge.all") : cat === "Uncategorized" ? t("mediaKnowledge.uncategorized") : cat}
             </button>
           ))}
         </div>
@@ -110,13 +113,13 @@ export default function MediaKnowledgeList() {
                     <span className="text-white/90 text-2xl font-bold">{getFileExt(item.image) || "FILE"}</span>
                   </div>
                 ) : (
-                  <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <img src={item.image || SportsActivitiesOne} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 )}
                 <div className="absolute inset-0 bg-[linear-gradient(360deg,#2E0006_0%,rgba(148,1,20,0)_100%)]" />
                 <div className="absolute inset-0 z-10 flex flex-col justify-between p-4">
                   <div className="flex gap-2 flex-wrap">
                     <span className="rounded-full text-white md:text-xs/tight text-[10px]/tight font-semibold py-1 px-2.5 bg-primary">
-                      {item.category}
+                      {(() => { const cat = lang === 'ar' ? (item.categoryAr || item.category) : item.category; return cat === "Uncategorized" || cat === "غير مصنف" ? t("mediaKnowledge.uncategorized") : cat; })()}
                     </span>
                     {item.isVideo && (
                       <span className="rounded-full text-white md:text-xs/tight text-[10px]/tight font-semibold py-1 px-2.5 bg-black/50 flex items-center gap-1">
@@ -142,8 +145,8 @@ export default function MediaKnowledgeList() {
                 <div className="flex-1 min-w-0">
                   <p className="text-secondary/60 md:text-sm/tight text-xs/tight font-medium line-clamp-3">{item.description}</p>
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {item.tags.slice(0, 3).map((tag: any) => (
-                      <span key={tag} className="text-xs font-semibold text-primary/70 bg-primary/8 px-2 py-1 rounded-full">
+                    {(lang === 'ar' ? (item.tagsAr || item.tags) : item.tags).slice(0, 3).map((tag: any, idx: number) => (
+                      <span key={idx} className="text-xs font-semibold text-primary/70 bg-primary/8 px-2 py-1 rounded-full">
                         #{tag}
                       </span>
                     ))}

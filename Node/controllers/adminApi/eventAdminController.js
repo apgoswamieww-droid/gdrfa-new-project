@@ -485,12 +485,12 @@ class EventAdminController {
                 return res.json({ status: true, data: [] });
             }
 
-            let coordinatorResp = await ciamService.getUserByRoleId(process.env.EVENTCOORDINATORROLEID, authToken);
-            if (coordinatorResp?.isError || coordinatorResp == null) {
+            let adminResp = await ciamService.getUserByRoleId(process.env.ADMINROLEID, authToken);
+            if (adminResp?.isError || adminResp == null) {
                 console.warn('[Event getEventCoordinators] CIAM getUserByRoleId failed — returning empty list');
-                coordinatorResp = { value: { internalClientUsers: [] } };
+                adminResp = { value: { internalClientUsers: [] } };
             }
-            const employees = coordinatorResp?.isError || coordinatorResp == null ? [] : (coordinatorResp.value?.internalClientUsers || []);
+            const employees = adminResp?.isError || adminResp == null ? [] : (adminResp.value?.internalClientUsers || []);
 
             const data = employees.map(emp => ({
                 id: emp.userDomain,
@@ -1141,19 +1141,12 @@ class EventAdminController {
                 return res.status(400).json({ status: false, message: 'Invalid event status. Use 0=Pending, 1=Approved, 2=Rejected' });
             }
 
-            // Check role: only Admin or Event Coordinator can approve/reject
-            const currentRoleId = String(req.user?.roleId || '').trim();
-            const ADMIN_ROLE_ID = String(process.env.ADMINROLEID || '').trim();
-            const EVENT_COORDINATOR_ROLE_ID = String(process.env.EVENTCOORDINATORROLEID || '').trim();
-
-            const hasAllowedRole = currentRoleId === ADMIN_ROLE_ID || currentRoleId === EVENT_COORDINATOR_ROLE_ID;
-
-            // Also check granular permission (OR logic — role OR permission is sufficient)
+            // Check permission: only users with approve-event permission (or wildcard) can approve/reject
             const userPermissions = req.user?.permissions || [];
             const hasPermission = userPermissions.includes('*') || userPermissions.includes('approve-event');
 
-            if (!hasAllowedRole && !hasPermission) {
-                return res.status(403).json({ status: false, message: 'You do not have permission to approve or reject events. Required role: Admin or Event Coordinator.' });
+            if (!hasPermission) {
+                return res.status(403).json({ status: false, message: 'You do not have permission to approve or reject events.' });
             }
 
             const event = await db.queryOne(

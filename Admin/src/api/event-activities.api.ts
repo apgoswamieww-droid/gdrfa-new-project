@@ -3,6 +3,7 @@ import { apiRequest } from "./request";
 export interface EventActivity {
   id: number;
   name: string;
+  name_ar?: string;
   activityType: number;
   isTeam: string;
   image?: string;
@@ -14,6 +15,7 @@ export interface EventActivity {
 
 export interface EventActivityPayload {
   name: string;
+  name_ar?: string;
   activityType: number;
   isTeam?: string;
   status?: "1" | "0";

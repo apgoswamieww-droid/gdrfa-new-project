@@ -69,7 +69,7 @@ export default function MediaKnowledgeSec() {
                   <div onClick={() => navigate(`/media-knowledge/${item.id}`)} className="cursor-pointer group/desc">
                     <div className="flex justify-between gap-2 lg:mb-3.5 mb-2.5 items-center">
                       <span className="rounded-full inline-block xs:py-1.5 py-1 px-2.5 text-xs/tight text-primary font-bold bg-[#E7D2D2]">
-                        {item.category}
+                        {(() => { const cat = i18n.language === 'ar' ? (item.categoryAr || item.category) : item.category; return cat === "Uncategorized" || cat === "غير مصنف" ? t("mediaKnowledge.uncategorized") : cat; })()}
                       </span>
                       <span className="inline-block text-sm/tight font-medium text-secondary">{item.readTime}</span>
                     </div>

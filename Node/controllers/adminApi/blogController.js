@@ -43,14 +43,14 @@ class BlogController {
             if (blogIds.length > 0) {
                 const placeholders = blogIds.map(() => '?').join(',');
                 const tagsData = await db.query(
-                    `SELECT pt.postId, t.id, t.name FROM post_tags pt
+                    `SELECT pt.postId, t.id, t.name, t.name_ar FROM post_tags pt
                      INNER JOIN tags t ON pt.tagId = t.id
                      WHERE pt.postId IN (${placeholders}) AND t.deletedAt IS NULL`,
                     blogIds
                 );
                 tagsData.forEach(t => {
                     if (!tagsMap[t.postId]) tagsMap[t.postId] = [];
-                    tagsMap[t.postId].push({ id: t.id, name: t.name });
+                    tagsMap[t.postId].push({ id: t.id, name: t.name, name_ar: t.name_ar });
                 });
             }
             const withTags = formatted.map(b => ({
@@ -121,24 +121,43 @@ class BlogController {
 
             if (postId && req.body.tags) {
                 let tags = [];
+                let tagsAr = [];
                 try { tags = JSON.parse(req.body.tags); } catch {}
+                try { tagsAr = JSON.parse(req.body.tags_ar || '[]'); } catch {}
                 if (Array.isArray(tags) && tags.length > 0) {
-                    for (let tagName of tags) {
+                    for (let i = 0; i < tags.length; i++) {
+                        let tagName = tags[i];
+                        let tagNameAr = tagsAr[i] || null;
                         if (!tagName || !tagName.trim()) continue;
                         let tag = await db.queryOne(
                             `SELECT id FROM tags WHERE LOWER(name) = LOWER(?) AND deletedAt IS NULL`,
                             [tagName.trim()]
                         );
                         if (tag) {
+                            // Update name_ar if provided and not yet set
+                            if (tagNameAr && tagNameAr.trim() && !tag.name_ar) {
+                                try {
+                                    await db.query(`UPDATE tags SET name_ar = ?, updatedAt = SYSDATETIME() WHERE id = ?`, [tagNameAr.trim(), tag.id]);
+                                } catch (e) {
+                                    // name_ar column may not exist yet — ignore
+                                }
+                            }
                             await db.query(
                                 `INSERT INTO post_tags (postId, tagId, createdAt, updatedAt) VALUES (?, ?, SYSDATETIME(), SYSDATETIME())`,
                                 [postId, tag.id]
                             );
                         } else {
-                            await db.query(
-                                `INSERT INTO tags (name, status, createdAt, updatedAt) VALUES (?, '1', SYSDATETIME(), SYSDATETIME())`,
-                                [tagName.trim()]
-                            );
+                            if (tagNameAr && tagNameAr.trim()) {
+                                await db.query(
+                                    `INSERT INTO tags (name, name_ar, status, createdAt, updatedAt) VALUES (?, ?, '1', SYSDATETIME(), SYSDATETIME())`,
+                                    [tagName.trim(), tagNameAr.trim()]
+                                );
+                            } else {
+                                await db.query(
+                                    `INSERT INTO tags (name, status, createdAt, updatedAt) VALUES (?, '1', SYSDATETIME(), SYSDATETIME())`,
+                                    [tagName.trim()]
+                                );
+                            }
                             const newTag = await db.queryOne(
                                 `SELECT CAST(IDENT_CURRENT('tags') as INT) as id`
                             );
@@ -222,24 +241,43 @@ class BlogController {
 
             if (req.body.tags) {
                 let tags = [];
+                let tagsAr = [];
                 try { tags = JSON.parse(req.body.tags); } catch {}
+                try { tagsAr = JSON.parse(req.body.tags_ar || '[]'); } catch {}
                 if (Array.isArray(tags) && tags.length > 0) {
-                    for (let tagName of tags) {
+                    for (let i = 0; i < tags.length; i++) {
+                        let tagName = tags[i];
+                        let tagNameAr = tagsAr[i] || null;
                         if (!tagName || !tagName.trim()) continue;
                         let tag = await db.queryOne(
                             `SELECT id FROM tags WHERE LOWER(name) = LOWER(?) AND deletedAt IS NULL`,
                             [tagName.trim()]
                         );
                         if (tag) {
+                            // Update name_ar if provided and not yet set
+                            if (tagNameAr && tagNameAr.trim() && !tag.name_ar) {
+                                try {
+                                    await db.query(`UPDATE tags SET name_ar = ?, updatedAt = SYSDATETIME() WHERE id = ?`, [tagNameAr.trim(), tag.id]);
+                                } catch (e) {
+                                    // name_ar column may not exist yet — ignore
+                                }
+                            }
                             await db.query(
                                 `INSERT INTO post_tags (postId, tagId, createdAt, updatedAt) VALUES (?, ?, SYSDATETIME(), SYSDATETIME())`,
                                 [postId, tag.id]
                             );
                         } else {
-                            await db.query(
-                                `INSERT INTO tags (name, status, createdAt, updatedAt) VALUES (?, '1', SYSDATETIME(), SYSDATETIME())`,
-                                [tagName.trim()]
-                            );
+                            if (tagNameAr && tagNameAr.trim()) {
+                                await db.query(
+                                    `INSERT INTO tags (name, name_ar, status, createdAt, updatedAt) VALUES (?, ?, '1', SYSDATETIME(), SYSDATETIME())`,
+                                    [tagName.trim(), tagNameAr.trim()]
+                                );
+                            } else {
+                                await db.query(
+                                    `INSERT INTO tags (name, status, createdAt, updatedAt) VALUES (?, '1', SYSDATETIME(), SYSDATETIME())`,
+                                    [tagName.trim()]
+                                );
+                            }
                             const newTag = await db.queryOne(
                                 `SELECT CAST(IDENT_CURRENT('tags') as INT) as id`
                             );
@@ -274,7 +312,7 @@ class BlogController {
             }
 
             const tags = await db.query(
-                `SELECT t.id, t.name FROM tags t
+                `SELECT t.id, t.name, t.name_ar FROM tags t
                  INNER JOIN post_tags pt ON t.id = pt.tagId
                  WHERE pt.postId = ? AND t.deletedAt IS NULL
                  ORDER BY t.name ASC`,
@@ -333,7 +371,7 @@ class BlogController {
     static async listTags(req, res) {
         try {
             const tags = await db.query(
-                `SELECT id, name FROM tags WHERE status = '1' AND deletedAt IS NULL ORDER BY name ASC`
+                `SELECT id, name, name_ar FROM tags WHERE status = '1' AND deletedAt IS NULL ORDER BY name ASC`
             );
             return res.json({ status: true, data: tags || [] });
         } catch (error) {

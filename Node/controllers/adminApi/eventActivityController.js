@@ -10,6 +10,7 @@ class EventActivityController {
                 SELECT 
                     sa.id,
                     sa.name,
+                    sa.name_ar,
                     sa.activityType,
                     sa.isTeam,
                     sa.image,
@@ -38,7 +39,7 @@ class EventActivityController {
 
     static async store(req, res) {
         try {
-            const { name, activityType, isTeam } = req.body;
+            const { name, name_ar, activityType, isTeam } = req.body;
             
             if (!name) {
                 return res.status(400).json({ status: false, message: 'Activity name is required' });
@@ -59,8 +60,8 @@ class EventActivityController {
 
             const isTeamValue = (isTeam === '1' || isTeam === 1 || isTeam === true || isTeam === 'true') ? '1' : '0';
             
-            const sql = `INSERT INTO sport_activities (name, activityType, isTeam, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())`;
-            await db.query(sql, [name.trim(), activityType, isTeamValue, '1']);
+            const sql = `INSERT INTO sport_activities (name, name_ar, activityType, isTeam, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())`;
+            await db.query(sql, [name.trim(), name_ar || null, activityType, isTeamValue, '1']);
             
             return res.json({ 
                 status: true, 
@@ -74,7 +75,7 @@ class EventActivityController {
 
     static async update(req, res) {
         try {
-            const { name, activityType, isTeam } = req.body;
+            const { name, name_ar, activityType, isTeam } = req.body;
             const activityId = req.params.id;
 
             if (!name) {
@@ -99,11 +100,11 @@ class EventActivityController {
             // Only update status if provided
             let sql, params;
             if (req.body.status !== undefined) {
-                sql = `UPDATE sport_activities SET name = ?, activityType = ?, isTeam = ?, status = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
-                params = [name.trim(), activityType, isTeamValue, req.body.status, activityId];
+                sql = `UPDATE sport_activities SET name = ?, name_ar = ?, activityType = ?, isTeam = ?, status = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
+                params = [name.trim(), name_ar || null, activityType, isTeamValue, req.body.status, activityId];
             } else {
-                sql = `UPDATE sport_activities SET name = ?, activityType = ?, isTeam = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
-                params = [name.trim(), activityType, isTeamValue, activityId];
+                sql = `UPDATE sport_activities SET name = ?, name_ar = ?, activityType = ?, isTeam = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
+                params = [name.trim(), name_ar || null, activityType, isTeamValue, activityId];
             }
 
             await db.query(sql, params);

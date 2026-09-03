@@ -7,6 +7,23 @@ export async function getSponsors() {
   });
 }
 
+export interface SocialLink {
+  id: number;
+  link: string;
+  image: string;
+  status: string;
+  createdAt: string;
+}
+
+export async function getSocialLinks(): Promise<SocialLink[]> {
+  try {
+    const res = await apiRequest({ url: "/social-links", method: "GET" });
+    return res?.data || [];
+  } catch {
+    return [];
+  }
+}
+
 
 export async function getHomeSliders() {
   return apiRequest({

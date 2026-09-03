@@ -43,8 +43,10 @@ class AdminUserController {
 
     static async getRoles(req, res) {
         try {
-            // Return static role like subAdminController does
-            const roles = [{ id: process.env.ADMINROLEID, name: "Admin", description: "" }];
+            const roles = [
+                { id: process.env.SUPERADMINROLEID, name: "Super Admin", description: "" },
+                { id: process.env.ADMINROLEID, name: "Admin", description: "" },
+            ];
             return res.json({
                 status: true,
                 message: 'Roles retrieved successfully',

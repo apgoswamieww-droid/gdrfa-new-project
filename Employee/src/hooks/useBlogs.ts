@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { getAllBlogs } from "../api/page.api";
 import { editorJsToHtml } from "../utils/editorJsToHtml";
 
@@ -24,16 +25,27 @@ export function transformBlog(item: any): any {
     content: editorJsToHtml(item.content),
     readTime: extractReadTime(item.readingTime),
     category: item.tags?.[0]?.name || "Uncategorized",
+    categoryAr: item.tags?.[0]?.name_ar || item.tags?.[0]?.name || "غير مصنف",
     image: item.media || "",
     isVideo: item.mediaType === "video",
     date: formatDate(item.createdAt),
     author: "",
     tags: (item.tags || []).map((t: any) => t.name),
+    tagsAr: (item.tags || []).map((t: any) => t.name_ar || t.name),
     type: "blog",
   };
 }
 
+export function getLocalizedTags(item: any, lang: string): string[] {
+  return lang === 'ar' ? (item.tagsAr || item.tags || []) : (item.tags || []);
+}
+
+export function getLocalizedCategory(item: any, lang: string): string {
+  return lang === 'ar' ? (item.categoryAr || item.category) : item.category;
+}
+
 export function useBlogs(page = 1, limit = 10) {
+  const { i18n } = useTranslation();
   const [items, setItems] = useState<any>([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
@@ -69,5 +81,5 @@ export function useBlogs(page = 1, limit = 10) {
     };
   }, [page, limit]);
 
-  return { items, total, pages, loading, error };
+  return { items, total, pages, loading, error, lang: i18n.language };
 }

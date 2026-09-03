@@ -40,12 +40,30 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
 
   if (!isOpen) return null;
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = "any name is required";
+    if (!name.trim()) newErrors.name = "Sponsor name is required";
     if (!websiteUrl.trim()) newErrors.websiteUrl = "Website URL is required";
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    if (field === "name") setName(value);
+    else if (field === "websiteUrl") setWebsiteUrl(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +125,8 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
               label={t.sponsor.name}
               placeholder={t.sponsor.placeholder}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleFieldChange("name", e.target.value)}
+              onBlur={() => handleBlur("name")}
               error={errors.name}
               required
             />
@@ -116,7 +135,8 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
               label={t.sponsor.websiteUrl}
               placeholder={t.sponsor.websitePlaceholder}
               value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
+              onChange={(e) => handleFieldChange("websiteUrl", e.target.value)}
+              onBlur={() => handleBlur("websiteUrl")}
               error={errors.websiteUrl}
               required
             />

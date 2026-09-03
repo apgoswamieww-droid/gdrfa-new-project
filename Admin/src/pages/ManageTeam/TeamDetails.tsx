@@ -50,6 +50,7 @@ const TeamDetails = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<TeamEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [teamImageError, setTeamImageError] = useState(false);
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -220,14 +221,12 @@ const TeamDetails = () => {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm p-4">
             <div className="text-center mb-6">
-              {team.image ? (
+              {team.image && !teamImageError ? (
                 <img
                   src={getImageUrl(team.image)}
                   alt={team.name}
                   className="w-40 h-40 rounded-lg object-cover mx-auto bg-gray-100 mb-4"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
+                  onError={() => setTeamImageError(true)}
                 />
               ) : (
                 <div className="w-40 h-40 rounded-lg bg-gray-100 flex items-center justify-center mx-auto mb-4">

@@ -45,13 +45,33 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
 
   if (!isOpen) return null;
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
     if (!titleEn.trim()) newErrors.titleEn = "English title is required";
     if (!descEn.trim()) newErrors.descEn = "English description is required";
     if (!initialData && !media) newErrors.media = "Media file is required";
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    if (field === "titleEn") setTitleEn(value);
+    else if (field === "titleAr") setTitleAr(value);
+    else if (field === "descEn") setDescEn(value);
+    else if (field === "descAr") setDescAr(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,7 +130,8 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
               label={t.homeSlider.title}
               placeholder={t.homeSlider.titlePlaceholder}
               value={titleEn}
-              onChange={(e) => setTitleEn(e.target.value)}
+              onChange={(e) => handleFieldChange("titleEn", e.target.value)}
+              onBlur={() => handleBlur("titleEn")}
               error={errors.titleEn}
               required
             />
@@ -118,7 +139,8 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
               label={t.homeSlider.titleAr}
               placeholder={t.homeSlider.titleArPlaceholder}
               value={titleAr}
-              onChange={(e) => setTitleAr(e.target.value)}
+              onChange={(e) => handleFieldChange("titleAr", e.target.value)}
+              onBlur={() => handleBlur("titleAr")}
               error={errors.titleAr}
             />
           </div>
@@ -128,7 +150,8 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
               label={t.homeSlider.shortDescription}
               placeholder={t.homeSlider.descPlaceholder}
               value={descEn}
-              onChange={(e) => setDescEn(e.target.value)}
+              onChange={(e) => handleFieldChange("descEn", e.target.value)}
+              onBlur={() => handleBlur("descEn")}
               error={errors.descEn}
               required
             />
@@ -136,7 +159,8 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
               label={t.homeSlider.shortDescriptionAr}
               placeholder={t.homeSlider.descArPlaceholder}
               value={descAr}
-              onChange={(e) => setDescAr(e.target.value)}
+              onChange={(e) => handleFieldChange("descAr", e.target.value)}
+              onBlur={() => handleBlur("descAr")}
               error={errors.descAr}
             />
           </div>

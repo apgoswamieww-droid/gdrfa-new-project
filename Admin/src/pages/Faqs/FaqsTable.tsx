@@ -60,28 +60,28 @@ export default function FaqsTable({
   const columns: Column<Faq>[] = useMemo(() => [
     {
       key: "id",
-      label: "ID",
+      label: t.faq.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => value,
     },
     {
       key: "question",
-      label: "Question (EN)",
+      label: t.faq.questionEn,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/tight text-base/tight min-w-40",
       render: (value) => value,
     },
     {
       key: "question_ar",
-      label: "Question (AR)",
+      label: t.faq.questionAr,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/tight text-base/tight min-w-40 text-right",
       render: (value) => value,
     },
     {
       key: "status",
-      label: "Status",
+      label: t.faq.status,
       sortable: true,
       className: "text-center",
       render: (value, row) => {
@@ -93,14 +93,14 @@ export default function FaqsTable({
             ${isActive ? "bg-primary-green/8 text-primary-green hover:bg-primary-green/10" : "bg-red-50 text-red-600 hover:bg-red-100"}`}
           >
             <span className={`w-2 h-2 rounded-full ${isActive ? "bg-primary-green" : "bg-red-500"}`} />
-            {isActive ? "Active" : "Inactive"}
+            {isActive ? t.faq.active : t.faq.inactive}
           </button>
         );
       },
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t.faq.createdAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),
@@ -128,11 +128,11 @@ export default function FaqsTable({
   );
 
   if (loading) {
-    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">Loading FAQs...</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">{t.faq.loading}</div>;
   }
 
   if (error) {
-    return <div className="bg-white rounded-xl p-5 text-center text-red-500">Failed to load FAQs. Please try again.</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-red-500">{t.faq.errorFetch}</div>;
   }
 
   return (

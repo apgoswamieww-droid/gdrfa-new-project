@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { SportsActivityImg } from "../../assets/images/images";
-import PrimaryBtn from "../../component/Button/PrimaryButton";
 import CmsPagesTable from "./CmsPagesTable";
 import CmsPageModal from "./CmsPageModal";
 import { createCmsPageApi, updateCmsPageApi, deleteCmsPageApi, toggleCmsPageStatusApi } from "../../api/cms.api";
@@ -104,31 +103,6 @@ const ManageCmsPages = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <PrimaryBtn className="w-fit" onClick={openCreateModal}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M2.08203 9.99972C2.08203 6.26772 2.08203 4.40175 3.2414 3.24238C4.40077 2.08301 6.26675 2.08301 9.9987 2.08301C13.7306 2.08301 15.5966 2.08301 16.756 3.24238C17.9154 4.40175 17.9154 6.26772 17.9154 9.99972C17.9154 13.7316 17.9154 15.5976 16.756 16.757C15.5966 17.9164 13.7306 17.9164 9.9987 17.9164C6.26675 17.9164 4.40077 17.9164 3.2414 16.757C2.08203 15.5976 2.08203 13.7316 2.08203 9.99972Z"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M10.0013 6.66699V13.3337M13.3346 10.0004H6.66797"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {t.cms.create}
-          </PrimaryBtn>
         </div>
         <CmsPagesTable 
             key={refreshKey} 

@@ -1,10 +1,14 @@
 import { UserImg } from "../../assets/images/images";
 import { Heading, Text } from "../../component/Typography/Typography";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useMemo } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useMemo, useState, useEffect } from "react";
+import { apiRequest } from "../../api/request";
 
 const ProfileCard = () => {
   const { t } = useTranslation();
+  const { roleId } = useAuth();
+  const [userRole, setUserRole] = useState("Administrator");
   const adminUser = useMemo(() => {
     try {
       const stored = localStorage.getItem("adminUser");
@@ -12,8 +16,30 @@ const ProfileCard = () => {
     } catch { return null; }
   }, []);
 
-  const userName = adminUser?.name || "Admin";
-  const userImage = adminUser?.image || UserImg;
+  // Fetch roles and resolve role name dynamically
+  useEffect(() => {
+    if (!roleId) return;
+    let cancelled = false;
+    apiRequest({ url: "/api/admin/roles" })
+      .then((res: any) => {
+        if (cancelled) return;
+        if (res?.status && Array.isArray(res.data)) {
+          const matched = res.data.find((r: any) => r.id === roleId);
+          if (matched?.name) setUserRole(matched.name);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [roleId]);
+
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
+  const rawImage = adminUser?.image || null;
+  const userImage = rawImage
+    ? rawImage.startsWith("http")
+      ? rawImage
+      : `${IMAGE_BASE_URL}${rawImage}`
+    : UserImg;
+
   return (
     <div className="bg-white 2xl:rounded-lg rounded-xl xl:border-4 border-2 border-[#E7D2D2]/60">
       <div className="rounded-xl xl:p-3.5 p-3">
@@ -64,13 +90,14 @@ const ProfileCard = () => {
               src={userImage}
               alt="Profile"
               className="2xl:w-18 w-15 2xl:h-18 h-15 2xl:p-1 p-0.5 rounded-full object-cover border-2 border-primary"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = UserImg; }}
             />
           </div>
           <Heading variant="h3" className="mt-2 font-bold text-secondary !text-base">
-            {userName}
+            {adminUser?.name || "Admin"}
           </Heading>
           <Text variant="textBase" className="font-medium text-primary mt-0 !text-xs">
-            {t.dashboard?.userRoleDetail || "User Role Detail"}
+            {userRole}
           </Text>
         </div>
       </div>

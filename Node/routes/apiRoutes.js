@@ -4,6 +4,7 @@ const authController = require('../controllers/api/authController'); // Capital 
 const adminAuthController = require('../controllers/adminApi/adminAuthController');
 const { ensureAuthenticated, verifyToken } = require('../middlewares/authMiddleware');
 const verifyAdminOrSuperAdmin = require('../middlewares/verifyAdminOrSuperAdmin');
+const verifySuperAdminOnly = require('../middlewares/verifySuperAdminOnly');
 const { authorizeResource } = require('../middlewares/resourceAuthorization');
 const multer = require('multer');
 const createUploader = require('../utils/multer');
@@ -211,6 +212,10 @@ router.get('/admin/facility-request/change-status', verifyToken, verifyAdminOrSu
 const sponsorController = require('../controllers/api/sponsorController');
 router.get('/sponsors', sponsorController.getAllSponsors);
 
+// Social Links Public API (no auth required)
+const socialLinkPublicController = require('../controllers/api/socialLinkPublicController');
+router.get('/social-links', socialLinkPublicController.getAll);
+
 // Sponsor Admin API (React admin panel)
 const sponsorAdminController = require('../controllers/adminApi/sponsorController');
 const uploadSponsorAdmin = createUploader('uploads/sponsors', ['image']);
@@ -218,6 +223,14 @@ router.get('/admin/sponsors', verifyToken, authorizeResource('sponsor', { operat
 router.post('/admin/sponsors', uploadSponsorAdmin.single('logo'), xssSanitize, verifyToken, authorizeResource('sponsor', { operation: 'create' }), sponsorAdminController.store);
 router.put('/admin/sponsors/:id', uploadSponsorAdmin.single('logo'), xssSanitize, verifyToken, authorizeResource('sponsor'), sponsorAdminController.update);
 router.delete('/admin/sponsors/:id', verifyToken, authorizeResource('sponsor'), sponsorAdminController.delete);
+
+// Social Links Admin API (React admin panel) - Super Admin only
+const socialLinkAdminController = require('../controllers/adminApi/socialLinkController');
+const uploadSocialLinkAdmin = createUploader('uploads/socialLinks', ['image']);
+router.get('/admin/social-links', verifyToken, verifySuperAdminOnly, socialLinkAdminController.list);
+router.post('/admin/social-links', uploadSocialLinkAdmin.single('image'), xssSanitize, verifyToken, verifySuperAdminOnly, socialLinkAdminController.store);
+router.put('/admin/social-links/:id', uploadSocialLinkAdmin.single('image'), xssSanitize, verifyToken, verifySuperAdminOnly, socialLinkAdminController.update);
+router.delete('/admin/social-links/:id', verifyToken, verifySuperAdminOnly, socialLinkAdminController.delete);
 
 // Home Slider Admin API (React admin panel)
 const homeSliderAdminController = require('../controllers/adminApi/homeSliderController');

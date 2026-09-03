@@ -1,6 +1,7 @@
 const db = require('../config/dbDirect');
 const axios = require('axios');
 const https = require('https');
+const { isPermissionsBypass } = require('./permissionsBypass');
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -11,6 +12,7 @@ async function getUserRoleId(req) {
 }
 
 async function hasPermission(req, permissionSlug) {
+  if (isPermissionsBypass()) return true; // PERMISSIONS_BYPASS
   const roleId = await getUserRoleId(req);
   if (roleId === process.env.SUPERADMINROLEID) return true; // SuperAdmin bypass
 
@@ -19,6 +21,7 @@ async function hasPermission(req, permissionSlug) {
 }
 
 async function hasAnyPermission(req, permissionSlugs = []) {
+  if (isPermissionsBypass()) return true; // PERMISSIONS_BYPASS
   const roleId = await getUserRoleId(req);
   if (roleId === process.env.SUPERADMINROLEID) return true; // SuperAdmin bypass
 
@@ -27,6 +30,7 @@ async function hasAnyPermission(req, permissionSlugs = []) {
 }
 
 async function hasAllPermissions(req, permissionSlugs = []) {
+  if (isPermissionsBypass()) return true; // PERMISSIONS_BYPASS
   const roleId = await getUserRoleId(req);
   if (roleId === process.env.SUPERADMINROLEID) return true; // SuperAdmin bypass
 
@@ -37,6 +41,11 @@ async function hasAllPermissions(req, permissionSlugs = []) {
 async function getUserPermissions(roleId, accessToken = '', userId) {
   return new Promise((resolve) => {
     try {
+      // PERMISSIONS_BYPASS: return wildcard permission for ALL users
+      if (isPermissionsBypass()) {
+        return resolve(['*']);// Wildcard permission – full access
+      }
+
       // // Return all permissions for Super Admin (roleId = 1)
       if (roleId === process.env.SUPERADMINROLEID) {
         return resolve(['can-login', 'admin-access', '*']);// Wildcard permission
@@ -108,11 +117,6 @@ async function getUserPermissions(roleId, accessToken = '', userId) {
         "view-evaluation-rule-list",
         "view-fitness-category-list",
         "view-audit-history",
-        "change-event-coordinator-status",
-        "create-event-coordinator",
-        "delete-event-coordinator",
-        "edit-event-coordinator",
-        "list-view-event-coordinator",
         "can-event-end-or-complete",
         "can-manage-activities",
         "change-event-active-inactive",

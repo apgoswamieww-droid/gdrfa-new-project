@@ -4,6 +4,7 @@ import DataTable from "../../component/Table/DataTable";
 import { formatDate } from "../../utils/dateUtils";
 import toast from "react-hot-toast";
 import { getFacilityRequestsApi, deleteFacilityRequestApi } from "../../api/facilityRequests.api";
+import { useTranslation } from "../../hooks/useTranslation";
 
 // ─── Icons ───────────────────────────────────────────────────────
 const ViewIcon = () => (
@@ -23,27 +24,27 @@ const DeleteIcon = () => (
 );
 
 // ─── Status Badge ─────────────────────────────────────────────────
-const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void }) => {
+const StatusBadge = ({ status, onClick, t }: { status: string; onClick?: () => void; t: any }) => {
   switch (status) {
     case "1":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700">
           <span className="w-2 h-2 rounded-full bg-green-500" />
-          Approved
+          {t.facilityRequest.approved}
         </span>
       );
     case "2":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-700">
           <span className="w-2 h-2 rounded-full bg-red-500" />
-          Rejected
+          {t.facilityRequest.rejected}
         </span>
       );
     case "3":
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-600">
           <span className="w-2 h-2 rounded-full bg-gray-400" />
-          Cancelled
+          {t.facilityRequest.cancelled}
         </span>
       );
     default:
@@ -53,7 +54,7 @@ const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors cursor-pointer"
         >
           <span className="w-2 h-2 rounded-full bg-yellow-500" />
-          Pending
+          {t.facilityRequest.pending}
         </button>
       );
   }
@@ -96,6 +97,7 @@ interface FacilityRequestsTableProps {
 
 // ─── Main Component ──────────────────────────────────────────────
 export default function FacilityRequestsTable({ searchTerm, onView, onStatusClick }: FacilityRequestsTableProps) {
+  const { t } = useTranslation();
   const [data, setData] = useState<FacilityRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage] = useState(1);
@@ -116,7 +118,7 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
         setTotalRecords(res.data?.recordsTotal || 0);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to load facility requests");
+      toast.error(error.message || t.facilityRequest.errorDelete);
     } finally {
       setLoading(false);
     }
@@ -127,32 +129,32 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
   }, [currentPage, searchTerm]);
 
   if (loading) {
-    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">Loading facility requests...</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">{t.facilityRequest.loading}</div>;
   }
 
   const handleDelete = async (id: number) => {
-    const loadingToast = toast.loading("Deleting...");
+    const loadingToast = toast.loading(t.facilityRequest.deleting);
     try {
       const res = await deleteFacilityRequestApi(id);
       if (res.status) {
-        toast.success("Request deleted successfully!", { id: loadingToast });
+        toast.success(t.facilityRequest.successDelete, { id: loadingToast });
         fetchData();
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to delete request", { id: loadingToast });
+      toast.error(error.message || t.facilityRequest.errorDelete, { id: loadingToast });
     }
   };
 
   const confirmDelete = (id: number) => {
     toast((t_toast) => (
       <div className="flex flex-col gap-3 p-1">
-        <p className="font-bold text-secondary text-base text-start">Are you sure you want to delete this request?</p>
+        <p className="font-bold text-secondary text-base text-start">{t.facilityRequest.confirmDelete}</p>
         <div className="flex gap-2 justify-end">
           <button
             onClick={() => toast.dismiss(t_toast.id)}
             className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            Cancel
+            {t.facilityRequest.cancel}
           </button>
           <button
             onClick={async () => {
@@ -161,7 +163,7 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
             }}
             className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer"
           >
-            Delete
+            {t.facilityRequest.delete}
           </button>
         </div>
       </div>
@@ -175,14 +177,14 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
   const columns: Column<FacilityRequest>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t.facilityRequest.id,
       sortable: true,
       className: "text-center w-12 text-gray-500 text-sm font-medium",
       render: (value) => value,
     },
     {
       key: "title",
-      label: "Facility",
+      label: t.facilityRequest.facility,
       sortable: true,
       render: (_, row) => (
         <div className="flex items-center gap-3">
@@ -196,7 +198,7 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
     },
     {
       key: "name",
-      label: "Requester",
+      label: t.facilityRequest.requester,
       sortable: true,
       render: (_, row) => (
         <div>
@@ -207,26 +209,27 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
     },
     {
       key: "date",
-      label: "Requested Date",
+      label: t.facilityRequest.requestedDate,
       sortable: true,
       className: "text-gray-600 text-sm",
       render: (value) => value ? formatDate(value as string, true) : "-",
     },
     {
       key: "status",
-      label: "Status",
+      label: t.facilityRequest.status,
       sortable: true,
       className: "text-center",
       render: (_, row) => (
         <StatusBadge 
           status={row.status} 
-          onClick={() => onStatusClick?.(row.id, row.name, row.title || "Unknown Facility")} 
+          onClick={() => onStatusClick?.(row.id, row.name, row.title || "Unknown Facility")}
+          t={t}
         />
       ),
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t.facilityRequest.createdAt,
       sortable: true,
       className: "text-gray-600 text-sm whitespace-nowrap",
       render: (value) => value ? formatDate(value as string, false) : "-",
@@ -255,7 +258,7 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      <div className="mb-4 text-sm text-gray-500">Total requests: {totalRecords}</div>
+      <div className="mb-4 text-sm text-gray-500">{t.facilityRequest.totalRequests} {totalRecords}</div>
       <DataTable
         data={data}
         columns={columns}

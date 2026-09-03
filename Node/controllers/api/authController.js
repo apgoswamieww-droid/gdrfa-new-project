@@ -120,7 +120,7 @@ class ApiController {
             if (responseOfUser.isError) {
                 return res.error(getLocalizedMessage(req, 'Invalid email or password'));
             }
-
+            
             let detailsOfUser = await ciamService.getUserByDomainId(responseOfUser.value.userDomain.split(','), responseOfUser.value.accessToken);
             let user;
             if (detailsOfUser?.isError || detailsOfUser == null) {

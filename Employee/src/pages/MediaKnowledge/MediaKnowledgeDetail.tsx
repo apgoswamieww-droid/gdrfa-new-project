@@ -40,11 +40,13 @@ export default function MediaKnowledgeDetail() {
             content: "",
             readTime: d.readingTime || "",
             category: d.tags?.[0]?.name || "Uncategorized",
+            categoryAr: d.tags?.[0]?.name_ar || d.tags?.[0]?.name || "غير مصنف",
             image: d.file || "",
             isVideo: d.fileType === "video",
             date: d.createdAt ? new Date(d.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
             author: "",
             tags: (d.tags || []).map((tg: any) => tg.name),
+            tagsAr: (d.tags || []).map((tg: any) => tg.name_ar || tg.name),
             type: "media",
             fileType: d.fileType,
           });
@@ -118,19 +120,26 @@ export default function MediaKnowledgeDetail() {
             <div className="rounded-3xl bg-white border border-Secondary/10 p-6 mb-6">
               <h3 className="font-bold text-lg/-tight text-Secondary mb-4">{t("mediaKnowledge.inThisArticle")}</h3>
               <div className="text-sm font-medium text-Secondary/60 space-y-2 [&_h3]:font-bold [&_h3]:text-base [&_h3]:text-Primary [&_h3]:mb-2">
-                <p>Getting started</p>
-                <p>Event highlights</p>
-                <p>Awards ceremony</p>
-                <p>Looking ahead</p>
+                <p>{t("mediaKnowledge.gettingStarted")}</p>
+                <p>{t("mediaKnowledge.eventHighlights")}</p>
+                <p>{t("mediaKnowledge.awardsCeremony")}</p>
+                <p>{t("mediaKnowledge.lookingAhead")}</p>
               </div>
             </div>
 
             <div className="rounded-3xl bg-[#F7EEF0] border border-Primary/10 p-6">
               <h3 className="font-bold text-lg/tight text-Secondary mb-4">{t("mediaKnowledge.browseByCategory")}</h3>
               <div className="space-y-2">
-                {["All", "Running", "Football", "Cycling", "Wellness", "Fitness"].map((cat) => (
-                  <Link key={cat} to={`/media-knowledge?category=${cat}`} className="flex items-center justify-between py-2 px-3 rounded-xl text-sm font-semibold text-Secondary hover:bg-Primary/8 hover:text-Primary transition-[]">
-                    {cat === "All" ? t("mediaKnowledge.all") : cat}
+                {[
+                  { key: "All", label: t("mediaKnowledge.all") },
+                  { key: "Running", label: t("sportsEvents.running") },
+                  { key: "Football", label: t("sportsEvents.football") },
+                  { key: "Cycling", label: t("sportsEvents.cycling") },
+                  { key: "Wellness", label: t("sportsEvents.wellness") },
+                  { key: "Fitness", label: t("sportsEvents.fitness") }
+                ].map((cat) => (
+                  <Link key={cat.key} to={`/media-knowledge?category=${cat.key}`} className="flex items-center justify-between py-2 px-3 rounded-xl text-sm font-semibold text-Secondary hover:bg-Primary/8 hover:text-Primary transition-[]">
+                    {cat.label}
                   </Link>
                 ))}
               </div>
@@ -188,24 +197,26 @@ function MediaHero({ item, mediaFile, mediaFileType, t }: { item: any; mediaFile
 }
 
 function Breadcrumb({ item, t }: { item: any; t: any }) {
+  const { i18n } = useTranslation();
   return (
     <div className="absolute top-0 inset-x-0 z-20 max-w-341.5 mx-auto md:px-7 px-4 xl:pt-8 lg:pt-6 pt-4">
       <nav className="flex items-center gap-2 text-sm font-Just font-bold text-white/80">
-        <Link to="/" className="hover:text-white transition-[]">{t("home")}</Link>
+        <Link to="/" className="hover:text-white transition-[]">{t("HOME")}</Link>
         <ChevronRightIcon />
         <Link to="/media-knowledge" className="hover:text-white transition-[]">{t("mediaKnowledge.title")}</Link>
         <ChevronRightIcon />
-        <span className="text-white line-clamp-1">{item.category}</span>
+        <span className="text-white line-clamp-1">{(() => { const cat = i18n.language === 'ar' ? (item.categoryAr || item.category) : item.category; return cat === "Uncategorized" || cat === "غير مصنف" ? t("mediaKnowledge.uncategorized") : cat; })()}</span>
       </nav>
     </div>
   );
 }
 
 function HeroContent({ item, t }: { item: any; t: any }) {
+  const { i18n } = useTranslation();
   return (
     <div className="absolute inset-x-0 bottom-0 z-20 max-w-341.5 mx-auto md:px-7 px-4 xl:pb-10 lg:pb-8 pb-5">
       <div className="flex flex-wrap gap-2 mb-4">
-        <span className="rounded-2xl bg-Primary text-white px-4 py-2 text-sm font-bold">{item.category}</span>
+        <span className="rounded-2xl bg-Primary text-white px-4 py-2 text-sm font-bold">{(() => { const cat = i18n.language === 'ar' ? (item.categoryAr || item.category) : item.category; return cat === "Uncategorized" || cat === "غير مصنف" ? t("mediaKnowledge.uncategorized") : cat; })()}</span>
         {item.isVideo && (
           <span className="rounded-2xl bg-white/20 text-white px-4 py-2 text-sm font-bold flex items-center gap-2 backdrop-blur-md">
             <PlayIcon />
@@ -219,6 +230,8 @@ function HeroContent({ item, t }: { item: any; t: any }) {
 }
 
 function BlogBody({ item, relatedItems, t }: { item: any; relatedItems: any[]; t: any }) {
+  const { i18n } = useTranslation();
+  const displayTags = i18n.language === 'ar' ? (item.tagsAr || item.tags || []) : (item.tags || []);
   return (
     <>
       <div className="flex flex-wrap items-center gap-4 pb-6 border-b border-Secondary/20 mb-8">
@@ -250,8 +263,8 @@ function BlogBody({ item, relatedItems, t }: { item: any; relatedItems: any[]; t
       <div className="mt-10 pt-6 border-t border-Secondary/20">
         <span className="text-sm font-bold text-Secondary/60 block mb-3">{t("mediaKnowledge.tags")}</span>
         <div className="flex flex-wrap gap-2">
-          {item.tags.map((tag: any) => (
-            <Link key={tag} to={`/media-knowledge?tag=${tag}`} className="rounded-full border border-Primary/20 text-Primary px-4 py-2 text-sm font-semibold hover:bg-Primary hover:text-white transition-[]">#{tag}</Link>
+          {displayTags.map((tag: any, idx: number) => (
+            <Link key={idx} to={`/media-knowledge?tag=${tag}`} className="rounded-full border border-Primary/20 text-Primary px-4 py-2 text-sm font-semibold hover:bg-Primary hover:text-white transition-[]">#{tag}</Link>
           ))}
         </div>
       </div>
@@ -264,6 +277,8 @@ function BlogBody({ item, relatedItems, t }: { item: any; relatedItems: any[]; t
 }
 
 function MediaBody({ item, mediaFile, mediaFileType, t }: { item: any; mediaFile: string; mediaFileType: string; t: any }) {
+  const { i18n } = useTranslation();
+  const displayTags = i18n.language === 'ar' ? (item.tagsAr || item.tags || []) : (item.tags || []);
   const ext = getFileExt(mediaFile).toLowerCase();
   const displayType = ext || mediaFileType;
   const isPptx = ["ppt", "pptx"].includes(ext);
@@ -375,8 +390,8 @@ function MediaBody({ item, mediaFile, mediaFileType, t }: { item: any; mediaFile
       <div className="mt-10 pt-6 border-t border-Secondary/20">
         <span className="text-sm font-bold text-Secondary/60 block mb-3">{t("mediaKnowledge.tags")}</span>
         <div className="flex flex-wrap gap-2">
-          {item.tags.map((tag: any) => (
-            <Link key={tag} to={`/media-knowledge?tag=${tag}`} className="rounded-full border border-Primary/20 text-Primary px-4 py-2 text-sm font-semibold hover:bg-Primary hover:text-white transition-[]">#{tag}</Link>
+          {displayTags.map((tag: any, idx: number) => (
+            <Link key={idx} to={`/media-knowledge?tag=${tag}`} className="rounded-full border border-Primary/20 text-Primary px-4 py-2 text-sm font-semibold hover:bg-Primary hover:text-white transition-[]">#{tag}</Link>
           ))}
         </div>
       </div>

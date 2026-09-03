@@ -1,0 +1,62 @@
+[
+    {
+        "projectRoleId": "3B6439CC-B0AA-496D-B5F9-DBD255A73B1D",
+        "projectId": "6BDCD9FE-39B1-4ABD-AC3E-D93F4E2A43AF",
+        "clientRoleId": "8B1FABC7-73AF-47F5-944C-3BA7FF049AAF",
+        "isActive": true,
+        "projectName": "Sport",
+        "projectNameAr": "Sport",
+        "roleName": "Super Admin",
+        "roleNameArAe": "المشرف الفائق"
+    },
+    {
+        "projectRoleId": "B9803D5C-B69B-464C-B29F-1094C566E853",
+        "projectId": "6BDCD9FE-39B1-4ABD-AC3E-D93F4E2A43AF",
+        "clientRoleId": "2A778BDA-3C94-48DC-A756-2F422BDD04D2",
+        "isActive": true,
+        "projectName": "Sport",
+        "projectNameAr": "Sport",
+        "roleName": "Manager",
+        "roleNameArAe": "مدير"
+    },
+    {
+        "projectRoleId": "5662DC8B-22CB-48B3-A5AE-7E103F625DD8",
+        "projectId": "6BDCD9FE-39B1-4ABD-AC3E-D93F4E2A43AF",
+        "clientRoleId": "E4C276C5-9DFE-456B-B37D-9C7DF24CF3A7",
+        "isActive": true,
+        "projectName": "Sport",
+        "projectNameAr": "Sport",
+        "roleName": "User",
+        "roleNameArAe": "مستخدم"
+    },
+    {
+        "projectRoleId": "B8A04AAF-134B-4512-8B60-7EE9A5A7D633",
+        "projectId": "6BDCD9FE-39B1-4ABD-AC3E-D93F4E2A43AF",
+        "clientRoleId": "B2A05A1C-C96C-4E68-914C-222C0E18C30C",
+        "isActive": true,
+        "projectName": "Sport",
+        "projectNameAr": "Sport",
+        "roleName": "Staff",
+        "roleNameArAe": "طاقم عمل"
+    },
+    {
+        "projectRoleId": "662E69F0-F87B-4F2D-A008-2AA8B2315C3F",
+        "projectId": "6BDCD9FE-39B1-4ABD-AC3E-D93F4E2A43AF",
+        "clientRoleId": "93F59035-41A2-4A4A-A7D8-189EE28197E3",
+        "isActive": true,
+        "projectName": "Sport",
+        "projectNameAr": "Sport",
+        "roleName": "Event Coordinator",
+        "roleNameArAe": "منسق الفعاليات"
+    },
+    {
+        "projectRoleId": "20E37C81-3984-4023-8558-C4CDF3D4A9B6",
+        "projectId": "6BDCD9FE-39B1-4ABD-AC3E-D93F4E2A43AF",
+        "clientRoleId": "3C440A49-C079-479E-9747-53296DEC4D29",
+        "isActive": true,
+        "projectName": "Sport",
+        "projectNameAr": "Sport",
+        "roleName": "Admin",
+        "roleNameArAe": "مسؤول إحتياجات"
+    }
+]

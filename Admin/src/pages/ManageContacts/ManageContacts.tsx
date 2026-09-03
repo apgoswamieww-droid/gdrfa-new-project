@@ -5,6 +5,7 @@ import { getContactsApi, deleteContactApi } from "../../api/contact.api";
 import toast from "react-hot-toast";
 import { formatDate } from "../../utils/dateUtils";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ViewIcon = () => (
   <svg className="2xl:w-6 w-4 2xl:h-6 h-4" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,6 +24,7 @@ const DeleteIcon = () => (
 );
 
 const ManageContacts = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +38,7 @@ const ManageContacts = () => {
         setData(response.data.data);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to fetch contacts");
+      toast.error(error.message || t.contactUs.errorDelete);
     }
   };
 
@@ -56,20 +58,20 @@ const ManageContacts = () => {
   const handleDelete = (id: number) => {
     toast((t_toast) => (
       <div className="flex flex-col gap-3 p-1">
-        <p className="font-bold text-secondary text-base text-start">Are you sure you want to delete this contact?</p>
+        <p className="font-bold text-secondary text-base text-start">{t.contactUs.confirmDelete}</p>
         <div className="flex gap-2 justify-end">
-          <button onClick={() => toast.dismiss(t_toast.id)} className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+          <button onClick={() => toast.dismiss(t_toast.id)} className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer">{t.contactUs.cancel}</button>
           <button onClick={async () => {
             toast.dismiss(t_toast.id);
-            const loadingToast = toast.loading("Deleting...");
+            const loadingToast = toast.loading(t.contactUs.deleting);
             try {
               await deleteContactApi(id);
-              toast.success("any deleted successfully", { id: loadingToast });
+              toast.success(t.contactUs.successDelete, { id: loadingToast });
               setRefreshKey(k => k + 1);
             } catch (error: any) {
-              toast.error(error.message || "Failed to delete", { id: loadingToast });
+              toast.error(error.message || t.contactUs.errorDelete, { id: loadingToast });
             }
-          }} className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer">Delete</button>
+          }} className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer">{t.contactUs.delete}</button>
         </div>
       </div>
     ), { duration: 6000, position: "top-center", style: { minWidth: '350px', borderRadius: '24px', padding: '16px' } });
@@ -78,32 +80,32 @@ const ManageContacts = () => {
   const columns: Column<any>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t.contactUs.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
     },
     {
       key: "name",
-      label: "Name",
+      label: t.contactUs.name,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => <span className="font-medium text-black">{value as string}</span>,
     },
     {
       key: "email",
-      label: "Email",
+      label: t.contactUs.email,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
     },
     {
       key: "phone",
-      label: "Phone",
+      label: t.contactUs.phone,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
     },
     {
       key: "message",
-      label: "Message",
+      label: t.contactUs.message,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium max-w-xs",
       render: (value) => {
         const msg = value as string;
@@ -112,7 +114,7 @@ const ManageContacts = () => {
     },
     {
       key: "createdAt",
-      label: "Received At",
+      label: t.contactUs.receivedAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),
@@ -143,7 +145,7 @@ const ManageContacts = () => {
     <div className="h-full flex flex-col">
       <div className="flex sm:flex-row flex-col gap-3 justify-between mb-5">
         <SearchInput
-          placeholder="Search contacts..."
+          placeholder={t.contactUs.searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

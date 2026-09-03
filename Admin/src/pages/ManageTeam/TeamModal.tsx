@@ -73,14 +73,33 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
 
   if (!isOpen) return null;
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = "Team Name is required";
     if (!activity) newErrors.activity = "Activity is required";
     if (numberOfMembers <= 0) newErrors.numberOfMembers = "Number of members must be greater than 0";
-    
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string | number) => {
+    if (field === "name") setName(value as string);
+    else if (field === "activity") setActivity(value as string);
+    else if (field === "numberOfMembers") setNumberOfMembers(Number(value) || 0);
+    else if (field === "status") setStatus(value as string);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,7 +167,8 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
               label={t.team.name}
               placeholder={t.team.placeholder}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleFieldChange("name", e.target.value)}
+              onBlur={() => handleBlur("name")}
               error={errors.name}
               required
             />
@@ -156,7 +176,8 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
             <Selectfield
               label={t.team.activity}
               value={activity}
-              onChange={(e) => setActivity(e.target.value)}
+              onChange={(e) => handleFieldChange("activity", e.target.value)}
+              onBlur={() => handleBlur("activity")}
               options={[{ value: "", label: "Select Activity" }, ...activities]}
               error={errors.activity}
               required
@@ -167,7 +188,8 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
               type="number"
               placeholder="Enter number of members"
               value={String(numberOfMembers ?? "")}
-              onChange={(e) => setNumberOfMembers(parseInt(e.target.value) || 0)}
+              onChange={(e) => handleFieldChange("numberOfMembers", parseInt(e.target.value) || 0)}
+              onBlur={() => handleBlur("numberOfMembers")}
               error={errors.numberOfMembers}
               required
             />
@@ -175,7 +197,7 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
             <Selectfield
               label={t.team.status}
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => handleFieldChange("status", e.target.value)}
               options={[
                 { value: "1", label: t.team.active },
                 { value: "0", label: t.team.inactive },

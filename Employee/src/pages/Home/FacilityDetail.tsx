@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/store";
 import { getFacilities, createFacilityRequest, getBookedTimes } from "../../api/page.api";
 import { slugify } from "../../utils/slug";
 import { ArrowIcon } from "../SportsEvents/SportsEventList";
+import { SportsActivitiesOne } from "../../assets/images/images";
 import Toast from "../../components/ui/Toast";
 
 const timeSlots = [
@@ -180,7 +181,7 @@ export default function FacilityDetail() {
           <div className="grid lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-7 space-y-10">
               <div className="relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl border border-secondary/5 group">
-                <img src={facility.image ?? undefined} alt={facilityTitle} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                <img src={facility.image || SportsActivitiesOne} alt={facilityTitle} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,34,64,0)_0%,rgba(10,34,64,0.6)_100%)]" />
                 <div className="absolute bottom-10 left-10 right-10 text-start">
                   <h1 className="text-white text-3xl md:text-4xl font-bold leading-tight">

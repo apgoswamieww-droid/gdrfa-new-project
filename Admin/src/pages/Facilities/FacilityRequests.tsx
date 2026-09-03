@@ -4,8 +4,10 @@ import FacilityRequestViewModal from "./FacilityRequestViewModal";
 import FacilityRequestStatusModal from "./FacilityRequestStatusModal";
 import SearchInput from "../../component/Input/SearchInput";
 import type { FacilityRequest } from "../../api/facilityRequests.api";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const FacilityRequests = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewRequest, setViewRequest] = useState<FacilityRequest | null>(null);
   const [statusModal, setStatusModal] = useState<{
@@ -32,7 +34,7 @@ const FacilityRequests = () => {
     <div className="p-4 2xl:space-y-8 space-y-6 flex flex-col h-full">
       <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
         <SearchInput
-          placeholder="Search by name, email, or facility..."
+          placeholder={t.facilityRequest.searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

@@ -75,10 +75,8 @@ export default function EventsTable({ searchTerm, onRefresh }: { searchTerm: str
   const [error, setError] = useState(false);
   const [statusModalEvent, setStatusModalEvent] = useState<any | null>(null);
 
-  const { roleId, permissions: authPermissions } = useAuth();
-  const ADMIN_ROLE_ID = import.meta.env.VITE_ADMINROLEID || "3C440A49-C079-479E-9747-53296DEC4D29";
-  const EVENT_COORDINATOR_ROLE_ID = import.meta.env.VITE_EVENTCOORDINATORROLEID || "93F59035-41A2-4A4A-A7D8-189EE28197E3";
-  const canApproveEvent = hasPermission("approve-event", authPermissions) || roleId === ADMIN_ROLE_ID || roleId === EVENT_COORDINATOR_ROLE_ID;
+  const { permissions: authPermissions } = useAuth();
+  const canApproveEvent = hasPermission("approve-event", authPermissions);
 
   const handleEventStatusChange = async (id: number, eventStatus: "0" | "1" | "2") => {
     setStatusModalEvent(null);
@@ -214,64 +212,64 @@ export default function EventsTable({ searchTerm, onRefresh }: { searchTerm: str
     },
     {
       key: "regStartDate",
-      label: "Reg Start Date",
+      label: t.events?.regStart || "Reg Start Date",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => (value ? formatDate(value as string) : "-"),
     },
     {
       key: "regEndDate",
-      label: "Reg End Date",
+      label: t.events?.regEnd || "Reg End Date",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => (value ? formatDate(value as string) : "-"),
     },
     {
       key: "targetType",
-      label: "Target Type",
+      label: t.events?.targetType || "Target Type",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
           value === "competitive" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"
         }`}>
-          {value === "competitive" ? "Team Event" : "Individual Event"}
+          {value === "competitive" ? (t.events?.teamEvent || "Team Event") : (t.events?.individualEvent || "Individual Event")}
         </span>
       ),
     },
     {
       key: "targetedEmployees",
-      label: "Targeted Employee",
+      label: t.events?.targetedEmployee || "Targeted Employee",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
           value === "selected" ? "bg-amber-50 text-amber-700" : "bg-teal-50 text-teal-700"
         }`}>
-          {value === "selected" ? "Targeted Group" : value === "all" ? "All Employee" : "-"}
+          {value === "selected" ? (t.events?.targetedGroup || "Targeted Group") : value === "all" ? (t.events?.allEmployee || "All Employee") : "-"}
         </span>
       ),
     },
     {
       key: "eventActiveStatus",
-      label: "Active Status",
+      label: t.events?.activeStatus || "Active Status",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
           value === "2" ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"
         }`}>
-          {value === "2" ? "Completed" : "In Progress"}
+          {value === "2" ? (t.events?.completed || "Completed") : (t.events?.inProgress || "In Progress")}
         </span>
       ),
     },
     {
       key: "eventStatus",
-      label: "Event Status",
+      label: t.events?.eventStatus || "Event Status",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium relative",
       render: (value, row) => {
-        const statusLabel = value === "0" ? "Pending" : value === "1" ? "Approved" : "Rejected";
+        const statusLabel = value === "0" ? (t.events?.pending || "Pending") : value === "1" ? (t.events?.approved || "Approved") : (t.events?.rejected || "Rejected");
         const statusColor = value === "0" ? "bg-yellow-50 text-yellow-700 border-yellow-200"
           : value === "1" ? "bg-green-50 text-green-700 border-green-200"
           : "bg-red-50 text-red-700 border-red-200";

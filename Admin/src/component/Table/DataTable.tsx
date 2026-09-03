@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "../../hooks/useTranslation";
 
 // ─── Types ─────────────────────────────────────────────────────
 export type Column<T> = {
@@ -61,6 +62,7 @@ export default function DataTable<T>({
   loadingText = "Loading...",
   totalRecords,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<keyof T | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -115,7 +117,7 @@ export default function DataTable<T>({
               ))}
               {actions && (
                 <th className="px-3 py-2 text-start 2xl:text-base text-sm font-bold text-black whitespace-nowrap bg-[#fcf9f9] last:rounded-e-xl">
-                  Actions
+                  {t.common.actions}
                 </th>
               )}
             </tr>
@@ -145,7 +147,7 @@ export default function DataTable<T>({
             ) : (
               <tr>
                 <td colSpan={columns.length + (actions ? 1 : 0)} className="px-3 py-8 text-center text-gray-400 2xl:text-base text-sm">
-                  No records found
+                  {t.common.noRecords}
                 </td>
               </tr>
             )}
@@ -157,15 +159,15 @@ export default function DataTable<T>({
       <div className="flex flex-wrap items-center justify-between border-t border-gray-100 gap-2 mt-auto p-3">
         {/* Results count */}
         <span className="2xl:text-base text-sm font-medium text-gray-200">
-          Showing{" "}
+          {t.common.showing}{" "}
           <span className="font-bold text-primary">
             {String(paginated.length).padStart(2, "0")}
           </span>{" "}
-          Of{" "}
+          {t.common.of}{" "}
           <span className="font-medium text-gray-200">
             {String(totalRecords ?? sorted.length).padStart(2, "0")}
           </span>{" "}
-          Results
+          {t.common.results}
         </span>
 
         {/* Pagination */}
@@ -220,7 +222,7 @@ export default function DataTable<T>({
 
         {/* Per page */}
         <div className="flex items-center gap-2 2xl:text-base text-sm font-medium text-gray-200">
-          <span>Show Per Page</span>
+          <span>{t.common.showPerPage}</span>
           <div className="relative">
             <select
               value={perPage}

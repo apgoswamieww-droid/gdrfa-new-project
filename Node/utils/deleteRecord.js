@@ -536,6 +536,28 @@ const deleteRecord = async (req, modelName, id, force = false) => {
 
       return { success: true, message: req.t ? req.t('Record deleted successfully') : 'Record deleted successfully' };
     }
+    // Handle SocialLink model specifically with direct SQL (super admin only, hard delete)
+    if (modelName === 'SocialLink') {
+      const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
+      const currentRoleId = String(req.user?.roleId || '').trim();
+      if (currentRoleId !== SUPER_ADMIN_ROLE_ID) {
+        return { success: false, message: 'Access denied. Only Super Admin can access this module.' };
+      }
+
+      const record = await db.queryOne(
+        `SELECT * FROM social_links WHERE id = ?`,
+        [id]
+      );
+
+      if (!record) {
+        return { success: false, message: req.t ? req.t('Record not found') : 'Record not found' };
+      }
+
+      // social_links has no deletedAt; hard delete instead.
+      await db.query(`DELETE FROM social_links WHERE id = ?`, [id]);
+
+      return { success: true, message: req.t ? req.t('Record deleted successfully') : 'Record deleted successfully' };
+    }
 
     // For other models, we would need to add them as needed
     return { success: false, message: 'Unsupported model for direct SQL delete' };

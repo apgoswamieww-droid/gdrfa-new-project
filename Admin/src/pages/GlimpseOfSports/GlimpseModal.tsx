@@ -39,13 +39,31 @@ const GlimpseModal = ({ isOpen, onClose, onSubmit, initialData, title }: Glimpse
 
   if (!isOpen) return null;
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
     if (!description.trim()) newErrors.description = t.glimpse.descRequired || "Description is required";
     if (description.length > 100) newErrors.description = "Description must be 100 characters or less";
     if (!initialData && !image) newErrors.image = "Image is required";
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    if (field === "description") setDescription(value);
+    else if (field === "descriptionAr") setDescriptionAr(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,7 +118,8 @@ const GlimpseModal = ({ isOpen, onClose, onSubmit, initialData, title }: Glimpse
               label={t.glimpse.description}
               placeholder={t.glimpse.descPlaceholder}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
+              onBlur={() => handleBlur("description")}
               error={errors.description}
               required
             />
@@ -108,7 +127,8 @@ const GlimpseModal = ({ isOpen, onClose, onSubmit, initialData, title }: Glimpse
               label={t.glimpse.descriptionAr}
               placeholder={t.glimpse.descArPlaceholder}
               value={descriptionAr}
-              onChange={(e) => setDescriptionAr(e.target.value)}
+              onChange={(e) => handleFieldChange("descriptionAr", e.target.value)}
+              onBlur={() => handleBlur("descriptionAr")}
               error={errors.descriptionAr}
             />
           </div>

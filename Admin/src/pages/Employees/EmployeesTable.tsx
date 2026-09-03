@@ -3,6 +3,7 @@ import DataTable, { type Column } from "../../component/Table/DataTable";
 import type { Employee } from "../../api/employees.api";
 import { getEmployeesApi } from "../../api/employees.api";
 import { formatDate } from "../../utils/dateUtils";
+import { useTranslation } from "../../hooks/useTranslation";
 
 // ─── Icons ──────────────────
 const ViewIcon = () => (
@@ -17,6 +18,7 @@ export default function EmployeesTable({ searchTerm, onView }: {
   searchTerm: string; 
   onView: (data: Employee) => void; 
 }) {
+  const { t } = useTranslation();
   const [data, setData] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -53,35 +55,35 @@ export default function EmployeesTable({ searchTerm, onView }: {
   const columns: Column<Employee>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t.employee.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value,
     },
     {
       key: "name",
-      label: "Name",
+      label: t.employee.name,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/light text-base/light",
       render: (value) => value,
     },
     {
       key: "email",
-      label: "Email",
+      label: t.employee.email,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value,
     },
     {
       key: "mobile",
-      label: "Mobile",
+      label: t.employee.mobile,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value || "-",
     },
     {
       key: "status",
-      label: "Status",
+      label: t.employee.status,
       sortable: true,
       className: "text-center",
       render: (_, row) => {
@@ -89,14 +91,14 @@ export default function EmployeesTable({ searchTerm, onView }: {
         return (
           <span className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full 2xl:text-base/light text-base/light font-semibold ${isActive ? "bg-primary-green/8 text-primary-green" : "bg-red-50 text-red-600"}`}>
             <span className={`w-2 h-2 rounded-full ${isActive ? "bg-primary-green" : "bg-red-500"}`} />
-            {isActive ? "Active" : "Inactive"}
+            {isActive ? t.employee.active : t.employee.inactive}
           </span>
         );
       },
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t.employee.createdAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),
@@ -116,11 +118,11 @@ export default function EmployeesTable({ searchTerm, onView }: {
   );
 
   if (loading) {
-    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">Loading...</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">{t.employee.loading}</div>;
   }
 
   if (error) {
-    return <div className="bg-white rounded-xl p-5 text-center text-red-500">Failed to load employees</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-red-500">{t.employee.errorFetch}</div>;
   }
 
   return (

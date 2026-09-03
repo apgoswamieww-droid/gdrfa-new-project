@@ -6,6 +6,7 @@ interface SelectFieldProps {
   name?: string;
   value: string | number;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onBlur?: () => void;
   options: { value: string | number; label: string }[];
   required?: boolean;
   disabled?: boolean;
@@ -18,6 +19,7 @@ export default function Selectfield({
   name,
   value,
   onChange,
+  onBlur,
   options,
   required = false,
   disabled = false,
@@ -42,9 +44,9 @@ export default function Selectfield({
           name={name}
           value={value}
           onChange={onChange}
+          onBlur={() => { setIsFocused(false); onBlur?.(); }}
           disabled={disabled}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           className={`appearance-none transition-all duration-200 bg-white border rounded-lg py-1.5 w-full focus:outline-none text-[13px] text-gray-700 placeholder-gray-400 ps-3.5 pe-10 ${
             hasError
               ? "border-red-400 focus:ring-1 focus:ring-red-100"

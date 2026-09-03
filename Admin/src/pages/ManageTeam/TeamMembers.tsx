@@ -263,7 +263,7 @@ const TeamMembers = () => {
 
           
       <div className="bg-white p-4 rounded-xl shadow-sm flex items-start gap-4">
-        <img src={imageUrl} alt={team?.name} className="w-24 h-24 rounded-lg object-cover" />
+        <img src={imageUrl} alt={team?.name} className="w-24 h-24 rounded-lg object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
         <div className="flex-1 grid grid-cols-3 gap-4">
           <div>
             <p className="text-gray-500 uppercase text-xs font-bold mb-1">Team Name</p>

@@ -444,7 +444,7 @@ class PageController {
       const schedules = await db.query(
         `
                 SELECT eas.activity_id, eas.start_date, eas.end_date, eas.start_time, eas.end_time, eas.description,
-                       sa.name as activity_name
+                       sa.name as activity_name, sa.name_ar as activity_name_ar
                 FROM event_activity_schedules eas
                 LEFT JOIN sport_activities sa ON eas.activity_id = sa.id
                 WHERE eas.event_id = CAST(? AS INT) AND eas.deletedAt IS NULL
@@ -481,6 +481,7 @@ class PageController {
         return {
           activityId: s.activity_id,
           activityName: s.activity_name || null,
+          activityNameAr: s.activity_name_ar || null,
           activityType: "Sports Activity",
           startDate: s.start_date
             ? new Date(s.start_date).toISOString().split("T")[0]
@@ -1223,13 +1224,24 @@ class PageController {
       let blogTagsMap = {};
 
       if (blogIds.length > 0) {
-        const tagsQuery = await db.query(
-          `SELECT pt.postId, t.id, t.name
-                     FROM post_tags pt
-                     INNER JOIN tags t ON pt.tagId = t.id
-                     WHERE pt.postId IN (${blogIds.map(() => "?").join(",")}) AND t.deletedAt IS NULL`,
-          blogIds,
-        );
+        let tagsQuery = [];
+        try {
+          tagsQuery = await db.query(
+            `SELECT pt.postId, t.id, t.name, t.name_ar
+                       FROM post_tags pt
+                       INNER JOIN tags t ON pt.tagId = t.id
+                       WHERE pt.postId IN (${blogIds.map(() => "?").join(",")}) AND t.deletedAt IS NULL`,
+            blogIds,
+          );
+        } catch (e) {
+          tagsQuery = await db.query(
+            `SELECT pt.postId, t.id, t.name
+                       FROM post_tags pt
+                       INNER JOIN tags t ON pt.tagId = t.id
+                       WHERE pt.postId IN (${blogIds.map(() => "?").join(",")}) AND t.deletedAt IS NULL`,
+            blogIds,
+          );
+        }
 
         // Group tags by postId
         blogTagsMap = {};
@@ -1240,6 +1252,7 @@ class PageController {
           blogTagsMap[tag.postId].push({
             id: tag.id,
             name: tag.name,
+            name_ar: tag.name_ar,
           });
         });
       }
@@ -1322,13 +1335,26 @@ class PageController {
       }
 
       // Fetch tags for this blog
-      const tags = await db.query(
-        `SELECT t.id, t.name
-                 FROM tags t
-                 INNER JOIN post_tags pt ON t.id = pt.tagId
-                 WHERE pt.postId = CAST(? AS INT) AND t.deletedAt IS NULL
-                 ORDER BY t.name ASC`,
-        [blogId],
+      let tags = [];
+      try {
+        tags = await db.query(
+          `SELECT t.id, t.name, t.name_ar
+                   FROM tags t
+                   INNER JOIN post_tags pt ON t.id = pt.tagId
+                   WHERE pt.postId = CAST(? AS INT) AND t.deletedAt IS NULL
+                   ORDER BY t.name ASC`,
+          [blogId],
+        );
+      } catch (e) {
+        tags = await db.query(
+          `SELECT t.id, t.name
+                   FROM tags t
+                   INNER JOIN post_tags pt ON t.id = pt.tagId
+                   WHERE pt.postId = CAST(? AS INT) AND t.deletedAt IS NULL
+                   ORDER BY t.name ASC`,
+          [blogId],
+        );
+      }
       );
 
       // Fetch related blogs with same tags
@@ -1422,13 +1448,24 @@ class PageController {
       let mediaTagsMap = {};
 
       if (mediaIds.length > 0) {
-        const tagsQuery = await db.query(
-          `SELECT mt.mediaId, t.id, t.name
-                     FROM media_tags mt
-                     INNER JOIN tags t ON mt.tagId = t.id
-                     WHERE mt.mediaId IN (${mediaIds.map(() => "?").join(",")}) AND t.deletedAt IS NULL`,
+        let tagsQuery = [];
+        try {
+          tagsQuery = await db.query(
+            `SELECT mt.mediaId, t.id, t.name, t.name_ar
+                       FROM media_tags mt
+                       INNER JOIN tags t ON mt.tagId = t.id
+                       WHERE mt.mediaId IN (${mediaIds.map(() => "?").join(",")}) AND t.deletedAt IS NULL`,
           mediaIds,
         );
+        } catch (e) {
+          tagsQuery = await db.query(
+            `SELECT mt.mediaId, t.id, t.name
+                       FROM media_tags mt
+                       INNER JOIN tags t ON mt.tagId = t.id
+                       WHERE mt.mediaId IN (${mediaIds.map(() => "?").join(",")}) AND t.deletedAt IS NULL`,
+          mediaIds,
+        );
+        }
 
         // Group tags by mediaId
         mediaTagsMap = {};
@@ -1439,6 +1476,7 @@ class PageController {
           mediaTagsMap[tag.mediaId].push({
             id: tag.id,
             name: tag.name,
+            name_ar: tag.name_ar,
           });
         });
       }
@@ -1500,14 +1538,26 @@ class PageController {
       }
 
       // Fetch tags for this media
-      const tags = await db.query(
-        `SELECT t.id, t.name
-                 FROM tags t
-                 INNER JOIN media_tags mt ON t.id = mt.tagId
-                 WHERE mt.mediaId = CAST(? AS INT) AND t.deletedAt IS NULL
-                 ORDER BY t.name ASC`,
+      let tags = [];
+      try {
+        tags = await db.query(
+          `SELECT t.id, t.name, t.name_ar
+                   FROM tags t
+                   INNER JOIN media_tags mt ON t.id = mt.tagId
+                   WHERE mt.mediaId = CAST(? AS INT) AND t.deletedAt IS NULL
+                   ORDER BY t.name ASC`,
         [mediaId],
-      );
+        );
+      } catch (e) {
+        tags = await db.query(
+          `SELECT t.id, t.name
+                   FROM tags t
+                   INNER JOIN media_tags mt ON t.id = mt.tagId
+                   WHERE mt.mediaId = CAST(? AS INT) AND t.deletedAt IS NULL
+                   ORDER BY t.name ASC`,
+        [mediaId],
+        );
+      }
 
       // Fetch related media with same tags
       const relatedMedia = await db.query(

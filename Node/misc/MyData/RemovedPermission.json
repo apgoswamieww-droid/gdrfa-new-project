@@ -1,0 +1,469 @@
+// {
+//     "id": 100,
+//     "name": "Change Admin Status",
+//     "slug": "change-admin-status",
+//     "module": "Admin Management",
+//     "description": null
+// },
+// {
+//     "id": 101,
+//     "name": "Create Admin",
+//     "slug": "create-admin",
+//     "module": "Admin Management",
+//     "description": null
+// },
+// {
+//     "id": 103,
+//     "name": "Delete Admin",
+//     "slug": "delete-admin",
+//     "module": "Admin Management",
+//     "description": null
+// },
+// {
+//     "id": 102,
+//     "name": "Edit Admin",
+//     "slug": "edit-admin",
+//     "module": "Admin Management",
+//     "description": null
+// },
+// {
+//     "id": 104,
+//     "name": "List View Admin",
+//     "slug": "list-view-admin",
+//     "module": "Admin Management",
+//     "description": null
+// },
+// {
+//     "id": 87,
+//     "name": "Change Status Branch",
+//     "slug": "change-status-branch",
+//     "module": "Branch Management",
+//     "description": null
+// },
+// {
+//     "id": 26,
+//     "name": "Create Branches",
+//     "slug": "create-branches",
+//     "module": "Branch Management",
+//     "description": "Can create new branches"
+// },
+// {
+//     "id": 28,
+//     "name": "Delete Branches",
+//     "slug": "delete-branches",
+//     "module": "Branch Management",
+//     "description": "Can delete branches"
+// },
+// {
+//     "id": 27,
+//     "name": "Edit Branches",
+//     "slug": "edit-branches",
+//     "module": "Branch Management",
+//     "description": "Can edit existing branches"
+// },
+// {
+//     "id": 25,
+//     "name": "View Branches",
+//     "slug": "view-branches",
+//     "module": "Branch Management",
+//     "description": "Can view branch list"
+// },
+// {
+//     "id": 88,
+//     "name": "Change Status Department",
+//     "slug": "change-status-department",
+//     "module": "Department Management",
+//     "description": null
+// },
+// {
+//     "id": 18,
+//     "name": "Create Departments",
+//     "slug": "create-departments",
+//     "module": "Department Management",
+//     "description": "Can create new departments"
+// },
+// {
+//     "id": 20,
+//     "name": "Delete Departments",
+//     "slug": "delete-departments",
+//     "module": "Department Management",
+//     "description": "Can delete departments"
+// },
+// {
+//     "id": 19,
+//     "name": "Edit Departments",
+//     "slug": "edit-departments",
+//     "module": "Department Management",
+//     "description": "Can edit existing departments"
+// },
+// {
+//     "id": 17,
+//     "name": "View Departments",
+//     "slug": "view-departments",
+//     "module": "Department Management",
+//     "description": "Can view department list"
+// },
+// {
+//     "id": 110,
+//     "name": "Change Event Coordinator Status",
+//     "slug": "change-event-coordinator-status",
+//     "module": "Event Coordinator",
+//     "description": null
+// },
+// {
+//     "id": 107,
+//     "name": "Create Event Coordinator",
+//     "slug": "create-event-coordinator",
+//     "module": "Event Coordinator",
+//     "description": null
+// },
+// {
+//     "id": 109,
+//     "name": "Delete Event Coordinator",
+//     "slug": "delete-event-coordinator",
+//     "module": "Event Coordinator",
+//     "description": null
+// },
+// {
+//     "id": 108,
+//     "name": "Edit Event Coordinator",
+//     "slug": "edit-event-coordinator",
+//     "module": "Event Coordinator",
+//     "description": null
+// },
+// {
+//     "id": 106,
+//     "name": "List View Event Coordinator",
+//     "slug": "list-view-event-coordinator",
+//     "module": "Event Coordinator",
+//     "description": null
+// },
+// {
+//     "id": 89,
+//     "name": "Change Job Title Status",
+//     "slug": "change-job-title-status",
+//     "module": "Job Title Management",
+//     "description": null
+// },
+// {
+//     "id": 34,
+//     "name": "Create Job Titles",
+//     "slug": "create-job-titles",
+//     "module": "Job Title Management",
+//     "description": "Can create new job titles"
+// },
+// {
+//     "id": 36,
+//     "name": "Delete Job Titles",
+//     "slug": "delete-job-titles",
+//     "module": "Job Title Management",
+//     "description": "Can delete job titles"
+// },
+// {
+//     "id": 35,
+//     "name": "Edit Job Titles",
+//     "slug": "edit-job-titles",
+//     "module": "Job Title Management",
+//     "description": "Can edit existing job titles"
+// },
+// {
+//     "id": 33,
+//     "name": "View Job Titles",
+//     "slug": "view-job-titles",
+//     "module": "Job Title Management",
+//     "description": "Can view job title list"
+// },
+// {
+//     "id": 90,
+//     "name": "Change Manager Status",
+//     "slug": "change-manager-status",
+//     "module": "Manager",
+//     "description": null
+// },
+// {
+//     "id": 51,
+//     "name": "Create Manager",
+//     "slug": "create-manager",
+//     "module": "Manager",
+//     "description": "Can create Manager"
+// },
+// {
+//     "id": 52,
+//     "name": "Delete Manager",
+//     "slug": "delete-manager",
+//     "module": "Manager",
+//     "description": "Delete Manager"
+// },
+// {
+//     "id": 53,
+//     "name": "Edit Manager",
+//     "slug": "edit-manager",
+//     "module": "Manager",
+//     "description": null
+// },
+// {
+//     "id": 54,
+//     "name": "List View Manager",
+//     "slug": "list-view-manager",
+//     "module": "Manager",
+//     "description": null
+// },
+// {
+//     "id": 91,
+//     "name": "Change Permission Status",
+//     "slug": "change-permission-status",
+//     "module": "Permission Management",
+//     "description": null
+// },
+// {
+//     "id": 10,
+//     "name": "Create Permissions",
+//     "slug": "create-permissions",
+//     "module": "Permission Management",
+//     "description": "Can create new permissions"
+// },
+// {
+//     "id": 12,
+//     "name": "Delete Permissions",
+//     "slug": "delete-permissions",
+//     "module": "Permission Management",
+//     "description": "Can delete permissions"
+// },
+// {
+//     "id": 11,
+//     "name": "Edit Permissions",
+//     "slug": "edit-permissions",
+//     "module": "Permission Management",
+//     "description": "Can edit existing permissions"
+// },
+// {
+//     "id": 9,
+//     "name": "View Permissions",
+//     "slug": "view-permissions",
+//     "module": "Permission Management",
+//     "description": "Can view permission list"
+// },
+// {
+//     "id": 93,
+//     "name": "Change Rank Status",
+//     "slug": "change-rank-status",
+//     "module": "Rank Management",
+//     "description": null
+// },
+// {
+//     "id": 30,
+//     "name": "Create Ranks",
+//     "slug": "create-ranks",
+//     "module": "Rank Management",
+//     "description": "Can create new ranks"
+// },
+// {
+//     "id": 32,
+//     "name": "Delete Ranks",
+//     "slug": "delete-ranks",
+//     "module": "Rank Management",
+//     "description": "Can delete ranks"
+// },
+// {
+//     "id": 31,
+//     "name": "Edit Ranks",
+//     "slug": "edit-ranks",
+//     "module": "Rank Management",
+//     "description": "Can edit existing ranks"
+// },
+// {
+//     "id": 29,
+//     "name": "View Ranks",
+//     "slug": "view-ranks",
+//     "module": "Rank Management",
+//     "description": "Can view rank list"
+// },
+// {
+//     "id": 6,
+//     "name": "Create Roles",
+//     "slug": "create-roles",
+//     "module": "Role Management",
+//     "description": "Can create new roles"
+// },
+// {
+//     "id": 8,
+//     "name": "Delete Roles",
+//     "slug": "delete-roles",
+//     "module": "Role Management",
+//     "description": "Can delete roles"
+// },
+// {
+//     "id": 7,
+//     "name": "Edit Roles",
+//     "slug": "edit-roles",
+//     "module": "Role Management",
+//     "description": "Can edit existing roles"
+// },
+// {
+//     "id": 5,
+//     "name": "View Roles",
+//     "slug": "view-roles",
+//     "module": "Role Management",
+//     "description": "Can view role list"
+// },
+// {
+//     "id": 94,
+//     "name": "Change Sections Status",
+//     "slug": "change-sections-status",
+//     "module": "Section Management",
+//     "description": null
+// },
+// {
+//     "id": 22,
+//     "name": "Create Sections",
+//     "slug": "create-sections",
+//     "module": "Section Management",
+//     "description": "Can create new sections"
+// },
+// {
+//     "id": 24,
+//     "name": "Delete Sections",
+//     "slug": "delete-sections",
+//     "module": "Section Management",
+//     "description": "Can delete sections"
+// },
+// {
+//     "id": 23,
+//     "name": "Edit Sections",
+//     "slug": "edit-sections",
+//     "module": "Section Management",
+//     "description": "Can edit existing sections"
+// },
+// {
+//     "id": 21,
+//     "name": "View Sections",
+//     "slug": "view-sections",
+//     "module": "Section Management",
+//     "description": "Can view section list"
+// },
+// {
+//     "id": 95,
+//     "name": "Change Sector Status",
+//     "slug": "change-sector-status",
+//     "module": "Sector Management",
+//     "description": null
+// },
+// {
+//     "id": 14,
+//     "name": "Create Sectors",
+//     "slug": "create-sectors",
+//     "module": "Sector Management",
+//     "description": "Can create new sectors"
+// },
+// {
+//     "id": 16,
+//     "name": "Delete Sectors",
+//     "slug": "delete-sectors",
+//     "module": "Sector Management",
+//     "description": "Can delete sectors"
+// },
+// {
+//     "id": 15,
+//     "name": "Edit Sectors",
+//     "slug": "edit-sectors",
+//     "module": "Sector Management",
+//     "description": "Can edit existing sectors"
+// },
+// {
+//     "id": 13,
+//     "name": "View Sectors",
+//     "slug": "view-sectors",
+//     "module": "Sector Management",
+//     "description": "Can view sector list"
+// },
+// {
+//     "id": 98,
+//     "name": "Change Staff Member Status",
+//     "slug": "change-staff-member-status",
+//     "module": "Staff Member",
+//     "description": null
+// },
+// {
+//     "id": 67,
+//     "name": "Create Staff Member",
+//     "slug": "create-staff-member",
+//     "module": "Staff Member",
+//     "description": null
+// },
+// {
+//     "id": 69,
+//     "name": "Delete Staff Member",
+//     "slug": "delete-staff-member",
+//     "module": "Staff Member",
+//     "description": null
+// },
+// {
+//     "id": 68,
+//     "name": "Edit Staff Member",
+//     "slug": "edit-staff-member",
+//     "module": "Staff Member",
+//     "description": null
+// },
+// {
+//     "id": 99,
+//     "name": "Staff Detail View",
+//     "slug": "staff-detail-view",
+//     "module": "Staff Member",
+//     "description": null
+// },
+// {
+//     "id": 70,
+//     "name": "View Staff Member",
+//     "slug": "view-staff-member",
+//     "module": "Staff Member",
+//     "description": null
+// },
+// {
+//     "id": 105,
+//     "name": "Change User Status",
+//     "slug": "change-user-status",
+//     "module": "User Management",
+//     "description": null
+// },
+// {
+//     "id": 2,
+//     "name": "Create Users",
+//     "slug": "create-users",
+//     "module": "User Management",
+//     "description": "Can create new users"
+// },
+// {
+//     "id": 4,
+//     "name": "Delete Users",
+//     "slug": "delete-users",
+//     "module": "User Management",
+//     "description": "Can delete users"
+// },
+// {
+//     "id": 3,
+//     "name": "Edit Users",
+//     "slug": "edit-users",
+//     "module": "User Management",
+//     "description": "Can edit existing users"
+// },
+// {
+//     "id": 1,
+//     "name": "List View Users",
+//     "slug": "list-view-users",
+//     "module": "User Management",
+//     "description": "Can view user list"
+// },
+// {
+//     "id": 114,
+//     "name": "User View Details Page",
+//     "slug": "user-view-details-page",
+//     "module": "User Management",
+//     "description": "User Management"
+// },
+// {
+//     "id": 113,
+//     "name": "View User Management",
+//     "slug": "view-user-management",
+//     "module": "User Management",
+//     "description": null
+// },

@@ -10,6 +10,9 @@ import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useNavigationGuard } from "../../hooks/useNavigationGuard";
 
+const SUPER_ADMIN_ROLE_ID =
+  import.meta.env.VITE_SUPERADMINROLEID || "8B1FABC7-73AF-47F5-944C-3BA7FF049AAF";
+
 // ─── Icons ────────────────────────────────────────────────────────────
 const icons: Record<string, ReactNode> = {
   dashboard: (
@@ -162,6 +165,7 @@ const NAV_PERMISSIONS: Record<string, string[]> = {
   cms: ["view-blog-list"],
   faq: ["view-blog-list"],
   sponsors: ["view-blog-list"],
+  "social-links": ["view-blog-list"],
   "home-slider": ["view-blog-list"],
   blog: ["view-blog-list"],
   media: ["view-blog-list"],
@@ -174,12 +178,16 @@ const NAV_PERMISSIONS: Record<string, string[]> = {
   "fitness-score-matrix": ["view-fitness-category-list"],
 };
 
-function filterNavItems(items: NavItem[], contextPermissions: string[], contextIsAdminOrSuperAdmin: boolean): NavItem[] {
+function filterNavItems(items: NavItem[], contextPermissions: string[], contextIsAdminOrSuperAdmin: boolean, contextRoleId?: string): NavItem[] {
   return items.reduce<NavItem[]>((acc, item) => {
     // Restrict audit-history and eval modules to Admin / Super Admin only
     if (item.key === "audit-history" || item.key === "eval") {
       if (!contextIsAdminOrSuperAdmin) return acc;
     }
+
+    // Restrict social-links module to Super Admin only
+    const isSocialLinks = item.children?.some((c) => c.key === "social-links");
+    if (isSocialLinks && contextRoleId !== SUPER_ADMIN_ROLE_ID) return acc;
 
     const permKey = NAV_PERMISSIONS[item.key];
     if (permKey && !hasAnyPermission(permKey, contextPermissions)) return acc;
@@ -187,6 +195,7 @@ function filterNavItems(items: NavItem[], contextPermissions: string[], contextI
     let filteredChildren: SubNavItem[] | undefined;
     if (item.children) {
       filteredChildren = item.children.filter(child => {
+        if (child.key === "social-links" && contextRoleId !== SUPER_ADMIN_ROLE_ID) return false;
         const childPerm = NAV_PERMISSIONS[child.key];
         return !childPerm || hasAnyPermission(childPerm, contextPermissions);
       });
@@ -272,7 +281,7 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
 }) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { permissions: authPermissions, isAdminOrSuperAdmin: authIsAdminOrSuperAdmin, clearAdminUser } = useAuth();
+  const { permissions: authPermissions, isAdminOrSuperAdmin: authIsAdminOrSuperAdmin, roleId: authRoleId, clearAdminUser } = useAuth();
 
   // Use the navigation guard hook for safe navigation
   const { navigateWithGuard, isNavigating } = useNavigationGuard();
@@ -300,8 +309,8 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
     { key: "events", label: t.sidebar.manageEvents, icon: "events", href: "/events" },
     { key: "request", label: t.sidebar.participantsRequest, icon: "request", href: "/participant-requests" },
     { key: "fitness-evaluation", label: t.sidebar.fitnessEvaluation, icon: "evaluation_config", href: "/fitness-evaluation" },
-    { key: "audit-history", label: "Audit History", icon: "cms_pages", href: "/audit-history" },
-    { key: "notifications", label: "Notifications", icon: "help", href: "/notifications" },
+    { key: "audit-history", label: t.sidebar.auditHistory, icon: "cms_pages", href: "/audit-history" },
+    { key: "notifications", label: t.sidebar.notifications, icon: "help", href: "/notifications" },
     {
       key: "facility", label: t.sidebar.manageFacilities, icon: "facility", href: "/facility",
       children: [
@@ -314,6 +323,7 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
       children: [
         { key: "faq", label: t.sidebar.faqs, href: "/cms/faq" },
         { key: "sponsors", label: t.sidebar.sponsors, href: "/cms/sponsors" },
+        { key: "social-links", label: t.sidebar.socialLinks, href: "/cms/social-links" },
         { key: "home-slider", label: t.sidebar.homeSlider, href: "/cms/home-slider" },
         { key: "blog", label: t.sidebar.blog, href: "/cms/blog" },
         { key: "media", label: t.sidebar.media, href: "/cms/media" },
@@ -358,7 +368,7 @@ const Sidebar = ({ active, setActive, open, setOpen }: {
     setOpen(false);
     try { await adminLogoutApi(); } catch (error) { console.warn("Admin logout API failed:", error); } finally { clearAdminSession(); navigateWithGuard("logout", "/login", { replace: true }); }
   };
-  const filteredNavItems = filterNavItems(navItems, authPermissions, authIsAdminOrSuperAdmin());
+  const filteredNavItems = filterNavItems(navItems, authPermissions, authIsAdminOrSuperAdmin(), authRoleId);
   const allItems = [...filteredNavItems, ...bottomNav];
   const allSubs = allItems.flatMap((i) => i.children ?? []);
   const matchedSub = allSubs.find((s) => location.pathname === s.href || location.pathname.startsWith(s.href + "/"));

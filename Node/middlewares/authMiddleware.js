@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/dbDirect');
 const ciamService = require('../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../utils/ciamTokenHelper');
+const { isPermissionsBypass } = require('../utils/permissionsBypass');
 module.exports = {
   ensureAuthenticated: (req, res, next) => {
     if (req.session.admin && req.session.admin) return next();
@@ -19,6 +20,8 @@ module.exports = {
   },
   ensureAdminApiPermission: (requiredPermission) => {
     return (req, res, next) => {
+      if (isPermissionsBypass()) return next(); // PERMISSIONS_BYPASS
+
       const admin = req.session?.admin;
 
       if (!admin) {
@@ -92,6 +95,16 @@ module.exports = {
         if (myUserInfo?.isError || myUserInfo == null) {
           console.warn('[verifyToken] CIAM unavailable, falling back to JWT payload for user:', user.sub);
           req.user = buildFallbackUser();
+
+          // PERMISSIONS_BYPASS: apply bypass to fallback user so roleId/permissions are correct
+          if (isPermissionsBypass()) {
+            const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
+            if (SUPER_ADMIN_ROLE_ID) {
+              req.user.roleId = SUPER_ADMIN_ROLE_ID;
+              req.user.permissions = ['*'];
+            }
+          }
+
           return next();
         }
 
@@ -100,6 +113,16 @@ module.exports = {
         if (!userInfo) {
           console.warn('[verifyToken] User not found in CIAM, falling back to JWT payload for user:', user.sub);
           req.user = buildFallbackUser();
+
+          // PERMISSIONS_BYPASS: apply bypass to fallback user so roleId/permissions are correct
+          if (isPermissionsBypass()) {
+            const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
+            if (SUPER_ADMIN_ROLE_ID) {
+              req.user.roleId = SUPER_ADMIN_ROLE_ID;
+              req.user.permissions = ['*'];
+            }
+          }
+
           return next();
         }
 
@@ -114,7 +137,14 @@ module.exports = {
         const { decryptRole } = require('../config/role-decryption');
         const { getUserPermissions } = require('../utils/permissionChecker');
         const decryptedRoles = await decryptRole(rolesInfo.encryptedRoles);
-        const roleId = decryptedRoles?.[0]?.ClientRoleId?.toString() || '';
+        let roleId = decryptedRoles?.[0]?.ClientRoleId?.toString() || '';
+
+        // PERMISSIONS_BYPASS: override roleId to SuperAdmin for all API requests
+        if (isPermissionsBypass()) {
+          const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
+          if (SUPER_ADMIN_ROLE_ID) roleId = SUPER_ADMIN_ROLE_ID;
+        }
+
         const permissions = roleId ? await getUserPermissions(roleId, token, userInfo.userDomain) : [];
 
         req.user = {

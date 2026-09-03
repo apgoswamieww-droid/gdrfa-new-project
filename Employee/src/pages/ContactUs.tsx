@@ -25,7 +25,7 @@ const suspiciousPattern =
 const fieldLimits: Record<keyof ContactForm, number> = {
   name: 80,
   email: 120,
-  phone: 12,
+  phone: 9,
   message: 800,
 };
 
@@ -76,7 +76,7 @@ export default function ContactUs() {
 
     if (!phone) {
       errors.phone = t("contactUs.validation.phoneRequired");
-    } else if (!/^\+?[0-9][0-9\s()-]{7,10}$/.test(phone) || phone.length > fieldLimits.phone) {
+    } else if (!/^[0-9]{9}$/.test(phone)) {
       errors.phone = t("contactUs.validation.phoneInvalid");
     } else if (suspiciousPattern.test(phone)) {
       errors.phone = t("contactUs.validation.phoneInvalid");
@@ -125,7 +125,7 @@ export default function ContactUs() {
     const payload = {
       name: sanitizeForSubmit(form.name),
       email: sanitizeForSubmit(form.email),
-      phone: sanitizeForSubmit(form.phone),
+      phone: "+971" + sanitizeForSubmit(form.phone),
       message: sanitizeForSubmit(form.message),
     };
 
@@ -215,9 +215,10 @@ export default function ContactUs() {
                 type="tel"
                 value={form.phone}
                 error={errors.phone}
-                placeholder={t("contactUs.phonePlaceholder")}
+                placeholder="50 000 0000"
                 autoComplete="tel"
                 maxLength={fieldLimits.phone}
+                prefix="+971"
                 onChange={(value) => handleChange("phone", value)}
               />
              
@@ -263,6 +264,7 @@ function ContactField({
   autoComplete,
   maxLength,
   type = "text",
+  prefix,
   onChange,
 }: {
   label: string;
@@ -272,22 +274,42 @@ function ContactField({
   autoComplete: string;
   maxLength?: number;
   type?: string;
+  prefix?: string;
   onChange: (value: string) => void;
 }) {
   return (
     <label className="block text-start">
       <span className="mb-2 block text-secondary text-sm font-bold">{label}</span>
-      <input
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        maxLength={maxLength}
-        className={`w-full rounded-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${
-          error ? "border-primary" : "border-secondary/10"
-        }`}
-      />
+      {prefix ? (
+        <div className="flex items-center">
+          <span className="flex-shrink-0 px-3 py-3 bg-secondary/5 border border-secondary/10 border-r-0 rounded-l-2xl text-secondary text-sm font-semibold">
+            {prefix}
+          </span>
+          <input
+            type={type}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            maxLength={maxLength}
+            className={`w-full rounded-r-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${
+              error ? "border-primary" : "border-secondary/10"
+            }`}
+          />
+        </div>
+      ) : (
+        <input
+          type={type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          maxLength={maxLength}
+          className={`w-full rounded-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${
+            error ? "border-primary" : "border-secondary/10"
+          }`}
+        />
+      )}
       <span className="mt-2 block min-h-4 text-primary text-xs font-bold">{error || ""}</span>
     </label>
   );

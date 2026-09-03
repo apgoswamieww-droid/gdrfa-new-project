@@ -4,7 +4,7 @@ import DataTable, { type Column } from "../../component/Table/DataTable";
 import { getMediaListApi } from "../../api/media.api";
 import { changeStatusApi } from "../../api/request";
 import toast from "react-hot-toast";
-
+import { useTranslation } from "../../hooks/useTranslation";
 import { formatDate } from "../../utils/dateUtils";
 
 const ViewIcon = () => (
@@ -43,7 +43,7 @@ const FileTypeBadge = ({ type }: { type: string }) => {
   );
 };
 
-const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void }) => {
+const StatusBadge = ({ status, onClick, t }: { status: string; onClick?: () => void; t: any }) => {
   const isActive = status === "1";
   return (
     <button
@@ -52,7 +52,7 @@ const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void
       ${isActive ? "bg-primary-green/8 text-primary-green hover:bg-primary-green/10" : "bg-red-50 text-red-600 hover:bg-red-100"}`}
     >
       <span className={`w-2 h-2 rounded-full ${isActive ? "bg-primary-green" : "bg-red-500"}`} />
-      {isActive ? "Active" : "Inactive"}
+      {isActive ? t.media.active : t.media.inactive}
     </button>
   );
 };
@@ -78,6 +78,7 @@ interface MediaTableProps {
 }
 
 export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState<any[]>([]);
 
@@ -94,11 +95,11 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
 
   const handleToggleStatus = async (row: any) => {
     const newStatus = row.status === "1" ? "0" : "1";
-    const loadingToast = toast.loading("Updating...");
+    const loadingToast = toast.loading(t.media.type);
     try {
       const res = await changeStatusApi("Media", row.id, newStatus);
       if (res.status) {
-        toast.success("Status updated successfully", { id: loadingToast });
+        toast.success(t.media.status, { id: loadingToast });
         fetchMedia();
       }
     } catch (error: any) {
@@ -121,47 +122,47 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
   const columns: Column<any>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t.media.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
-      render: (value) => Array.isArray(value) ? value.map(t => t.name).join(", ") : String(value ?? ""),
+      render: (value) => Array.isArray(value) ? value.map(v => v.name).join(", ") : String(value ?? ""),
     },
     {
       key: "file",
-      label: "Preview",
+      label: t.media.preview,
       className: "text-center",
       render: (_, row) => <MediaPreview row={row} />,
     },
     {
       key: "title",
-      label: "Title (EN)",
+      label: t.media.titleEn,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
       render: (value) => <span className="font-medium text-black">{value as string}</span>,
     },
     {
       key: "title_ar",
-      label: "Title (AR)",
+      label: t.media.titleAr,
       sortable: true,
-      className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
+      className: "text-[#898B8E] 2xl/text-base/tight text-base/tight font-medium",
       render: (value) => (value as string) || "-",
     },
     {
       key: "fileType",
-      label: "Type",
+      label: t.media.type,
       className: "text-center",
       render: (value) => <FileTypeBadge type={value as string} />,
     },
     {
       key: "status",
-      label: "Status",
+      label: t.media.status,
       sortable: true,
       className: "text-center",
-      render: (_, row) => <StatusBadge status={row.status} onClick={() => handleToggleStatus(row)} />,
+      render: (_, row) => <StatusBadge status={row.status} onClick={() => handleToggleStatus(row)} t={t} />,
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t.media.createdAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),

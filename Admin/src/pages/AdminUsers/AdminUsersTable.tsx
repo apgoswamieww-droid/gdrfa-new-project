@@ -4,6 +4,7 @@ import type { AdminUser } from "../../api/adminUsers.api";
 import { getAdminUsersApi, changeAdminUserStatusApi } from "../../api/adminUsers.api";
 import toast from "react-hot-toast";
 import { formatDate } from "../../utils/dateUtils";
+import { useTranslation } from "../../hooks/useTranslation";
 
 // ─── Icons ──────────────────
 const ViewIcon = () => (
@@ -15,6 +16,7 @@ const ViewIcon = () => (
 
 // ─── Status Badge ──────────────────
 const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void }) => {
+  const { t } = useTranslation();
   const isActive = status === "1";
   return (
     <button
@@ -23,7 +25,7 @@ const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void
       ${isActive ? "bg-primary-green/8 text-primary-green hover:bg-primary-green/10" : "bg-red-50 text-red-600 hover:bg-red-100"}`}
     >
       <span className={`w-2 h-2 rounded-full ${isActive ? "bg-primary-green" : "bg-red-500"}`} />
-      {isActive ? "Active" : "Inactive"}
+      {isActive ? t.adminUser.active : t.adminUser.inactive}
     </button>
   );
 };
@@ -34,6 +36,7 @@ export default function AdminUsersTable({ searchTerm, onView, onEdit: _onEdit }:
   onView: (data: AdminUser) => void; 
   onEdit?: (data: AdminUser) => void;
 }) {
+  const { t } = useTranslation();
   const [data, setData] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -80,49 +83,49 @@ export default function AdminUsersTable({ searchTerm, onView, onEdit: _onEdit }:
   const columns: Column<AdminUser>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t.adminUser.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value,
     },
     {
       key: "name",
-      label: "Name",
+      label: t.adminUser.name,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/light text-base/light",
       render: (value) => value,
     },
     {
       key: "email",
-      label: "Email",
+      label: t.adminUser.email,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value,
     },
     {
       key: "mobile",
-      label: "Mobile",
+      label: t.adminUser.mobile,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value || "-",
     },
     {
       key: "role_name",
-      label: "Role",
+      label: t.adminUser.role,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => value || "-",
     },
     {
       key: "status",
-      label: "Status",
+      label: t.adminUser.status,
       sortable: true,
       className: "text-center",
       render: (_, row) => <StatusBadge status={row.status} onClick={() => handleToggleStatus(row)} />,
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t.adminUser.createdAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),
@@ -142,11 +145,11 @@ export default function AdminUsersTable({ searchTerm, onView, onEdit: _onEdit }:
   );
 
   if (loading) {
-    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">Loading...</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-gray-400">{t.adminUser.loading}</div>;
   }
 
   if (error) {
-    return <div className="bg-white rounded-xl p-5 text-center text-red-500">Failed to load admins</div>;
+    return <div className="bg-white rounded-xl p-5 text-center text-red-500">{t.adminUser.errorFetch}</div>;
   }
 
   return (

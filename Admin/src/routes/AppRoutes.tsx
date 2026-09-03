@@ -15,6 +15,7 @@ import ManageEventActivity from '../pages/Events/ManageEventActivity';
 import ManagePlans from '../pages/Plans/ManagePlans';
 import ManageFaqs from '../pages/Faqs/ManageFaqs';
 import ManageSponsor from '../pages/ManageSponsor/ManageSponsor';
+import ManageSocialLinks from '../pages/SocialLinks/ManageSocialLinks';
 import ManageHomeSlider from '../pages/ManageHomeSlider/ManageHomeSlider';
 import ManageBlog from '../pages/Blog/ManageBlog';
 import CreateBlog from '../pages/Blog/CreateBlog';
@@ -95,6 +96,7 @@ const AppRoutes = () => {
         <Route path="/facility/request" element={<ProtectedRoute><FacilityRequests /></ProtectedRoute>} />
         <Route path="/cms/faq" element={<ProtectedRoute><ManageFaqs /></ProtectedRoute>} />
         <Route path="/cms/sponsors" element={<ProtectedRoute><ManageSponsor /></ProtectedRoute>} />
+        <Route path="/cms/social-links" element={<ProtectedRoute><ManageSocialLinks /></ProtectedRoute>} />
         <Route path="/cms/home-slider" element={<ProtectedRoute><ManageHomeSlider /></ProtectedRoute>} />
         <Route path="/cms/blog" element={<ProtectedRoute><ManageBlog /></ProtectedRoute>} />
         <Route path="/cms/blog/create" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />

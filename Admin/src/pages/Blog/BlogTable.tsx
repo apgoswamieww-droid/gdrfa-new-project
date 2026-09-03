@@ -114,9 +114,9 @@ export default function BlogTable({ searchTerm, onDelete }: BlogTableProps) {
     },
     {
       key: "tags",
-      label: "Tags",
+      label: t.blog.tags,
       className: "text-[#898B8E] 2xl:text-base/tight text-base/tight font-medium",
-      render: (value) => Array.isArray(value) ? (value as { name: string }[]).map(t => t.name).join(", ") : String(value ?? ""),
+      render: (value) => Array.isArray(value) ? (value as { name: string }[]).map(tag => tag.name).join(", ") : String(value ?? ""),
     },
     {
       key: "media",

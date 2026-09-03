@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import DataTable, { type Column } from "../../component/Table/DataTable";
 import type { Participant } from "../../api/participants.api";
-
+import { useTranslation } from "../../hooks/useTranslation";
 import { formatDate } from "../../utils/dateUtils";
 
 // ─── Icons ──────────────────
@@ -43,17 +43,18 @@ export default function ParticipantsTable({
   // onEvaluate?: (data: Participant) => void;
   onDelete?: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const columns: Column<Participant>[] = useMemo(() => [
     {
       key: "id",
-      label: "ID",
+      label: t.participants.id,
       sortable: true,
       className: "text-center w-12 text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (value) => String(value ?? ""),
     },
     {
       key: "user",
-      label: "Participant",
+      label: t.participants.participant,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/light text-base/light",
       render: (user: any) => (
@@ -70,43 +71,43 @@ export default function ParticipantsTable({
     },
     {
       key: "event",
-      label: "Event",
+      label: t.participants.event,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (event: any) => event.name,
     },
     {
       key: "team",
-      label: "Team",
+      label: t.participants.team,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
       render: (team: any) => team?.name || "-",
     },
     {
       key: "status",
-      label: "Status",
+      label: t.participants.status,
       sortable: true,
       className: "text-center",
       render: (value, row) => {
         const p = row as Participant;
         const levelLabel: Record<string, string> = {
-          section: "Section Mgr",
-          department: "Dept Mgr",
-          admin: "Admin",
+          section: t.participants.sectionMgr,
+          department: t.participants.deptMgr,
+          admin: t.participants.admin,
         };
         const levelSuffix = p.currentApprovalLevel ? ` (${levelLabel[p.currentApprovalLevel] || p.currentApprovalLevel})` : "";
 
         let statusClass = "bg-yellow-50 text-yellow-600";
-        let statusLabel = "Pending" + levelSuffix;
+        let statusLabel = t.participants.pending + levelSuffix;
         let dotClass = "bg-yellow-500";
 
         if (p.workflowStatus === "fully_approved" || value === "1") {
           statusClass = "bg-green-50 text-green-600";
-          statusLabel = "Approved";
+          statusLabel = t.participants.approved;
           dotClass = "bg-green-500";
         } else if (p.workflowStatus === "rejected" || value === "2") {
           statusClass = "bg-red-50 text-red-600";
-          statusLabel = "Rejected";
+          statusLabel = t.participants.rejected;
           dotClass = "bg-red-500";
         }
 
@@ -135,12 +136,12 @@ export default function ParticipantsTable({
     },
     {
       key: "createdAt",
-      label: "Requested At",
+      label: t.participants.requestedAt,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),
     },
-  ], []);
+  ], [t]);
 
   const actions = (row: Participant) => (
     <div className="flex items-center gap-1.5">

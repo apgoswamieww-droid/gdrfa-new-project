@@ -39,10 +39,7 @@ const AppRouting = () => {
           <Route path="/media-knowledge/:id" Component={MediaKnowledgeDetail} />
           <Route path="/contact-us" Component={ContactUs} />
           <Route path="/faq" Component={Faq} />
-          <Route path="/system-user-guide" element={<CmsPageWrapper slug="system-user-guide" />} />
-          <Route path="/privacy-policy" element={<CmsPageWrapper slug="privacy-policy" />} />
-          <Route path="/terms-condition" element={<CmsPageWrapper slug="terms-conditions" />} />
-          <Route path="/end-user-licence-agreement" element={<CmsPageWrapper slug="end-user-licence-agreement" />} />
+          <Route path="/cms/:slug" element={<CmsPageWrapper />} />
         </Routes>
       </HeaderFooterWrapper>
     </>

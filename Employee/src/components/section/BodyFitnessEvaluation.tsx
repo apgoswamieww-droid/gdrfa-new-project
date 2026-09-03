@@ -52,17 +52,17 @@ export default function BodyFitnessEvaluationYo() {
                     if (response.data?.categories) {
                         // console.log(`[BodyFitnessEvaluation] 🔵 STEP 4: Setting ${response.data.categories.length} categories into state`);
                         response.data.categories.forEach((cat: any, i: number) => {
-                            console.log(`[BodyFitnessEvaluation]   Category[${i}]:`, {
-                                category_id: cat.category_id,
-                                category_name: cat.category_name,
-                                unit: cat.unit,
-                                input_value: cat.input_value,
-                                result_points: cat.result_points,
-                                level: cat.level,
-                                last_update: cat.last_update,
-                                total_points: cat.total_points,
-                                evaluation_points: cat.evaluation_points,
-                            });
+                            // console.log(`[BodyFitnessEvaluation]   Category[${i}]:`, {
+                            //     category_id: cat.category_id,
+                            //     category_name: cat.category_name,
+                            //     unit: cat.unit,
+                            //     input_value: cat.input_value,
+                            //     result_points: cat.result_points,
+                            //     level: cat.level,
+                            //     last_update: cat.last_update,
+                            //     total_points: cat.total_points,
+                            //     evaluation_points: cat.evaluation_points,
+                            // });
                         });
                         setCategories(response.data.categories);
                     } else {

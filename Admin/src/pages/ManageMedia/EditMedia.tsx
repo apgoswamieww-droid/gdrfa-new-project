@@ -18,6 +18,7 @@ const EditMedia = () => {
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [existingFileType, setExistingFileType] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
+  const [tagsAr, setTagsAr] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,7 @@ const EditMedia = () => {
           setDescription(media.description);
           setDescriptionAr(media.description_ar || "");
           setTags(media.tags ? media.tags.map((t: any) => t.name) : []);
+          setTagsAr(media.tags ? media.tags.map((t: any) => t.name_ar || '') : []);
           setExistingFileUrl(media.file_url || null);
           setExistingFileType(media.fileType);
           setFilePreview(media.file_url || null);
@@ -48,15 +50,35 @@ const EditMedia = () => {
     fetchMedia();
   }, [id, navigate]);
 
-  const validate = () => {
+  const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
     if (!title.trim()) newErrors.title = "Title is required";
     if (!titleAr.trim()) newErrors.titleAr = "Arabic title is required";
     if (!description.trim()) newErrors.description = "Description is required";
     if (!descriptionAr.trim()) newErrors.descriptionAr = "Arabic description is required";
     if (tags.length === 0) newErrors.tags = "At least one tag is required";
-    setErrors(newErrors);
+
+    if (field) {
+      setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
+    } else {
+      setErrors(newErrors);
+    }
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    if (field === "title") setTitle(value);
+    else if (field === "titleAr") setTitleAr(value);
+    else if (field === "description") setDescription(value);
+    else if (field === "descriptionAr") setDescriptionAr(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    validate(field);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,6 +101,7 @@ const EditMedia = () => {
       formData.append("description", description.trim());
       formData.append("description_ar", descriptionAr.trim());
       formData.append("tags", JSON.stringify(tags));
+      formData.append("tags_ar", JSON.stringify(tagsAr));
       if (file) formData.append("file", file);
       await updateMediaApi(Number(id), formData);
       toast.success("Media updated successfully", { id: loadingToast });
@@ -121,7 +144,8 @@ const EditMedia = () => {
               label="Title (English)"
               placeholder="Enter title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleFieldChange("title", e.target.value)}
+              onBlur={() => handleBlur("title")}
               error={errors.title}
               required
             />
@@ -129,7 +153,8 @@ const EditMedia = () => {
               label="Title (Arabic)"
               placeholder="Enter Arabic title"
               value={titleAr}
-              onChange={(e) => setTitleAr(e.target.value)}
+              onChange={(e) => handleFieldChange("titleAr", e.target.value)}
+              onBlur={() => handleBlur("titleAr")}
               error={errors.titleAr}
               required
             />
@@ -140,7 +165,8 @@ const EditMedia = () => {
               label="Description (English)"
               placeholder="Enter description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
+              onBlur={() => handleBlur("description")}
               error={errors.description}
               required
             />
@@ -148,20 +174,38 @@ const EditMedia = () => {
               label="Description (Arabic)"
               placeholder="Enter Arabic description"
               value={descriptionAr}
-              onChange={(e) => setDescriptionAr(e.target.value)}
+              onChange={(e) => handleFieldChange("descriptionAr", e.target.value)}
+              onBlur={() => handleBlur("descriptionAr")}
               error={errors.descriptionAr}
               required
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="block text-xs font-semibold text-secondary/50">Tags</label>
-            <TagsInput
-              value={tags}
-              onChange={setTags}
-              placeholder="Type tag and press Enter"
-              error={errors.tags}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-xs font-semibold text-secondary/50">Tags (English)</label>
+              <TagsInput
+                value={tags}
+                onChange={(newTags) => {
+                  setTags(newTags);
+                  if (errors.tags) setErrors((prev) => ({ ...prev, tags: "" }));
+                }}
+                placeholder="Type tag and press Enter"
+                error={errors.tags}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-xs font-semibold text-secondary/50">Tags (Arabic)</label>
+              <TagsInput
+                value={tagsAr}
+                onChange={(newTagsAr) => {
+                  setTagsAr(newTagsAr);
+                  if (errors.tagsAr) setErrors((prev) => ({ ...prev, tagsAr: "" }));
+                }}
+                placeholder="اكتب الوسم بالعربي واضغط Enter"
+                error={errors.tagsAr}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">

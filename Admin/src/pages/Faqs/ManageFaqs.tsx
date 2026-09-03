@@ -7,22 +7,24 @@ import { createFaqApi, updateFaqApi, deleteFaqApi, toggleFaqStatusApi } from "..
 import type { Faq } from "../../api/faqs.api";
 import toast from "react-hot-toast";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ManageFaqs = () => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingFaq, setEditingFaq] = useState<Faq | undefined>(undefined);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleCreateOrUpdateFaq = async (data: any) => {
-    const loadingToast = toast.loading(editingFaq ? "Updating FAQ..." : "Creating FAQ...");
+    const loadingToast = toast.loading(editingFaq ? t.faq.updating : t.faq.creating);
     try {
       if (editingFaq) {
         await updateFaqApi(editingFaq.id, data);
-        toast.success("FAQ updated successfully", { id: loadingToast });
+        toast.success(t.faq.successUpdate, { id: loadingToast });
       } else {
         await createFaqApi(data);
-        toast.success("FAQ created successfully", { id: loadingToast });
+        toast.success(t.faq.successCreate, { id: loadingToast });
       }
       setIsModalOpen(false);
       setEditingFaq(undefined);
@@ -41,30 +43,30 @@ const ManageFaqs = () => {
   const handleDeleteFaq = async (id: number) => {
     toast((t_toast) => (
       <div className="flex flex-col gap-3 p-1">
-        <p className="font-bold text-secondary text-base text-start">Are you sure you want to delete this FAQ?</p>
+        <p className="font-bold text-secondary text-base text-start">{t.faq.confirmDelete}</p>
         <div className="flex gap-2 justify-end">
           <button
             onClick={() => toast.dismiss(t_toast.id)}
             className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            Cancel
+            {t.faq.cancel}
           </button>
           <button
             onClick={async () => {
               toast.dismiss(t_toast.id);
-              const loadingToast = toast.loading("Deleting FAQ...");
+              const loadingToast = toast.loading(t.faq.deleting);
               try {
                 await deleteFaqApi(id);
-                toast.success("FAQ deleted successfully", { id: loadingToast });
+                toast.success(t.faq.successDelete, { id: loadingToast });
                 setRefreshKey((prev) => prev + 1);
               } catch (error: any) {
                 console.error("Failed to delete FAQ:", error);
-                toast.error(error.message || "Failed to delete FAQ", { id: loadingToast });
+                toast.error(error.message || t.faq.errorFetch, { id: loadingToast });
               }
             }}
             className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer"
           >
-            Delete
+            {t.faq.delete}
           </button>
         </div>
       </div>
@@ -77,10 +79,10 @@ const ManageFaqs = () => {
 
   const handleToggleStatus = async (id: number, currentStatus: string) => {
     const newStatus = currentStatus === "1" ? "0" : "1";
-    const loadingToast = toast.loading("Updating status...");
+    const loadingToast = toast.loading(t.faq.updating);
     try {
       await toggleFaqStatusApi(id, newStatus);
-      toast.success("Status updated successfully", { id: loadingToast });
+      toast.success(t.faq.successUpdate, { id: loadingToast });
       setRefreshKey((prev) => prev + 1);
     } catch (error: any) {
       console.error("Failed to update status:", error);
@@ -98,7 +100,7 @@ const ManageFaqs = () => {
       <div className="2xl:space-y-8 md:space-y-6 space-y-4 h-full flex flex-col">
         <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
           <SearchInput
-            placeholder="Search FAQs"
+            placeholder={t.faq.search}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -125,7 +127,7 @@ const ManageFaqs = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            Add New FAQ
+            {t.faq.create}
           </PrimaryBtn>
         </div>
         <FaqsTable 
@@ -149,7 +151,7 @@ const ManageFaqs = () => {
         }}
         onSubmit={handleCreateOrUpdateFaq}
         initialData={editingFaq}
-        title={editingFaq ? "Edit FAQ" : "Add New FAQ"}
+        title={editingFaq ? t.faq.edit : t.faq.create}
       />
     </>
   );

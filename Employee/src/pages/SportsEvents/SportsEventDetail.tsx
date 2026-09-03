@@ -135,7 +135,7 @@ export default function SportsEventDetail() {
 
     if (start && now < start) {
       return {
-        label: `Registration Opens On ${formatSingleDate(event.regStartDate)}`,
+        label: t("sportsEvents.detail.registrationOpensOn", { date: formatSingleDate(event.regStartDate) }),
         type: "warning" as const,
       };
     }
@@ -143,20 +143,43 @@ export default function SportsEventDetail() {
     if (start && end && now >= start && now <= end) {
       return {
         label: end
-          ? `Registration Live - Closes On ${formatSingleDate(event.regEndDate)}`
-          : "Registration Live",
+          ? t("sportsEvents.detail.registrationClosesOn", { date: formatSingleDate(event.regEndDate) })
+          : t("sportsEvents.detail.registrationLive"),
         type: "success" as const,
       };
     }
 
     if (end && now > end) {
       return {
-        label: "Registration Closed",
+        label: t("sportsEvents.detail.registrationClosed"),
         type: "danger" as const,
       };
     }
 
     return null;
+  };
+
+  const translateActivityType = (type: string | null): string => {
+    if (!type) return t("sportsEvents.sports");
+    const normalized = type.trim();
+    const typeMap: Record<string, string> = {
+      "sports activity": t("sportsEvents.sportActivity"),
+      "sport activity": t("sportsEvents.sportActivity"),
+      "running": t("sportsEvents.running"),
+      "football": t("sportsEvents.football"),
+      "cycling": t("sportsEvents.cycling"),
+      "wellness": t("sportsEvents.wellness"),
+      "fitness": t("sportsEvents.fitness"),
+      "yoga": t("sportsEvents.yoga"),
+      "swimming": t("sportsEvents.swimming"),
+    };
+    const lower = normalized.toLowerCase();
+    return typeMap[lower] || normalized;
+  };
+
+  const getActivityDisplayName = (activity: any): string => {
+    const name = i18n.language === 'ar' ? activity.activityNameAr : activity.activityName;
+    return name || activity.activityNameAr || activity.activityName || t("sportsEvents.detail.activity", { id: activity.activityId });
   };
 
   const handleTeamClick = (team: any) => {
@@ -316,13 +339,13 @@ export default function SportsEventDetail() {
                       <div key={activity.activityId} className="border border-secondary/5 rounded-2xl p-5 bg-secondary/[0.02]">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-secondary font-bold text-base">{activity.activityName || t("sportsEvents.detail.activity", { id: activity.activityId })}</h4>
+                            <h4 className="text-secondary font-bold text-base">{getActivityDisplayName(activity)}</h4>
                             {activity.description && (
                               <p className="text-secondary/50 text-sm mt-1.5 leading-relaxed">{activity.description}</p>
                             )}
                           </div>
                           <span className="shrink-0 rounded-full bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 uppercase tracking-wider">
-                            {activity.activityType || t("sportsEvents.sports")}
+                            {translateActivityType(activity.activityType)}
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-secondary/60">
@@ -452,7 +475,7 @@ export default function SportsEventDetail() {
                     >
                       {event.eventActivitySchedule.map((a: any) => (
                         <option key={a.activityId} value={a.activityId}>
-                          {a.activityName || t("sportsEvents.detail.activity", { id: a.activityId })}
+                          {getActivityDisplayName(a)}
                         </option>
                       ))}
                     </select>
@@ -570,7 +593,7 @@ export default function SportsEventDetail() {
         onClose={() => setIsOpen(false)}
         onRegister={handleRegister}
         participating={participating}
-        activityName={selectedActivityObject?.activityName}
+        activityName={selectedActivityObject ? getActivityDisplayName(selectedActivityObject) : ""}
       />
 
       {/* Team Members Modal */}
