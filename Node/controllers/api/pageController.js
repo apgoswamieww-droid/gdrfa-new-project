@@ -271,9 +271,12 @@ class PageController {
       const eventData = {
         id: event.id,
         name: isArabic ? event.name_ar || event.name : event.name,
+        name_ar: event.name_ar || event.name,
         eventDescription: isArabic
           ? event.eventDescription_ar || event.eventDescription
           : event.eventDescription,
+        eventDescription_ar:
+          event.eventDescription_ar || event.eventDescription,
         startDate: event.startDate
           ? new Date(event.startDate).toISOString().split("T")[0]
           : null,
@@ -1355,7 +1358,7 @@ class PageController {
           [blogId],
         );
       }
-      );
+      
 
       // Fetch related blogs with same tags
       const relatedBlogs = await db.query(

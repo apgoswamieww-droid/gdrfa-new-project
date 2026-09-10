@@ -116,6 +116,7 @@ export default function Profile() {
             image: profileResp.data.image || currentUser.image,
             email: profileResp.data.email || currentUser.email,
             name: profileResp.data.name || currentUser.name,
+            nameAr: profileResp.data.nameAr || currentUser.nameAr,
             assignedTo: profileResp.data.assignedTo || currentUser.assignedTo,
           });
         }
@@ -146,29 +147,25 @@ export default function Profile() {
   }, [user]);
 
   const profile = useMemo(() => {
+    const localizedName =
+      i18n.language === 'ar' && user?.nameAr
+        ? user.nameAr
+        : (user?.name || user?.username || fallbackProfile.name);
     return {
       ...fallbackProfile,
       ...user,
-      name: user?.name || user?.username || fallbackProfile.name,
+      name: localizedName,
       image: profileImageUrl || user?.image || user?.avatar || AvtarImage,
     };
-  }, [user, profileImageUrl]);
+  }, [user, profileImageUrl, i18n.language]);
 
-  // Normalize work detail values to display strings (some are objects from the API)
-  const normalizeValue = (val: any): string => {
+  // Normalize work detail values to display strings (some are objects from the API).
+  // For Arabic mode, pick the field's specific AR key (e.g. sectorNameAR for sector).
+  const pickValue = (val: any, arKey: string): string => {
     if (val == null) return "";
     if (typeof val === "object") {
-      if (i18n.language === 'ar') {
-        // Prefer the Arabic variants when available
-        const ar =
-          val.jobTitleAR ||
-          val.rankAR ||
-          val.sectorNameAR ||
-          val.deptNameAR ||
-          val.sectionNameAr ||
-          val.branchNameAR ||
-          val.nameAr ||
-          val.name_ar;
+      if (i18n.language === 'ar' && arKey) {
+        const ar = val[arKey];
         if (ar && String(ar).trim()) return String(ar);
       }
       return val.name || val.id || "";
@@ -193,13 +190,13 @@ export default function Profile() {
   };
 
   const workDetails: DetailItem[] = [
-    { label: t("profile.jobTitle"), value: normalizeValue(profile.jobTitle) || t("profile.fallbackJobTitle") },
-    { label: t("profile.rank"), value: normalizeValue(profile.rank) || t("profile.fallbackRank") },
-    { label: t("profile.sector"), value: normalizeValue(profile.sector) || t("profile.fallbackSector") },
-    { label: t("profile.department"), value: normalizeValue(profile.department) || t("profile.fallbackDepartment") },
-    { label: t("profile.section"), value: normalizeValue(profile.section) || t("profile.fallbackSection") },
-    { label: t("profile.branch"), value: normalizeValue(profile.branch) || t("profile.fallbackBranch") },
-    { label: t("profile.workSystem"), value: translateWorkSystem(normalizeValue(profile.workSystem)) || t("profile.fallbackWorkSystem") },
+    { label: t("profile.jobTitle"), value: pickValue(profile.jobTitle, "jobTitleAR") || t("profile.fallbackJobTitle") },
+    { label: t("profile.rank"), value: pickValue(profile.rank, "rankAR") || t("profile.fallbackRank") },
+    { label: t("profile.sector"), value: pickValue(profile.sector, "sectorNameAR") || t("profile.fallbackSector") },
+    { label: t("profile.department"), value: pickValue(profile.department, "deptNameAR") || t("profile.fallbackDepartment") },
+    { label: t("profile.section"), value: pickValue(profile.section, "sectionNameAr") || t("profile.fallbackSection") },
+    { label: t("profile.branch"), value: pickValue(profile.branch, "branchNameAR") || t("profile.fallbackBranch") },
+    { label: t("profile.workSystem"), value: translateWorkSystem(pickValue(profile.workSystem, "")) || t("profile.fallbackWorkSystem") },
   ];
 
   
@@ -299,7 +296,7 @@ export default function Profile() {
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
                 <h1 className="mt-5 text-secondary font-bold xl:text-3xl/tight text-2xl/tight">{profile.name}</h1>
-                <p className="mt-2 text-primary font-bold text-sm">{normalizeValue(profile.jobTitle) || t("profile.fallbackJobTitle")}</p>
+                <p className="mt-2 text-primary font-bold text-sm">{pickValue(profile.jobTitle, "jobTitleAR") || t("profile.fallbackJobTitle")}</p>
                 <p className="mt-3 text-secondary/60 text-sm/tight font-medium max-w-80">{t("profile.readOnlyNote")}</p>
                 <Link to="/certificates" className="mt-5 block w-full rounded-2xl bg-primary text-white px-5 py-3 text-sm font-bold text-center hover:bg-primary/90 transition-colors">
                   {t("profile.viewCertificates")}

@@ -5,15 +5,20 @@ import { UserImg } from "../../assets/images/images";
 import toast from "react-hot-toast";
 import { apiRequest } from "../../api/request";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { useTranslation } from "../../hooks/useTranslation";
 
 type ProfileData = {
   name: string;
+  nameAr?: string | null;
   role: string;
   image?: string | null;
 };
 
 const ProfilePage = () => {
   const { roleId } = useAuth();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -41,6 +46,7 @@ const ProfilePage = () => {
           imageUrl = parsed.image || null;
           setProfile({
             name: parsed.name,
+            nameAr: parsed.nameAr,
             role: roleName,
             image: parsed.image,
           });
@@ -79,14 +85,14 @@ const ProfilePage = () => {
 
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      toast.error("Only image files (JPG, PNG, GIF, WebP) are allowed.");
+      toast.error(t.profile.imageTypeError);
       e.target.value = "";
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error("Image size must be less than 5 MB.");
+      toast.error(t.profile.imageSizeError);
       e.target.value = "";
       return;
     }
@@ -109,12 +115,12 @@ const ProfilePage = () => {
           localStorage.setItem("adminUser", JSON.stringify(parsed));
         }
         setProfile((prev) => prev ? { ...prev, image: resp.data.image } : prev);
-        toast.success("Profile image updated successfully.");
+        toast.success(t.profile.imageUpdated);
       } else {
-        toast.error(resp?.message || "Failed to upload image.");
+        toast.error(resp?.message || t.profile.imageUploadFailed);
       }
     } catch {
-      toast.error("Failed to upload image.");
+      toast.error(t.profile.imageUploadFailed);
     } finally {
       setUploading(false);
     }
@@ -124,7 +130,7 @@ const ProfilePage = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center">
         <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full" />
-        <p className="mt-4 text-secondary/60 font-medium">Loading...</p>
+        <p className="mt-4 text-secondary/60 font-medium">{t.profile.loading}</p>
       </div>
     );
   }
@@ -138,14 +144,14 @@ const ProfilePage = () => {
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="rtl:rotate-180">
           <path d="M12.5 16.6L6.25 10L12.5 3.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <span className="text-sm font-semibold">Back to Dashboard</span>
+        <span className="text-sm font-semibold">{t.profile.backToDashboard}</span>
       </Link>
 
       <div className="w-full bg-white 2xl:rounded-2xl rounded-xl p-4 2xl:p-5 shadow-sm border border-gray-100">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Heading variant="h2" className="font-bold text-secondary">
-            My Profile
+            {t.profile.myProfile}
           </Heading>
         </div>
 
@@ -192,7 +198,7 @@ const ProfilePage = () => {
             />
           </div>
           <Heading variant="h3" className="mt-4 font-bold text-secondary">
-            {profile?.name || "Admin"}
+            {language === "ar" && profile?.nameAr ? profile.nameAr : (profile?.name || "Admin")}
           </Heading>
           <Text variant="textBase" className="font-medium text-primary mt-0.5">
             {profile?.role || "Administrator"}
@@ -204,19 +210,19 @@ const ProfilePage = () => {
           {/* Personal Information */}
           <div className="space-y-5">
             <Heading variant="h4" className="font-bold text-secondary pb-2 border-b border-gray-100">
-              Personal Information
+              {t.profile.personalInformation}
             </Heading>
             <div>
               <Text variant="textSm" className="font-semibold text-secondary/50 mb-1">
-                Full Name
+                {t.profile.fullName}
               </Text>
               <Text variant="textBase" className="font-bold text-secondary">
-                {profile?.name || "-"}
+                {language === "ar" && profile?.nameAr ? profile.nameAr : (profile?.name || "-")}
               </Text>
             </div>
             <div>
               <Text variant="textSm" className="font-semibold text-secondary/50 mb-1">
-                Email Address
+                {t.profile.emailAddress}
               </Text>
               <Text variant="textBase" className="font-bold text-secondary">
                 {(() => {
@@ -232,7 +238,7 @@ const ProfilePage = () => {
             </div>
             <div>
               <Text variant="textSm" className="font-semibold text-secondary/50 mb-1">
-                Phone Number
+                {t.profile.phoneNumber}
               </Text>
               <Text variant="textBase" className="font-bold text-secondary">
                 {(() => {
@@ -252,11 +258,11 @@ const ProfilePage = () => {
           {/* Account Information */}
           <div className="space-y-5">
             <Heading variant="h4" className="font-bold text-secondary pb-2 border-b border-gray-100">
-              Account Information
+              {t.profile.accountInformation}
             </Heading>
             <div>
               <Text variant="textSm" className="font-semibold text-secondary/50 mb-1">
-                Role
+                {t.profile.role}
               </Text>
               <Text variant="textBase" className="font-bold text-secondary">
                 {profile?.role || "Administrator"}
@@ -264,7 +270,7 @@ const ProfilePage = () => {
             </div>
             <div>
               <Text variant="textSm" className="font-semibold text-secondary/50 mb-1">
-                Employee ID
+                {t.profile.employeeId}
               </Text>
               <Text variant="textBase" className="font-bold text-secondary">
                 {(() => {
@@ -287,7 +293,7 @@ const ProfilePage = () => {
             to="/dashboard"
             className="flex items-center justify-center font-bold text-sm rounded-lg px-6 py-1.5 border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            Back to Dashboard
+            {t.profile.backToDashboard}
           </Link>
         </div>
       </div>

@@ -100,6 +100,7 @@ export default function Login() {
       localStorage.setItem("adminUser", JSON.stringify({
         id: admin.id,
         name: admin.name,
+        nameAr: admin.nameAr,
         email: admin.email,
         image: admin.image,
         // permissions and roleId intentionally excluded from localStorage

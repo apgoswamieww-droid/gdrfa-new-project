@@ -173,6 +173,7 @@ class ApiController {
                         image: user.img,
                         email: user.emailAddress,
                         name: user.nameEn,
+                        nameAr: user.nameAr || user.nameArAe || null,
                         id: user.userDomain
                     },
                     language: preferredLang
@@ -267,6 +268,7 @@ class ApiController {
             const formattedUser = {
                 id: user?.userDomain,
                 name: user?.nameEn,
+                nameAr: user?.nameAr || user?.nameArAe || null,
                 email: user?.emailAddress,
                 mobile: user?.mobile,
                 gender: user?.sex == 1 ? 'Male' : 'Female',

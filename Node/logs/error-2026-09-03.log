@@ -1,0 +1,2 @@
+{"timestamp":"2026-09-03T10:54:11.716Z","level":"error","referenceId":null,"error":{"message":"[object Object]"},"request":null,"extra":{"query":"SELECT 1 as connected","queryParams":[]}}
+{"timestamp":"2026-09-03T10:59:42.622Z","level":"error","referenceId":null,"error":{"message":"[object Object]"},"request":null,"extra":{"query":"SELECT 1 as connected","queryParams":[]}}

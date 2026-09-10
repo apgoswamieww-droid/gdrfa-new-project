@@ -536,6 +536,8 @@ export const translations = {
     },
     topbar: {
       searchPlaceholder: "Search for Events, Participants & more...",
+      myProfile: "My Profile",
+      logout: "Log Out",
     },
     team: {
       manage: "Manage Teams",
@@ -775,6 +777,22 @@ export const translations = {
       greeting: "Hi, Good Morning!",
       heading: "My Dashboard",
       headingSuffix: "Insights",
+    },
+    profile: {
+      backToDashboard: "Back to Dashboard",
+      myProfile: "My Profile",
+      personalInformation: "Personal Information",
+      accountInformation: "Account Information",
+      fullName: "Full Name",
+      emailAddress: "Email Address",
+      phoneNumber: "Phone Number",
+      role: "Role",
+      employeeId: "Employee ID",
+      loading: "Loading...",
+      imageTypeError: "Only image files (JPG, PNG, GIF, WebP) are allowed.",
+      imageSizeError: "Image size must be less than 5 MB.",
+      imageUpdated: "Profile image updated successfully.",
+      imageUploadFailed: "Failed to upload image.",
     },
     sidebar: {
       mainMenu: "Main Menu",
@@ -1429,6 +1447,8 @@ export const translations = {
     },
     topbar: {
       searchPlaceholder: "بحث عن فعاليات، مشاركين والمزيد...",
+      myProfile: "ملفي الشخصي",
+      logout: "تسجيل الخروج",
     },
     team: {
       manage: "إدارة الفرق التنافسية",
@@ -1668,6 +1688,22 @@ export const translations = {
       greeting: "مرحباً! صباح الخير",
       heading: "بياناتي",
       headingSuffix: "",
+    },
+    profile: {
+      backToDashboard: "العودة إلى لوحة البيانات",
+      myProfile: "ملفي الشخصي",
+      personalInformation: "المعلومات الشخصية",
+      accountInformation: "معلومات الحساب",
+      fullName: "الاسم الكامل",
+      emailAddress: "البريد الإلكتروني",
+      phoneNumber: "رقم الهاتف",
+      role: "الدور",
+      employeeId: "رقم الموظف",
+      loading: "جار التحميل...",
+      imageTypeError: "يُسمح فقط بملفات الصور (JPG, PNG, GIF, WebP).",
+      imageSizeError: "يجب أن يكون حجم الصورة أقل من 5 ميجابايت.",
+      imageUpdated: "تم تحديث صورة الملف الشخصي بنجاح.",
+      imageUploadFailed: "فشل في تحميل الصورة.",
     },
     sidebar: {
       mainMenu: "القائمة الرئيسية",

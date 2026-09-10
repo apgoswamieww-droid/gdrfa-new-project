@@ -52,7 +52,7 @@
     "diff": "^8.0.3"
   },
   "scripts": {
-    "dev": "NODE_ENV=development nodemon app.js",
+    "dev": "nodemon app.js",
     "watch": "nodemon app.js",
     "prod": "node app.js",
     "test": "jest --detectOpenHandles --forceExit",

@@ -6,6 +6,10 @@ const resources = {
     translation: {
       HOME: "Home",
       Home: "Home",
+      backToHome: "Back to Home",
+      backToTop: "Back to Top",
+      pageNotFound: "Page Not Found",
+      pageNotFoundMessage: "The page you're looking for doesn't exist or has been moved.",
       "SPEVNT": "Sport Events",
       sportsEvent: "Sport Events",
       Achievements: "Achievements",
@@ -405,6 +409,10 @@ const resources = {
     translation: {
       Home: "الرئيسية",
       HOME: "الرئيسية",
+      backToHome: "العودة إلى الرئيسية",
+      backToTop: "العودة إلى الأعلى",
+      pageNotFound: "الصفحة غير موجودة",
+      pageNotFoundMessage: "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
       "Sport Events": "الفعاليات الرياضية",
       sportsEvent: "الفعاليات الرياضية",
       Achievements: "الإنجازات",

@@ -24,15 +24,15 @@ function getIconForSlug(slug: string): string {
 
 export default function CmsPageWrapper() {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [page, setPage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    if (!slug) return;
     let cancelled = false;
     async function fetchPage() {
-      if (!slug) return;
       setLoading(true);
       setNotFound(false);
       try {
@@ -46,7 +46,7 @@ export default function CmsPageWrapper() {
     }
     fetchPage();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, i18n.language]);
 
   if (loading) return <LoadingState />;
   if (notFound || !page) return <NotFoundState />;
@@ -97,13 +97,13 @@ export default function CmsPageWrapper() {
             <span className="transform group-hover:-translate-x-1 transition-transform duration-300">
               <ArrowLeftIcon />
             </span>
-            {t("backToHome") || "Back to Home"}
+            {t("backToHome")}
           </Link>
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="inline-flex items-center gap-2 text-sm font-bold text-secondary/50 hover:text-primary transition-colors duration-300 group"
           >
-            {t("backToTop") || "Back to Top"}
+            {t("backToTop")}
             <span className="transform group-hover:-translate-y-1 transition-transform duration-300">
               <ArrowUpIcon />
             </span>
@@ -171,17 +171,17 @@ function NotFoundState() {
       <div className="relative max-w-[860px] w-full mx-auto md:px-7 px-4 flex flex-col items-center justify-center min-h-[60vh] text-center">
         <span className="text-8xl mb-6">🏗️</span>
         <h1 className="xl:text-[40px]/tight md:text-3xl/tight text-2xl/tight font-bold text-secondary mb-4">
-          {t("pageNotFound") || "Page Not Found"}
+          {t("pageNotFound")}
         </h1>
         <p className="text-secondary/60 text-base max-w-md mb-8">
-          {t("pageNotFoundMessage") || "The page you're looking for doesn't exist or has been moved."}
+          {t("pageNotFoundMessage")}
         </p>
         <Link
           to="/"
           className="inline-flex items-center gap-2 bg-primary text-white font-bold px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-all duration-300 text-sm"
         >
           <ArrowLeftIcon />
-          {t("backToHome") || "Back to Home"}
+          {t("backToHome")}
         </Link>
       </div>
     </section>
@@ -206,7 +206,7 @@ function ChevronRightIcon() {
 
 function ArrowLeftIcon() {
   return (
-    <svg className="w-4 h-4" width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg className="w-4 h-4 rtl:rotate-180" width="16" height="16" viewBox="0 0 16 16" fill="none">
       <path d="M12 8H4M4 8L7.5 11.5M4 8L7.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

@@ -2,11 +2,13 @@ import { UserImg } from "../../assets/images/images";
 import { Heading, Text } from "../../component/Typography/Typography";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { useMemo, useState, useEffect } from "react";
 import { apiRequest } from "../../api/request";
 
 const ProfileCard = () => {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const { roleId } = useAuth();
   const [userRole, setUserRole] = useState("Administrator");
   const adminUser = useMemo(() => {
@@ -94,7 +96,7 @@ const ProfileCard = () => {
             />
           </div>
           <Heading variant="h3" className="mt-2 font-bold text-secondary !text-base">
-            {adminUser?.name || "Admin"}
+            {language === "ar" && adminUser?.nameAr ? adminUser.nameAr : (adminUser?.name || "Admin")}
           </Heading>
           <Text variant="textBase" className="font-medium text-primary mt-0 !text-xs">
             {userRole}

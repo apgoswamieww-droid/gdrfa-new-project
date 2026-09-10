@@ -88,6 +88,7 @@ class AdminAuthController {
           admin: {
             id: user.userDomain,
             name: user.name,
+            nameAr: user.nameAr || user.nameArAe || null,
             email: user.email,
             roleId,
             image: userImage,
@@ -185,6 +186,7 @@ class AdminAuthController {
       return res.success({
         id: req.user.id,
         name: req.user.nameEn,
+        nameAr: req.user.nameAr || null,
         email: req.user.email,
         roleId: bypassRoleId,
         image: userImage,

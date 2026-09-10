@@ -23,6 +23,7 @@ function App() {
           if (profileResp.status && profileResp.data) {
             setUser({
               name: profileResp.data.name,
+              nameAr: profileResp.data.nameAr,
               email: profileResp.data.email,
               image: profileResp.data.image,
               mobile: profileResp.data.mobile,

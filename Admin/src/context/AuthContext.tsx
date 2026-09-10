@@ -19,6 +19,7 @@ import { apiRequest } from "../api/request";
 export interface AdminUser {
   id?: string;
   name?: string;
+  nameAr?: string | null;
   email?: string;
   image?: string | null;
   mobile?: string;
@@ -111,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAdminUserState({
           id: response.data.id,
           name: response.data.name,
+          nameAr: response.data.nameAr,
           email: response.data.email,
           roleId,
           image: response.data.image,
@@ -125,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ...parsed,
             id: response.data.id,
             name: response.data.name,
+            nameAr: response.data.nameAr,
             email: response.data.email,
             image: response.data.image,
             // ⚠️ Do NOT store permissions/roleId in localStorage — they come from the server
