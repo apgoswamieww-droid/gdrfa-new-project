@@ -60,15 +60,15 @@ export default function SponsorTable({ searchTerm, onEdit, onDelete }: SponsorTa
 
   const handleToggleStatus = async (row: any) => {
     const newStatus = row.status === "1" ? "0" : "1";
-    const loadingToast = toast.loading("Updating...");
+    const loadingToast = toast.loading(t.sponsor.updating);
     try {
       const res = await changeStatusApi("any", row.id, newStatus);
       if (res.status) {
-        toast.success("Status updated successfully", { id: loadingToast });
+        toast.success(t.sponsor.statusUpdated, { id: loadingToast });
         fetchSponsors();
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to update status", { id: loadingToast });
+      toast.error(error.message || t.sponsor.errorStatus, { id: loadingToast });
     }
   };
 

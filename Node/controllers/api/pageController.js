@@ -5,6 +5,7 @@ const responseFormatter = require("../../middlewares/responseFormatter");
 const { getLocalizedMessage } = require("../../utils/apiLanguageHelper");
 const approvalWorkflow = require("../../services/approvalWorkflowService");
 const { storeNotification } = require("../../utils/notificationHelper");
+const { tr, trTitle, trMessage } = require("../../utils/translationSheet");
 require("dotenv").config();
 
 class PageController {
@@ -847,7 +848,7 @@ class PageController {
 
       // console.log('📌 Fetching event data for ID:', event_id);
       const eventData = await db.queryOne(
-        `SELECT id, name, eventDescription, location, startDate, endDate, eventAdmins FROM events WHERE id = ? AND deletedAt IS NULL`,
+        `SELECT id, name, name_ar, eventDescription, eventDescription_ar, location, startDate, endDate, eventAdmins FROM events WHERE id = ? AND deletedAt IS NULL`,
         [event_id],
       );
       // console.log('✅ Event data:', eventData);
@@ -873,7 +874,7 @@ class PageController {
 
       // console.log('📌 Fetching activity data for ID:', activity_id);
       const activityData = await db.queryOne(
-        `SELECT sa.id, sa.name, sa.activityType, at.name as activityTypeName 
+        `SELECT sa.id, sa.name, sa.name_ar, sa.activityType, at.name as activityTypeName, at.name_ar as activityTypeNameAr 
                  FROM sport_activities sa
                  LEFT JOIN activity_types at ON sa.activityType = at.id
                  WHERE sa.id = ? AND sa.deletedAt IS NULL`,
@@ -892,14 +893,23 @@ class PageController {
           // console.log('📨 Sending email to manager:', managerData.email);
           await sendEmail({
             to: managerData.email,
-            subject: `GDRFA - Event Participation Request: ${eventData.name}`,
+            subject: tr("A11"),
             template: "employee-participant-to-manager.ejs",
             data: {
-              title: "Employee Event Participation Notification",
-              userData,
-              eventData,
+              title: tr("B13"),
+              userData: {
+                name: userData.nameAr || userData.nameEn || userData.userDomain || user_id,
+                email: userData.emailAddress || userData.email || "",
+                phone: userData.mobile || "",
+              },
+              eventData: {
+                name: eventData.name_ar || eventData.name,
+                location: eventData.location,
+                startDate: eventData.startDate ? moment(eventData.startDate).format("DD-MM-YYYY") : "",
+                endDate: eventData.endDate ? moment(eventData.endDate).format("DD-MM-YYYY") : "",
+              },
               userDetailsUrl,
-              managerData,
+              managerData: { name: managerData.nameAr || managerData.nameEn || managerData.userDomain || "" },
               logoUrl: `${req.protocol}://${req.get("host")}/assets/images/Group.png`,
             },
           });
@@ -941,18 +951,18 @@ class PageController {
                 // console.log('📨 Sending emailAddress to admin:', admin.emailAddress);
                 await sendEmail({
                   to: admin.emailAddress,
-                  subject: `GDRFA - New Participant Registered: ${eventData.name}`,
+                  subject: tr("A12"),
                   template: "admin-participant-notification.ejs",
                   data: {
-                    title: "New Event Participant Registration",
-                    adminName: admin.nameEn,
-                    participantName: userData.nameEn,
-                    participantEmail: userData.emailAddress,
-                    participantMobile: userData.mobile || "Not provided",
-                    eventName: eventData.name,
+                    title: tr("B14"),
+                    adminName: admin.nameAr || admin.nameEn || admin.userDomain,
+                    participantName: userData.nameAr || userData.nameEn || userData.userDomain || user_id,
+                    participantEmail: userData.emailAddress || userData.email || "",
+                    participantMobile: userData.mobile || tr("G8"),
+                    eventName: eventData.name_ar || eventData.name,
                     eventDescription:
-                      eventData.eventDescription || "No description provided",
-                    eventLocation: eventData.location,
+                      eventData.eventDescription_ar || eventData.eventDescription || tr("G8"),
+                    eventLocation: eventData.location || tr("G8"),
                     eventStartDate: moment(eventData.startDate).format(
                       "DD-MM-YYYY",
                     ),
@@ -960,12 +970,14 @@ class PageController {
                       "DD-MM-YYYY",
                     ),
                     activityName: activityData
-                      ? activityData.name
-                      : "Activity not found",
+                      ? activityData.name_ar || activityData.name
+                      : tr("G8"),
                     activityType:
-                      activityData && activityData.activityTypeName
+                      activityData && activityData.activityTypeNameAr
+                        ? activityData.activityTypeNameAr
+                        : activityData && activityData.activityTypeName
                         ? activityData.activityTypeName
-                        : "Type not specified",
+                        : tr("G8"),
                     participantType:
                       activity_type === "1" ? "Individual" : "Team Captain",
                     registrationDate: moment().format("DD-MM-YYYY HH:mm"),
@@ -996,10 +1008,10 @@ class PageController {
         if (managerData && managerData.userDomain) {
           await storeNotification({
             userId: managerData.userDomain,
-            title_en: 'New Registration Approval Request',
-            title_ar: 'طلب موافقة تسجيل جديد',
-            message_en: `${userData.nameEn || user_id} has registered for "${eventData.name}" and requires your approval.`,
-            message_ar: `قام ${userData.nameAr || userData.nameEn || user_id} بالتسجيل في "${eventData.name_ar || eventData.name}" ويحتاج إلى موافقتك.`,
+            title_en: trTitle('D15', 'en'),
+            title_ar: trTitle('D15', 'ar'),
+            message_en: trMessage('D15', 'en', { Name: userData.nameEn || user_id, Event: eventData.name }),
+            message_ar: trMessage('D15', 'ar', { name: userData.nameAr || userData.nameEn || user_id, event: eventData.name_ar || eventData.name }),
           });
         }
       } catch (notifErr) {

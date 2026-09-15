@@ -5,6 +5,7 @@ export interface Plan {
   year: string;
   kpi: number;
   kpi_name?: string;
+  kpi_name_ar?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -13,6 +14,7 @@ export interface Plan {
 export interface KpiOption {
   id: number;
   name: string;
+  name_ar?: string;
 }
 
 export interface PlansResponse {

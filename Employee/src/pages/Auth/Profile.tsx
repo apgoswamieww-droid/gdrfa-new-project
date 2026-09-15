@@ -88,18 +88,15 @@ export default function Profile() {
   const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!user || fetchedRef.current) return;
+    if (sessionChecking) return;
+    if ((!user && !getAccessToken()) || fetchedRef.current) return;
     fetchedRef.current = true;
     let cancelled = false;
-    const fetchAll = async () => {
+    const fetchProfile = async () => {
       try {
-        // Fetch full profile data from CIAM to enrich user details
         const profileResp = await getProfileApi();
         if (!cancelled && profileResp.status && profileResp.data) {
-          // Read current user directly from store to avoid stale closure
           const currentUser = useAuthStore.getState().user || {};
-          // Merge the full CIAM profile data into the auth store
-          // Use data objects (sectorData, departmentData, etc.) for display names
           setUser({
             ...currentUser,
             mobile: profileResp.data.mobile || currentUser.mobile,
@@ -120,31 +117,72 @@ export default function Profile() {
             assignedTo: profileResp.data.assignedTo || currentUser.assignedTo,
           });
         }
-
-        const [reqResp, notifResp, unreadResp, profileImgResp, evalResp] = await Promise.all([
-          getMyFacilityRequests(),
-          getNotifications(1, 20),
-          getUnreadCount(),
-          getProfileImage(),
-          getMyFitnessEvaluations(),
-        ]);
-        if (!cancelled) {
-          setFacilityRequests(reqResp.data || []);
-          setNotificationsList(notifResp.data?.notifications || []);
-          setUnreadCount(unreadResp.data?.unreadCount || 0);
-          setProfileImageUrl(profileImgResp.data?.image || null);
-          setEvaluations(evalResp.data?.data || []);
-        }
       } catch {
-        if (!cancelled) { setFacilityRequests([]); setEvaluations([]); }
-      } finally {
-        if (!cancelled) { setRequestsLoading(false); setNotificationsLoading(false); setEvaluationsLoading(false); }
+        // Profile details should not prevent the activity cards from loading.
       }
     };
-    fetchAll();
+
+    const fetchFacilityRequests = async () => {
+      try {
+        const response = await getMyFacilityRequests();
+        if (!cancelled) setFacilityRequests(Array.isArray(response.data) ? response.data : []);
+      } catch {
+        if (!cancelled) setFacilityRequests([]);
+      } finally {
+        if (!cancelled) setRequestsLoading(false);
+      }
+    };
+
+    const fetchNotifications = async () => {
+      try {
+        const [notificationsResponse, unreadResponse] = await Promise.all([
+          getNotifications(1, 20, "all"),
+          getUnreadCount(),
+        ]);
+        if (!cancelled) {
+          setNotificationsList(Array.isArray(notificationsResponse.data?.notifications) ? notificationsResponse.data.notifications : []);
+          setUnreadCount(unreadResponse.data?.unreadCount || 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setNotificationsList([]);
+          setUnreadCount(0);
+        }
+      } finally {
+        if (!cancelled) setNotificationsLoading(false);
+      }
+    };
+
+    const fetchProfileImage = async () => {
+      try {
+        const response = await getProfileImage();
+        if (!cancelled) setProfileImageUrl(response.data?.image || null);
+      } catch {
+        if (!cancelled) setProfileImageUrl(null);
+      }
+    };
+
+    const fetchEvaluations = async () => {
+      try {
+        const response = await getMyFitnessEvaluations();
+        const evaluationData = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data;
+        if (!cancelled) setEvaluations(Array.isArray(evaluationData) ? evaluationData : []);
+      } catch {
+        if (!cancelled) setEvaluations([]);
+      } finally {
+        if (!cancelled) setEvaluationsLoading(false);
+      }
+    };
+
+    fetchProfile();
+    fetchFacilityRequests();
+    fetchNotifications();
+    fetchProfileImage();
+    fetchEvaluations();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [sessionChecking]);
 
   const profile = useMemo(() => {
     const localizedName =
@@ -469,31 +507,45 @@ function FacilityRequestsSection({ requestsRef, requests, loading }: { requestsR
 }
 
 function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]; loading: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "ar" ? "ar-AE" : "en-GB";
 
-  const groupedResults = useMemo(() => {
-    const groups: { key: string; label: string; results: any[]; total: number }[] = [];
-    const map = new Map<string, any[]>();
-    evaluations.forEach((ev) => {
-      (ev.results || []).forEach((r: any) => {
-        const d = new Date(r.createdAt ?? ev.createdAt ?? "");
-        const key = `${d.toLocaleDateString("en-GB")} ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
-        if (!map.has(key)) map.set(key, []);
-        map.get(key)!.push(r);
-      });
+  const translateCategory = (name: string, slug?: string): string => {
+    const key = String(slug || name || "").trim().toLowerCase();
+    const map: Record<string, string> = {
+      running: t("profile.categoryRunning"),
+      situps: t("profile.categorySitups"),
+      pushups: t("profile.categoryPushups"),
+    };
+    return map[key] || name;
+  };
+
+  const translateUnit = (unit?: string): string => {
+    if (unit === "time") return t("profile.unitTime");
+    if (unit === "count") return t("profile.unitCount");
+    return unit || "";
+  };
+
+  const evaluationItems = useMemo(() => {
+    return evaluations.map((evaluation, index) => {
+      const results = Array.isArray(evaluation.results) ? evaluation.results : [];
+      const date = evaluation.createdAt
+        ? new Date(evaluation.createdAt).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" })
+        : "";
+      const calculatedTotal = results.reduce((sum: number, result: any) => sum + Number(result.result || 0), 0);
+      return {
+        key: String(evaluation.id ?? evaluation.createdAt ?? index),
+        label: index === 0 ? t("profile.latest") : t("profile.previous"),
+        date,
+        results,
+        total: Number(evaluation.total_points ?? evaluation.evaluation_points ?? calculatedTotal),
+      };
     });
-    const sortedKeys = Array.from(map.keys()).sort().reverse();
-    sortedKeys.forEach((key, i) => {
-      const items = map.get(key)!;
-      const total = items.reduce((s: number, r: any) => s + Number(r.result || 0), 0);
-      groups.push({ key, label: i === 0 ? t("profile.latest") : `${t("profile.previous")} — ${key}`, results: items, total });
-    });
-    return groups;
-  }, [evaluations]);
+  }, [evaluations, t, i18n.language]);
 
   const overallTotal = useMemo(() => {
-    return groupedResults.reduce((sum, g) => sum + g.total, 0);
-  }, [groupedResults]);
+    return evaluationItems.reduce((sum, evaluation) => sum + evaluation.total, 0);
+  }, [evaluationItems]);
 
   return (
     <section className="mt-5 bg-white/90 border-2 border-primary/10 xl:rounded-[44px] rounded-3xl xl:p-7 md:p-6 p-4 backdrop-blur-xl shadow-[0_24px_80px_rgba(10,34,64,0.12)] scroll-mt-28 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -509,7 +561,7 @@ function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]
           </div>
           <div className="bg-primary/10 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
             <span className="block text-[10px] font-bold text-primary/60 uppercase tracking-wider">{t("profile.sessions")}</span>
-            <span className="block text-xl font-bold text-primary">{groupedResults.length}</span>
+            <span className="block text-xl font-bold text-primary">{evaluationItems.length}</span>
           </div>
         </div>
       </div>
@@ -527,21 +579,24 @@ function FitnessEvaluationSection({ evaluations, loading }: { evaluations: any[]
             </div>
           ))}
         </div>
-      ) : groupedResults.length > 0 ? (
+      ) : evaluationItems.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {groupedResults.map((group) => (
-            <div key={group.key} className="rounded-lg border border-gray-100 bg-white shadow-sm overflow-hidden">
+          {evaluationItems.map((evaluation) => (
+            <div key={evaluation.key} className="rounded-lg border border-gray-100 bg-white shadow-sm overflow-hidden">
               <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-[11px] font-bold text-secondary/70">{group.label}</span>
-                <span className="text-[13px] font-bold text-primary">{group.total.toFixed(2).replace(/\.00$/, '')} {t("profile.pts")}</span>
+                <div>
+                  <span className="text-[11px] font-bold text-secondary/70">{evaluation.label}</span>
+                  {evaluation.date && <span className="block text-[10px] text-secondary/45">{evaluation.date}</span>}
+                </div>
+                <span className="text-[13px] font-bold text-primary">{evaluation.total.toFixed(2).replace(/\.00$/, '')} {t("profile.pts")}</span>
               </div>
               <div className="p-2 space-y-1.5">
-                {group.results.map((r: any) => (
+                {evaluation.results.map((r: any) => (
                   <div key={r.result_id || r.id} className="flex items-center justify-between px-2 py-1.5 rounded bg-gray-50/50">
-                    <span className="text-[11px] font-semibold text-gray-600 truncate">{r.category_name || `Cat #${r.fitness_category_id}`}</span>
+                    <span className="text-[11px] font-semibold text-gray-600 truncate">{translateCategory(r.category_name, r.slug) || `Cat #${r.fitness_category_id}`}</span>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[11px] text-gray-500">{r.input_value}{r.unit_type ? ` ${r.unit_type}` : ''}</span>
-                      <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{r.result} pts</span>
+                      <span className="text-[11px] text-gray-500">{r.input_value}{r.unit_type ? ` ${translateUnit(r.unit_type)}` : ''}</span>
+                      <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{r.result} {t("profile.pts")}</span>
                     </div>
                   </div>
                 ))}

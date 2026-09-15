@@ -7,6 +7,8 @@ import AuthTitle from "./AuthTitle";
 import { adminLoginApi } from "../api/auth.api";
 import { setAccessToken } from "../api/request";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
+import { useTranslation } from "../hooks/useTranslation";
 
 const UserIcon = () => (
   <svg
@@ -45,6 +47,8 @@ const LockIcon = () => (
 export default function Login() {
   const navigate = useNavigate();
   const { setAdminUser } = useAuth();
+  const { language, toggleLanguage } = useLanguage();
+  const { t } = useTranslation();
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,17 +60,17 @@ export default function Login() {
     const cleanEmployeeId = employeeId.trim();
 
     if (!cleanEmployeeId) {
-      nextErrors.employeeId = "Employee ID / Username is required.";
+      nextErrors.employeeId = t.login.employeeIdRequired;
     } else if (cleanEmployeeId.length < 3 || cleanEmployeeId.length > 120) {
-      nextErrors.employeeId = "Enter a valid Employee ID / Username.";
+      nextErrors.employeeId = t.login.employeeIdInvalid;
     } else if (/[<>"'`;(){}]/.test(cleanEmployeeId)) {
-      nextErrors.employeeId = "Invalid characters are not allowed.";
+      nextErrors.employeeId = t.login.invalidCharacters;
     }
 
     if (!password) {
-      nextErrors.password = "Password is required.";
+      nextErrors.password = t.login.passwordRequired;
     } else if (password.length < 6 || password.length > 128) {
-      nextErrors.password = "Password length is invalid.";
+      nextErrors.password = t.login.passwordInvalid;
     }
 
     setErrors(nextErrors);
@@ -125,7 +129,7 @@ export default function Login() {
     } catch (error) {
       setErrors((current) => ({
         ...current,
-        general: error instanceof Error ? error.message : "Unable to login. Please try again.",
+        general: error instanceof Error ? error.message : t.login.loginFailed,
       }));
     } finally {
       setLoading(false);
@@ -141,12 +145,26 @@ export default function Login() {
 
         {/* Card */}
         <div
-          className="w-full xl:max-w-120 max-w-100 rounded-xl overflow-hidden shadow-lg"
+          className="relative w-full xl:max-w-120 max-w-100 rounded-xl overflow-hidden shadow-lg"
           style={{
             background: "rgba(255,255,255,0.92)",
             backdropFilter: "blur(12px)",
           }}
         >
+          {/* Language Switcher */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="absolute top-2 end-2 z-10 flex items-center gap-1.5 text-sm font-bold text-primary py-1.5 px-3 rounded-lg bg-white/80 backdrop-blur-sm border border-primary/10 hover:bg-primary/5 transition-colors cursor-pointer"
+            aria-label="Switch language"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.02231 16.9777C7.07674 18.6978 7.26397 19.7529 7.90796 20.5376C8.07418 20.7401 8.25989 20.9258 8.46243 21.092C9.56878 22 11.2125 22 14.5 22C17.7875 22 19.4312 22 20.5376 21.092C20.7401 20.9258 20.9258 20.7401 21.092 20.5376C22 19.4312 22 17.7875 22 14.5C22 11.2125 22 9.56878 21.092 8.46243C20.9258 8.25989 20.7401 8.07418 20.5376 7.90796C19.7563 7.26676 18.707 7.07837 17 7.02303M7.02231 16.9777C5.30217 16.9233 4.24713 16.736 3.46243 16.092C3.25989 15.9258 3.07418 15.7401 2.90796 15.5376C2 14.4312 2 12.7875 2 9.5C2 6.21252 2 4.56878 2.90796 3.46243C3.07418 3.25989 3.25989 3.07418 3.46243 2.90796C4.56878 2 6.21252 2 9.5 2C12.7875 2 14.4312 2 15.5376 2.90796C15.7401 3.07418 15.9258 3.25989 16.092 3.46243C16.736 4.24713 16.9233 5.30217 16.9777 7.02231C16.9777 7.02231 16.9777 7.02231 17 7.02303M7.02231 16.9777L17 7.02303"
+                stroke="#161616" strokeWidth="1.5" />
+            </svg>
+            <span>{language === "ar" ? "EN" : "عربي"}</span>
+          </button>
+
           {/* Hero Banner */}
           <AuthBanner />
 
@@ -155,8 +173,8 @@ export default function Login() {
             <form onSubmit={handleSignIn} className="space-y-3">
               {/* Employee ID Field */}
               <InputField
-                label="Employee ID / Username"
-                placeholder="Employee ID / Username"
+                label={t.login.employeeId}
+                placeholder={t.login.employeeId}
                 value={employeeId}
                 onChange={(e) => {
                   setEmployeeId(e.target.value.slice(0, 120));
@@ -170,9 +188,9 @@ export default function Login() {
               />
 
               <InputField
-                label="Password"
+                label={t.login.password}
                 type="password"
-                placeholder="Password"
+                placeholder={t.login.password}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value.slice(0, 128));
@@ -200,7 +218,7 @@ export default function Login() {
                     onChange={(event) => setRememberMe(event.target.checked)}
                     className="size-4 accent-primary"
                   />
-                  Remember me
+                  {t.login.rememberMe}
                 </label>
                 {/* <a
                   onClick={() => navigate("/forgot-password")}
@@ -234,10 +252,10 @@ export default function Login() {
                         d="M4 12a8 8 0 018-8v8z"
                       />
                     </svg>
-                    Signing In...
+                    {t.login.signingIn}
                   </span>
                 ) : (
-                  "Sign In"
+                  t.login.signIn
                 )}
               </PrimaryBtn>
             </form>

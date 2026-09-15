@@ -81,7 +81,7 @@ export default function SportsEventList() {
             </h1>
           </div>
           <div className="flex flex-col lg:items-end gap-6">
-            <p className="text-secondary/60 md:text-base/tight text-sm/tight font-medium lg:max-w-105 lg:text-end text-start">
+            <p className="text-secondary/60 md:text-base/tight text-sm/tight font-medium lg:max-w-105 text-right">
               {t("sportsEvents.subtitle")}
             </p>
 

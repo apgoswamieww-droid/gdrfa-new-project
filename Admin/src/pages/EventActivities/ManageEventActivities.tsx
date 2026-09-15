@@ -5,8 +5,10 @@ import EventActivityModal from "./EventActivityModal";
 import { createEventActivityApi, updateEventActivityApi, getActivityTypesForSelectApi } from "../../api/event-activities.api";
 import toast from "react-hot-toast";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ManageEventActivities = () => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -27,15 +29,15 @@ const ManageEventActivities = () => {
 
   const handleSubmit = async (data: { name: string; name_ar?: string; activityType: number; isTeam?: string }, id?: number) => {
     const loadingToast = toast.loading(
-      id ? "Updating..." : "Creating..."
+      id ? t.eventActivity.updating : t.eventActivity.creating
     );
     try {
       if (id) {
         await updateEventActivityApi(id, data);
-        toast.success("Event Activity updated successfully!", { id: loadingToast });
+        toast.success(t.eventActivity.successUpdate, { id: loadingToast });
       } else {
         await createEventActivityApi(data);
-        toast.success("Event Activity created successfully!", { id: loadingToast });
+        toast.success(t.eventActivity.successCreate, { id: loadingToast });
       }
       setIsModalOpen(false);
       setEditData(null);
@@ -55,7 +57,7 @@ const ManageEventActivities = () => {
       <div className="2xl:space-y-8 md:space-y-6 space-y-4 h-full flex flex-col">
         <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
           <SearchInput
-            placeholder="Search for Event Activities.."
+            placeholder={t.eventActivity.search}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -88,7 +90,7 @@ const ManageEventActivities = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            Create Event Activity
+            {t.eventActivity.create}
           </PrimaryBtn>
         </div>
         <EventActivitiesTable
@@ -106,7 +108,7 @@ const ManageEventActivities = () => {
         }}
         onSubmit={handleSubmit}
         initialData={editData}
-        title={editData ? "Edit Event Activity" : "Create Event Activity"}
+        title={editData ? t.eventActivity.edit : t.eventActivity.create}
         activityTypes={activityTypes}
       />
     </>

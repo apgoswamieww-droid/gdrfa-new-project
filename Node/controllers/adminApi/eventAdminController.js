@@ -427,8 +427,11 @@ class EventAdminController {
     static async getYears(req, res) {
         try {
             const years = await db.query(`
-                SELECT DISTINCT id, year FROM plans WHERE status = '1' AND deletedAt IS NULL 
-                ORDER BY year DESC
+                SELECT DISTINCT p.id, p.year, k.name AS name, k.name_ar AS name_ar
+                FROM plans p
+                LEFT JOIN kpis k ON p.kpi = k.id
+                WHERE p.status = '1' AND p.deletedAt IS NULL 
+                ORDER BY p.year DESC
             `);
             return res.json({
                 status: true,
@@ -718,25 +721,28 @@ class EventAdminController {
                 const ciamService = require('../../ciam/ciam.service');
                 const { sendEmail } = require('../../utils/emailService');
                 const { storeNotification } = require('../../utils/notificationHelper');
+                const { tr, trTitle, trMessage } = require('../../utils/translationSheet');
                 const moment = require('moment');
                 const accessToken = req.user?.token || req.session?.admin?.accessToken || req.headers.authorization?.split(' ')[1];
 
                 // Get activity name(s)
                 const activityIdInts = activityIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
                 let activityNameStr = 'Activity';
+                let activityNameStrAr = '';
                 if (activityIdInts.length > 0) {
                     const actRows = await db.query(
-                        `SELECT name FROM sport_activities WHERE id IN (${activityIdInts.map(() => '?').join(',')}) AND deletedAt IS NULL`,
+                        `SELECT name, name_ar FROM sport_activities WHERE id IN (${activityIdInts.map(() => '?').join(',')}) AND deletedAt IS NULL`,
                         activityIdInts
                     );
                     activityNameStr = actRows.map(r => r.name).filter(Boolean).join(', ') || 'Activity';
+                    activityNameStrAr = actRows.map(r => r.name_ar).filter(Boolean).join(', ') || activityNameStr;
                 }
 
                 const baseNotificationData = {
-                    title_en: 'New Activity Invitation',
-                    title_ar: 'دعوة نشاط جديد',
-                    message_en: `You have been invited to the activity "${activityNameStr}" for event "${event.name}".`,
-                    message_ar: `لقد تمت دعوتك للنشاط "${activityNameStr}" في الفعالية "${event.name_ar || event.name}".`,
+                    title_en: trTitle('D18', 'en'),
+                    title_ar: trTitle('D18', 'ar'),
+                    message_en: trMessage('D18', 'en', { Activity: activityNameStr, Event: event.name }),
+                    message_ar: trMessage('D18', 'ar', { activity: activityNameStrAr, event: event.name_ar || event.name }),
                 };
 
                 let targetUserDomains = [];
@@ -744,7 +750,7 @@ class EventAdminController {
                 if (targetType === 'competitive' && teamNameStr) {
                     const teams = teamNameStr.split(',').map(t => t.trim()).filter(Boolean);
                     const teamMembers = await db.query(
-                        `SELECT tp.player_id, tp.isCaptain, t.name as team_name
+                        `SELECT tp.player_id, tp.isCaptain, t.name as team_name, t.name_ar as team_name_ar
                          FROM team_players tp
                          INNER JOIN teams t ON tp.team_id = t.id
                          WHERE tp.team_id IN (${teams.map(() => '?').join(',')}) AND tp.deletedAt IS NULL`,
@@ -753,7 +759,7 @@ class EventAdminController {
                     const userDomainMap = {};
                     for (const member of teamMembers) {
                         if (!userDomainMap[member.player_id]) {
-                            userDomainMap[member.player_id] = { teamName: member.team_name, isCaptain: member.isCaptain };
+                            userDomainMap[member.player_id] = { teamName: member.team_name, teamNameAr: member.team_name_ar, isCaptain: member.isCaptain };
                         }
                     }
                     targetUserDomains = Object.keys(userDomainMap);
@@ -771,21 +777,21 @@ class EventAdminController {
                                 if (user.emailAddress) {
                                     sendEmail({
                                         to: user.emailAddress,
-                                        subject: `GDRFA - Activity Invitation: ${event.name}`,
+                                        subject: tr('A13'),
                                         template: 'activity-invitation.ejs',
                                         data: {
-                                            title: 'You\'re Invited to a Sports Activity!',
-                                            employeeName: user.nameEn || user.nameAr || domain,
-                                            eventName: event.name,
-                                            activityName: activityNameStr,
+                                            title: tr('B15'),
+                                            employeeName: user.nameAr || user.nameEn || domain,
+                                            eventName: event.name_ar || event.name,
+                                            activityName: activityNameStrAr,
                                             location: event.location || 'TBD',
                                             startDate: event.startDate ? moment(event.startDate).format('DD-MM-YYYY') : 'TBD',
                                             endDate: event.endDate ? moment(event.endDate).format('DD-MM-YYYY') : 'TBD',
                                             startTime: event.startTime || '',
                                             endTime: event.endTime || '',
-                                            eventDescription: event.eventDescription || '',
+                                            eventDescription: event.eventDescription_ar || event.eventDescription || '',
                                             targetType: 'competitive',
-                                            teamName: info.teamName || '',
+                                            teamName: info.teamNameAr || info.teamName || '',
                                             isCaptain: info.isCaptain || '0',
                                             logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                         },
@@ -811,19 +817,19 @@ class EventAdminController {
                                 if (user.emailAddress) {
                                     sendEmail({
                                         to: user.emailAddress,
-                                        subject: `GDRFA - Activity Invitation: ${event.name}`,
+                                        subject: tr('A13'),
                                         template: 'activity-invitation.ejs',
                                         data: {
-                                            title: 'You\'re Invited to a Sports Activity!',
-                                            employeeName: user.nameEn || user.nameAr || domain,
-                                            eventName: event.name,
-                                            activityName: activityNameStr,
+                                            title: tr('B15'),
+                                            employeeName: user.nameAr || user.nameEn || domain,
+                                            eventName: event.name_ar || event.name,
+                                            activityName: activityNameStrAr,
                                             location: event.location || 'TBD',
                                             startDate: event.startDate ? moment(event.startDate).format('DD-MM-YYYY') : 'TBD',
                                             endDate: event.endDate ? moment(event.endDate).format('DD-MM-YYYY') : 'TBD',
                                             startTime: event.startTime || '',
                                             endTime: event.endTime || '',
-                                            eventDescription: event.eventDescription || '',
+                                            eventDescription: event.eventDescription_ar || event.eventDescription || '',
                                             targetType: 'ragular',
                                             teamName: '',
                                             isCaptain: '0',
@@ -850,19 +856,19 @@ class EventAdminController {
                                 if (domain && user.emailAddress) {
                                     sendEmail({
                                         to: user.emailAddress,
-                                        subject: `GDRFA - Activity Invitation: ${event.name}`,
+                                        subject: tr('A13'),
                                         template: 'activity-invitation.ejs',
                                         data: {
-                                            title: 'You\'re Invited to a Sports Activity!',
-                                            employeeName: user.nameEn || user.nameAr || domain,
-                                            eventName: event.name,
-                                            activityName: activityNameStr,
+                                            title: tr('B15'),
+                                            employeeName: user.nameAr || user.nameEn || domain,
+                                            eventName: event.name_ar || event.name,
+                                            activityName: activityNameStrAr,
                                             location: event.location || 'TBD',
                                             startDate: event.startDate ? moment(event.startDate).format('DD-MM-YYYY') : 'TBD',
                                             endDate: event.endDate ? moment(event.endDate).format('DD-MM-YYYY') : 'TBD',
                                             startTime: event.startTime || '',
                                             endTime: event.endTime || '',
-                                            eventDescription: event.eventDescription || '',
+                                            eventDescription: event.eventDescription_ar || event.eventDescription || '',
                                             targetType: 'ragular',
                                             teamName: '',
                                             isCaptain: '0',

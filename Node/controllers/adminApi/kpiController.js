@@ -4,7 +4,7 @@ const { sanitizeHtml } = require('../../utils/sanitize');
 class KpiController {
     static async list(req, res) {
         try {
-            const kpis = await db.query(`SELECT id, name, status, createdAt FROM kpis WHERE deletedAt IS NULL ORDER BY createdAt DESC`);
+            const kpis = await db.query(`SELECT id, name, name_ar, status, createdAt FROM kpis WHERE deletedAt IS NULL ORDER BY createdAt DESC`);
             return res.json({
                 status: true,
                 message: 'KPIs retrieved successfully',
@@ -21,7 +21,7 @@ class KpiController {
 
     static async store(req, res) {
         try {
-            const { name, status } = req.body;
+            const { name, name_ar, status } = req.body;
             const cleanName = sanitizeHtml(name);
             if (!cleanName) {
                 return res.status(400).json({ status: false, message: 'KPI name is required' });
@@ -33,8 +33,9 @@ class KpiController {
                 return res.status(409).json({ status: false, message: 'KPI name already exists' });
             }
 
-            const sql = `INSERT INTO kpis (name, status, createdAt, updatedAt) VALUES (?, ?, SYSDATETIME(), SYSDATETIME())`;
-            await db.query(sql, [cleanName, status || '1']);
+            const cleanNameAr = name_ar ? sanitizeHtml(name_ar) : null;
+            const sql = `INSERT INTO kpis (name, name_ar, status, createdAt, updatedAt) VALUES (?, ?, ?, SYSDATETIME(), SYSDATETIME())`;
+            await db.query(sql, [cleanName, cleanNameAr, status || '1']);
             
             return res.json({ status: true, message: 'KPI created successfully' });
         } catch (error) {
@@ -45,7 +46,7 @@ class KpiController {
 
     static async update(req, res) {
         try {
-            const { name, status } = req.body;
+            const { name, name_ar, status } = req.body;
             const kpiId = req.params.id;
             const cleanName = sanitizeHtml(name);
 
@@ -63,14 +64,16 @@ class KpiController {
                 return res.status(409).json({ status: false, message: 'KPI name already exists' });
             }
 
+            const cleanNameAr = name_ar !== undefined ? sanitizeHtml(name_ar) : undefined;
+
             // Only update status if provided
             let sql, params;
             if (status !== undefined) {
-                sql = `UPDATE kpis SET name = ?, status = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
-                params = [cleanName, status, kpiId];
+                sql = `UPDATE kpis SET name = ?, name_ar = ?, status = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
+                params = [cleanName, cleanNameAr, status, kpiId];
             } else {
-                sql = `UPDATE kpis SET name = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
-                params = [cleanName, kpiId];
+                sql = `UPDATE kpis SET name = ?, name_ar = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
+                params = [cleanName, cleanNameAr, kpiId];
             }
 
             await db.query(sql, params);

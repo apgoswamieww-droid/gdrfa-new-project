@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import InputField from "../../component/Input/InputField";
 import Selectfield from "../../component/Input/Selectfield";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
+import { useTranslation } from "../../hooks/useTranslation";
 
 
 interface EventActivityModalProps {
@@ -14,6 +15,7 @@ interface EventActivityModalProps {
 }
 
 const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, activityTypes }: EventActivityModalProps) => {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [nameAr, setNameAr] = useState("");
   const [activityType, setActivityType] = useState<number | "">("");
@@ -93,8 +95,8 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <InputField
-              label="Activity Name"
-              placeholder="Enter Activity name"
+              label={t.eventActivity.name}
+              placeholder={t.eventActivity.placeholder}
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
@@ -108,8 +110,8 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
 
           <div>
             <InputField
-              label="Activity Name (Arabic)"
-              placeholder="Enter Activity name in Arabic"
+              label={t.eventActivity.nameAr}
+              placeholder={t.eventActivity.placeholderAr}
               value={nameAr}
               onChange={(e) => setNameAr(e.target.value)}
             />
@@ -117,7 +119,7 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
 
           <div>
             <Selectfield
-              label="Event Type"
+              label={t.eventActivity.activityType}
               value={activityType}
               onChange={(e) => {
                 const val = Number(e.target.value);
@@ -125,7 +127,7 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
                 if (errors.activityType) setErrors(prev => ({ ...prev, activityType: undefined }));
               }}
               options={[
-                { value: "", label: "Select Event Type" },
+                { value: "", label: t.eventActivity.selectActivityType },
                 ...activityTypes.map(type => ({ value: type.id, label: type.name }))
               ]}
               error={errors.activityType}
@@ -141,7 +143,7 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
               onChange={(e) => setIsTeam(e.target.checked ? "1" : "0")}
               className="w-4 h-4"
             />
-            <label htmlFor="isTeam" className="text-sm font-medium">Is Team Activity?</label>
+            <label htmlFor="isTeam" className="text-sm font-medium">{t.eventActivity.isTeam}</label>
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -150,10 +152,10 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
               onClick={onClose}
               className="flex lg:gap-1.5 gap-1 justify-center items-center font-bold 2xl:text-[0.84vw]/normal lg:text-base/normal text-sm/normal rounded-lg lg:px-4 px-2.5 border border-gray-200 lg:py-1.5 py-1.5 text-gray-600 hover:bg-gray-50 transition ease-in-out duration-300 cursor-pointer flex-1"
             >
-              Cancel
+              {t.eventActivity.cancel}
             </button>
             <PrimaryBtn type="submit" className="flex-1" disabled={submitting}>
-              {submitting ? "Saving..." : "Save"}
+              {submitting ? t.eventActivity.saving : t.eventActivity.save}
             </PrimaryBtn>
           </div>
         </form>

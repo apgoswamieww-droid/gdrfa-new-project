@@ -13,13 +13,13 @@ const ManagePlans = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [editData, setEditData] = useState<{ id: number; year: string; kpi: number } | null>(null);
-  const [kpiOptions, setKpiOptions] = useState<Array<{ id: number; name: string }>>([]);
+  const [kpiOptions, setKpiOptions] = useState<Array<{ id: number; name: string; name_ar?: string }>>([]);
 
   // Fetch KPIs for dropdown
   useEffect(() => {
     getKpisForSelectApi()
       .then((kpis) => {
-        if (kpis) setKpiOptions(kpis as Array<{ id: number; name: string }>);
+        if (kpis) setKpiOptions(kpis as Array<{ id: number; name: string; name_ar?: string }>);
       })
       .catch((e) => console.warn("KPI fetch error:", e));
   }, []);

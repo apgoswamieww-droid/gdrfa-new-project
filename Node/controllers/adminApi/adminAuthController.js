@@ -6,6 +6,7 @@ const { getUserPermissions } = require('../../utils/permissionChecker');
 const crypto = require('crypto');
 const { sendEmail } = require('../../utils/emailService');
 const { isPermissionsBypass } = require('../../utils/permissionsBypass');
+const { tr } = require('../../utils/translationSheet');
 
 const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
 
@@ -235,14 +236,14 @@ class AdminAuthController {
 
       await sendEmail({
         to: email,
-        subject: 'GDRFA Admin - Reset Your Password',
+        subject: tr('A10'),
         template: 'email-reset-password-template.ejs',
         data: {
           resetLink,
-          title: 'Reset Your Admin Password',
+          title: tr('B12'),
           logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
           username: userName,
-          buttonText: 'Reset Password',
+          buttonText: tr('B11'),
           role: 'admin'
         }
       });

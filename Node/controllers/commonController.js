@@ -20,6 +20,7 @@ const db = require('../config/dbDirect');
 const ciamService = require('../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../utils/ciamTokenHelper');
 const approvalWorkflow = require('../services/approvalWorkflowService');
+const { tr, trTitle, trMessage, statusValue } = require('../utils/translationSheet');
 class CommonController {
 
   static async deleteRecord(req, res) {
@@ -418,22 +419,22 @@ class CommonController {
       const eventDetailsUrl = frontendBaseUrl ? `${frontendBaseUrl}${eventDetailsPath}` : eventDetailsPath;
       const eventToken = `[#event:${eventRecord?.id}]`;
 
-      const titleEn = `New Sports Event: ${eventNameEn}`;
-      const titleAr = `فعالية رياضية جديدة: ${eventNameAr}`;
+      const titleEn = trTitle('D1', 'en', { Event: eventNameEn });
+      const titleAr = trTitle('D2', 'ar', { event: eventNameAr });
       const messageEn = [
-        `${eventNameEn} is now live.`,
-        `Start: ${eventStartDate}`,
-        `End: ${eventEndDate}`,
-        `Location: ${eventLocation}`,
-        `Open full event details: ${eventDetailsUrl}`,
+        trMessage('D1', 'en', { Event: eventNameEn }),
+        trMessage('D2', 'en', { startDate: eventStartDate }),
+        trMessage('D3', 'en', { endDate: eventEndDate }),
+        trMessage('D4', 'en', { Location: eventLocation }),
+        trMessage('D5', 'en', { url: eventDetailsUrl }),
         eventToken
       ].join('\n');
       const messageAr = [
-        `تم إطلاق فعالية جديدة: ${eventNameAr}`,
-        `تاريخ البداية: ${eventStartDate}`,
-        `تاريخ النهاية: ${eventEndDate}`,
-        `الموقع: ${eventLocation}`,
-        `عرض تفاصيل الفعالية: ${eventDetailsUrl}`,
+        trMessage('D1', 'ar'),
+        trMessage('D2', 'ar', { startDate: eventStartDate }),
+        trMessage('D3', 'ar', { endDate: eventEndDate }),
+        trMessage('D4', 'ar'),
+        trMessage('D5', 'ar', { url: eventDetailsUrl }),
         eventToken
       ].join('\n');
 
@@ -471,7 +472,7 @@ class CommonController {
         include: [{
           model: Event,
           as: 'event',
-          attributes: ['id', 'name', 'location', 'startDate', 'endDate', 'user_id']
+          attributes: ['id', 'name', 'name_ar', 'location', 'startDate', 'endDate', 'user_id']
         }]
       });
 
@@ -508,10 +509,10 @@ class CommonController {
         // Store in-app notification
         await storeNotification({
           userId: participantData.user_id,
-          title_en: 'Event Participant Status',
-          title_ar: 'حالة المشارك في الحدث',
-          message_en: 'Your approved registration has been cancelled by the administrator.',
-          message_ar: 'تم إلغاء تسجيلك المعتمد من قبل المسؤول.'
+          title_en: trTitle('D6', 'en'),
+          title_ar: trTitle('D6', 'ar'),
+          message_en: trMessage('D6', 'en'),
+          message_ar: trMessage('D6', 'ar')
         });
 
         // Send email
@@ -522,7 +523,7 @@ class CommonController {
           );
 
           const activityData = await db.queryOne(
-            `SELECT sa.name as activityName, at.name as activityTypeName
+            `SELECT sa.name, sa.name_ar, at.name as activityTypeName, at.name_ar as activityTypeNameAr
              FROM sport_activities sa
              LEFT JOIN activity_types at ON sa.activityType = at.id
              WHERE sa.id = ? AND sa.deletedAt IS NULL`,
@@ -531,21 +532,21 @@ class CommonController {
 
           await sendEmail({
             to: userCiam?.emailAddress || participantData.user_id,
-            subject: 'GDRFA - Event Registration Cancelled',
+            subject: tr('A1'),
             template: 'request-status-from-manager.ejs',
             data: {
-              title: 'Registration Cancelled',
-              userFullName: userCiam?.nameEn || participantData.user_id,
+              title: tr('B1'),
+              userFullName: userCiam?.nameAr || userCiam?.nameEn || participantData.user_id,
               status: 'Cancelled',
-              eventName: participantData.event?.name || 'N/A',
-              eventLocation: participantData.event?.location || 'N/A',
+              eventName: participantData.event?.name_ar || participantData.event?.name || tr('C2-13'),
+              eventLocation: participantData.event?.location || tr('C2-13'),
               startDate: moment(participantData.event?.startDate).format('DD-MM-YYYY'),
               endDate: moment(participantData.event?.endDate).format('DD-MM-YYYY'),
               startTime: scheduleData ? scheduleData.start_time : null,
               endTime: scheduleData ? scheduleData.end_time : null,
-              activityName: activityData?.activityName || 'N/A',
-              activityType: activityData?.activityTypeName || 'N/A',
-              rejectionReason: 'Your registration has been cancelled by the event administrator.',
+              activityName: activityData?.name_ar || activityData?.name || tr('C2-13'),
+              activityType: activityData?.activityTypeNameAr || activityData?.activityTypeName || tr('C2-13'),
+              rejectionReason: tr('C1-4'),
               logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`
             }
           });
@@ -575,10 +576,10 @@ class CommonController {
 
           await storeNotification({
             userId: participantData.user_id,
-            title_en: 'Event Participant Status',
-            title_ar: 'حالة المشارك في الحدث',
-            message_en: 'Your registration has been re-approved by the administrator.',
-            message_ar: 'تم إعادة الموافقة على تسجيلك من قبل المسؤول.'
+            title_en: trTitle('D7', 'en'),
+            title_ar: trTitle('D7', 'ar'),
+            message_en: trMessage('D7', 'en'),
+            message_ar: trMessage('D7', 'ar')
           });
 
           const scheduleData = await db.queryOne(
@@ -586,7 +587,7 @@ class CommonController {
             [participantData.event_id, participantData.activity_id]
           );
           const activityData = await db.queryOne(
-            `SELECT sa.name as activityName, at.name as activityTypeName
+            `SELECT sa.name, sa.name_ar, at.name as activityTypeName, at.name_ar as activityTypeNameAr
              FROM sport_activities sa
              LEFT JOIN activity_types at ON sa.activityType = at.id
              WHERE sa.id = ? AND sa.deletedAt IS NULL`,
@@ -596,21 +597,21 @@ class CommonController {
           const userCiamEmail = userCiam?.emailAddress || participantData.user_id;
           await sendEmail({
             to: userCiamEmail,
-            subject: 'GDRFA - Event Registration Re-approved',
+            subject: tr('A2'),
             template: 'request-status-from-manager.ejs',
             data: {
-              title: 'Registration Re-approved',
-              userFullName: userCiam?.nameEn || participantData.user_id,
+              title: tr('B2'),
+              userFullName: userCiam?.nameAr || userCiam?.nameEn || participantData.user_id,
               status: 'Approved',
-              eventName: participantData.event?.name || 'N/A',
-              eventLocation: participantData.event?.location || 'N/A',
+              eventName: participantData.event?.name_ar || participantData.event?.name || tr('C2-13'),
+              eventLocation: participantData.event?.location || tr('C2-13'),
               startDate: moment(participantData.event?.startDate).format('DD-MM-YYYY'),
               endDate: moment(participantData.event?.endDate).format('DD-MM-YYYY'),
               startTime: scheduleData ? scheduleData.start_time : null,
               endTime: scheduleData ? scheduleData.end_time : null,
-              activityName: activityData?.activityName || 'N/A',
-              activityType: activityData?.activityTypeName || 'N/A',
-              rejectionReason: 'Your registration has been re-approved by the event administrator.',
+              activityName: activityData?.name_ar || activityData?.name || tr('C2-13'),
+              activityType: activityData?.activityTypeNameAr || activityData?.activityTypeName || tr('C2-13'),
+              rejectionReason: tr('C1-5'),
               logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`
             }
           });
@@ -643,7 +644,7 @@ class CommonController {
           [participantData.event_id]
         );
         activityDetails = await db.queryOne(
-          `SELECT sa.name, at.name as activityTypeName FROM sport_activities sa LEFT JOIN activity_types at ON sa.activityType = at.id WHERE sa.id = ? AND sa.deletedAt IS NULL`,
+          `SELECT sa.name, sa.name_ar, at.name as activityTypeName, at.name_ar as activityTypeNameAr FROM sport_activities sa LEFT JOIN activity_types at ON sa.activityType = at.id WHERE sa.id = ? AND sa.deletedAt IS NULL`,
           [participantData.activity_id]
         );
         scheduleDetails = await db.queryOne(
@@ -664,34 +665,34 @@ class CommonController {
 
           await storeNotification({
             userId: employeeDomain,
-            title_en: isFullyApproved ? 'Registration Fully Approved' : 'Registration Advanced',
-            title_ar: isFullyApproved ? 'تمت الموافقة الكاملة على التسجيل' : 'تم تقديم التسجيل',
+            title_en: isFullyApproved ? trTitle('D8', 'en') : trTitle('D9', 'en'),
+            title_ar: isFullyApproved ? trTitle('D8', 'ar') : trTitle('D9', 'ar'),
             message_en: isFullyApproved
-              ? `Your registration for "${eventDetails?.name || 'Event'}" has been fully approved.`
-              : `Your registration for "${eventDetails?.name || 'Event'}" has been approved and sent to the next level.`,
+              ? trMessage('D8', 'en', { Event: eventDetails?.name || 'Event' })
+              : trMessage('D9', 'en', { Event: eventDetails?.name || 'Event' }),
             message_ar: isFullyApproved
-              ? `تمت الموافقة الكاملة على تسجيلك في "${eventDetails?.name_ar || eventDetails?.name || 'الفعالية'}".`
-              : `تمت الموافقة على تسجيلك في "${eventDetails?.name_ar || eventDetails?.name || 'الفعالية'}" وإرساله إلى المستوى التالي.`,
+              ? trMessage('D8', 'ar')
+              : trMessage('D9', 'ar', { event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية' }),
           });
 
           if (userCiam?.emailAddress) {
             await sendEmail({
               to: userCiam.emailAddress,
-              subject: `GDRFA - Registration ${isFullyApproved ? 'Approved' : 'Advanced'}: ${eventDetails?.name || 'Event'}`,
+              subject: tr(isFullyApproved ? 'A3' : 'A4'),
               template: 'request-status-from-manager.ejs',
               data: {
-                title: isFullyApproved ? 'Registration Fully Approved' : 'Registration Advanced',
-                userFullName: userCiam.nameEn || employeeDomain,
+                title: tr(isFullyApproved ? 'B3' : 'B4'),
+                userFullName: userCiam?.nameAr || userCiam?.nameEn || employeeDomain,
                 status: isFullyApproved ? 'Approved' : 'Approved & Advanced',
-                eventName: eventDetails?.name || 'N/A',
-                eventLocation: eventDetails?.location || 'N/A',
-                startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : 'N/A',
-                endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : 'N/A',
+                eventName: eventDetails?.name_ar || eventDetails?.name || tr('C2-13'),
+                eventLocation: eventDetails?.location || tr('C2-13'),
+                startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : tr('C2-13'),
+                endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : tr('C2-13'),
                 startTime: scheduleDetails?.start_time || null,
                 endTime: scheduleDetails?.end_time || null,
-                activityName: activityDetails?.name || 'N/A',
-                activityType: activityDetails?.activityTypeName || 'N/A',
-                rejectionReason: isFullyApproved ? '' : 'Your request has been forwarded to the next approver.',
+                activityName: activityDetails?.name_ar || activityDetails?.name || tr('C2-13'),
+                activityType: activityDetails?.activityTypeNameAr || activityDetails?.activityTypeName || tr('C2-13'),
+                rejectionReason: isFullyApproved ? '' : tr('C1-6'),
                 logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
               },
             });
@@ -715,22 +716,22 @@ class CommonController {
               if (approverData) {
                 await storeNotification({
                   userId: nextRecord.approver_id,
-                  title_en: 'New Approval Request',
-                  title_ar: 'طلب موافقة جديد',
-                  message_en: `Employee ${userCiam?.nameEn || employeeDomain} has requested approval for "${eventDetails?.name || 'Event'}".`,
-                  message_ar: `الموظف ${userCiam?.nameAr || userCiam?.nameEn || employeeDomain} طلب الموافقة على "${eventDetails?.name_ar || eventDetails?.name || 'الفعالية'}".`,
+                  title_en: trTitle('D10', 'en'),
+                  title_ar: trTitle('D10', 'ar'),
+                  message_en: trMessage('D10', 'en', { Name: userCiam?.nameEn || employeeDomain, Event: eventDetails?.name || 'Event' }),
+                  message_ar: trMessage('D10', 'ar', { name: userCiam?.nameAr || userCiam?.nameEn || employeeDomain, event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية' }),
                 });
 
                 if (approverData.emailAddress) {
                   await sendEmail({
                     to: approverData.emailAddress,
-                    subject: `GDRFA - Approval Request: ${eventDetails?.name || 'Event'}`,
+                    subject: tr('A5'),
                     template: 'employee-participant-to-manager.ejs',
                     data: {
-                      title: 'New Approval Request',
-                      managerData: { name: approverData.nameEn || nextRecord.approver_id },
-                      userData: { name: userCiam?.nameEn || employeeDomain, email: userCiam?.emailAddress || '', mobile: userCiam?.mobile || '' },
-                      eventData: eventDetails || { name: 'N/A' },
+                      title: tr('B5'),
+                      managerData: { name: approverData.nameAr || approverData.nameEn || nextRecord.approver_id },
+                      userData: { name: userCiam?.nameAr || userCiam?.nameEn || employeeDomain, email: userCiam?.emailAddress || '', phone: userCiam?.mobile || '' },
+                      eventData: { ...eventDetails, name: eventDetails?.name_ar || eventDetails?.name } || { name: tr('C2-13') },
                       logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                     },
                   });
@@ -778,10 +779,10 @@ class CommonController {
                 if (adminDomain) {
                   await storeNotification({
                     userId: adminDomain,
-                    title_en: 'Fully Approved Registration',
-                    title_ar: 'تسجيل تمت الموافقة عليه بالكامل',
-                    message_en: `Registration for "${eventDetails?.name || 'Event'}" by ${userCiam?.nameEn || employeeDomain} is fully approved.`,
-                    message_ar: `تمت الموافقة الكاملة على تسجيل "${eventDetails?.name_ar || eventDetails?.name || 'الفعالية'}" من قبل ${userCiam?.nameAr || userCiam?.nameEn || employeeDomain}.`,
+                    title_en: trTitle('D11', 'en'),
+                    title_ar: trTitle('D11', 'ar'),
+                    message_en: trMessage('D11', 'en', { Event: eventDetails?.name || 'Event', Name: userCiam?.nameEn || employeeDomain }),
+                    message_ar: trMessage('D11', 'ar', { event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية', name: userCiam?.nameAr || userCiam?.nameEn || employeeDomain }),
                   });
                 }
               }
@@ -802,34 +803,34 @@ class CommonController {
 
           await storeNotification({
             userId: employeeDomain,
-            title_en: 'Registration Rejected',
-            title_ar: 'تم رفض التسجيل',
+            title_en: trTitle('D13', 'en'),
+            title_ar: trTitle('D13', 'ar'),
             message_en: rejectComment
-              ? `Your registration for "${eventDetails?.name || 'Event'}" was rejected. Reason: ${rejectComment}`
-              : `Your registration for "${eventDetails?.name || 'Event'}" was rejected.`,
+              ? trMessage('D14', 'en', { Event: eventDetails?.name || 'Event', Reason: rejectComment })
+              : trMessage('D13', 'en', { Event: eventDetails?.name || 'Event' }),
             message_ar: rejectComment
-              ? '\u062A\u0645 \u0631\u0641\u0636 \u062A\u0633\u062C\u064A\u0644\u0643 \u0641\u064A "' + (eventDetails?.name_ar || eventDetails?.name || '\u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629') + '". \u0627\u0644\u0633\u0628\u0628: ' + rejectComment
-              : '\u062A\u0645 \u0631\u0641\u0636 \u062A\u0633\u062C\u064A\u0644\u0643 \u0641\u064A "' + (eventDetails?.name_ar || eventDetails?.name || '\u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629') + '".',
+              ? trMessage('D14', 'ar', { event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية', reason: rejectComment })
+              : trMessage('D13', 'ar', { event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية' }),
           });
 
           if (userCiam?.emailAddress) {
             await sendEmail({
               to: userCiam.emailAddress,
-              subject: `GDRFA - Registration Rejected: ${eventDetails?.name || 'Event'}`,
+              subject: tr('A6'),
               template: 'request-status-from-manager.ejs',
               data: {
-                title: 'Registration Rejected',
-                userFullName: userCiam.nameEn || employeeDomain,
+                title: tr('B6'),
+                userFullName: userCiam?.nameAr || userCiam?.nameEn || employeeDomain,
                 status: 'Rejected',
-                eventName: eventDetails?.name || 'N/A',
-                eventLocation: eventDetails?.location || 'N/A',
-                startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : 'N/A',
-                endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : 'N/A',
+                eventName: eventDetails?.name_ar || eventDetails?.name || tr('C2-13'),
+                eventLocation: eventDetails?.location || tr('C2-13'),
+                startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : tr('C2-13'),
+                endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : tr('C2-13'),
                 startTime: scheduleDetails?.start_time || null,
                 endTime: scheduleDetails?.end_time || null,
-                activityName: activityDetails?.name || 'N/A',
-                activityType: activityDetails?.activityTypeName || 'N/A',
-                rejectionReason: rejectComment || 'Your request was not approved.',
+                activityName: activityDetails?.name_ar || activityDetails?.name || tr('C2-13'),
+                activityType: activityDetails?.activityTypeNameAr || activityDetails?.activityTypeName || tr('C2-13'),
+                rejectionReason: rejectComment || tr('C1-7'),
                 logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
               },
             });
@@ -855,8 +856,11 @@ class CommonController {
         return res.status(404).json({ success: false, message: 'Facility request not found' });
       }
 
-      const facility = await Facilities.findByPk(facilityData.facility_id);
-      const facilityName = facility ? facility.title : 'Unknown Facility';
+      const facility = await db.queryOne(
+        `SELECT title, title_ar FROM facilities WHERE id = ? AND deletedAt IS NULL`,
+        [facilityData.facility_id]
+      );
+      const facilityName = facility ? (facility.title_ar || facility.title) : tr('C2-13');
 
       // Update status first
       const result = await utilsChangeStatus(req, model, id, 'status', status);
@@ -868,20 +872,16 @@ class CommonController {
       }
 
       const email = facilityData.email;
-      const name = facilityData.name;
+      const name = facilityData.name_ar || facilityData.name;
       const dbDate = facilityData.date;
       const approvedDate = dbDate ? moment.utc(dbDate).format('DD-MM-YYYY hh:mm A') : moment().format('DD-MM-YYYY hh:mm A');
       let facilityStatus = status;
-      let statusAr = '';
       if (facilityStatus === '1') {
-        facilityStatus = 'Approved';
-        statusAr = 'تمت الموافقة';
+        facilityStatus = statusValue('G1');
       } else if (facilityStatus === '2') {
-        facilityStatus = 'Rejected';
-        statusAr = 'مرفوض';
+        facilityStatus = statusValue('G3');
       } else {
-        facilityStatus = 'Cancelled';
-        statusAr = 'ملغي';
+        facilityStatus = statusValue('G2');
       }
 
       // Store in-app notification (commented: user_id was storing email instead of actual user ID)
@@ -901,10 +901,10 @@ class CommonController {
       try {
         await sendEmail({
           to: email,
-          subject: 'GDRFA - Your Facility Request Status Changed',
+          subject: tr('A7'),
           template: 'facility-template.ejs',
           data: {
-            title: 'Facility Request Status Changed',
+            title: tr('B7'),
             name,
             facilityName,
             facilityStatus,

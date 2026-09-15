@@ -52,7 +52,7 @@ const ManageParticipants = () => {
     if (!statusChangeTarget) return;
     const isReject = statusChangeTarget.status === "2";
     if (isReject && !rejectReason.trim()) {
-      toast.error("Rejection reason is required");
+      toast.error(t.participants?.rejectReasonRequired || "Rejection reason is required");
       return;
     }
     setStatusChanging(true);
@@ -107,7 +107,7 @@ const ManageParticipants = () => {
       <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <SearchInput
-            placeholder="Search by event name..."
+            placeholder={t.participants?.searchPlaceholder || "Search by event name..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -117,10 +117,10 @@ const ManageParticipants = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="">All Status</option>
-              <option value="0">Pending</option>
-              <option value="1">Approved</option>
-              <option value="2">Rejected</option>
+              <option value="">{t.participants?.allStatus || "All Status"}</option>
+              <option value="0">{t.participants?.filterPending || "Pending"}</option>
+              <option value="1">{t.participants?.filterApproved || "Approved"}</option>
+              <option value="2">{t.participants?.filterRejected || "Rejected"}</option>
             </select>
           </div>
         </div>
@@ -150,43 +150,45 @@ const ManageParticipants = () => {
         open={statusChangeTarget !== null}
         title={
           statusChangeTarget?.currentStatus === "1" && statusChangeTarget?.status === "2"
-            ? "Cancel Registration"
+            ? t.participants?.cancelRegistration || "Cancel Registration"
             : statusChangeTarget?.currentStatus === "2" && statusChangeTarget?.status === "1"
-              ? "Re-approve Participant"
+              ? t.participants?.reapproveParticipant || "Re-approve Participant"
               : statusChangeTarget?.status === "1"
-                ? "Approve Participant"
-                : "Reject Participant"
+                ? t.participants?.approveParticipant || "Approve Participant"
+                : t.participants?.rejectParticipant || "Reject Participant"
         }
         message={
           statusChangeTarget?.currentStatus === "1" && statusChangeTarget?.status === "2"
-            ? "This participant is already approved. Are you sure you want to cancel their registration?"
+            ? t.participants?.cancelRegistrationMsg || "This participant is already approved. Are you sure you want to cancel their registration?"
             : statusChangeTarget?.currentStatus === "2" && statusChangeTarget?.status === "1"
-              ? "This participant was rejected. Are you sure you want to re-approve them?"
-              : `Are you sure you want to ${statusChangeTarget?.status === "1" ? "approve" : "reject"} this participant request?`
+              ? t.participants?.reapproveParticipantMsg || "This participant was rejected. Are you sure you want to re-approve them?"
+              : statusChangeTarget?.status === "1"
+                ? t.participants?.approveParticipantMsg || "Are you sure you want to approve this participant request?"
+                : t.participants?.rejectParticipantMsg || "Are you sure you want to reject this participant request?"
         }
         confirmLabel={
           statusChangeTarget?.currentStatus === "1" && statusChangeTarget?.status === "2"
-            ? "Yes, Cancel"
+            ? t.participants?.yesCancel || "Yes, Cancel"
             : statusChangeTarget?.currentStatus === "2" && statusChangeTarget?.status === "1"
-              ? "Yes, Re-approve"
+              ? t.participants?.yesReapprove || "Yes, Re-approve"
               : statusChangeTarget?.status === "1"
-                ? "Yes, Approve"
-                : "Yes, Reject"
+                ? t.participants?.yesApprove || "Yes, Approve"
+                : t.participants?.yesReject || "Yes, Reject"
         }
-        cancelLabel="Cancel"
+        cancelLabel={t.participants?.cancel || "Cancel"}
         onConfirm={confirmStatusChange}
         onCancel={() => { setStatusChangeTarget(null); setRejectReason(""); }}
         loading={statusChanging}
       >
         {statusChangeTarget?.status === "2" && (
           <div className="mt-3">
-            <label className="block text-sm font-semibold text-gray-600 mb-1">Rejection Reason</label>
+            <label className="block text-sm font-semibold text-gray-600 mb-1">{t.participants?.rejectReason || "Rejection Reason"}</label>
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
               rows={3}
-              placeholder="Enter the reason for rejection..."
+              placeholder={t.participants?.rejectReasonPlaceholder || "Enter the reason for rejection..."}
             />
           </div>
         )}

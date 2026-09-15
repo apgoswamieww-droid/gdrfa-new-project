@@ -2,6 +2,20 @@ const db = require('../../config/dbDirect');
 const imagePath = require('../../utils/imagePath');
 const fs = require('fs');
 const path = require('path');
+const ciamService = require('../../ciam/ciam.service');
+
+async function getArabicNameByEmail(email) {
+  try {
+    const resp = await ciamService.getRecursiveUsers(
+      { pagination: { pageNumber: 1, pageSize: 10000 }, withImages: 0 }
+    );
+    const users = resp?.value || [];
+    const match = users.find(u => String(u.emailAddress || '').toLowerCase() === String(email || '').toLowerCase());
+    if (match?.nameAr) return match.nameAr;
+    if (match?.nameEn) return match.nameEn;
+    return null;
+  } catch { return null; }
+}
 
 class FacilityController {
     // ==================== LIST FACILITIES ====================
@@ -152,11 +166,11 @@ class FacilityController {
             
             const result = await db.query(
                 `SELECT 
-                    FR.id, FR.facility_id, FR.name, FR.email,
+                    FR.id, FR.facility_id, FR.name, FR.name_ar, FR.email,
                     FORMAT(FR.date, 'yyyy-MM-dd HH:mm:ss') as date,
                     FR.description, FR.status,
                     FORMAT(FR.createdAt, 'yyyy-MM-dd HH:mm:ss') as createdAt,
-                    F.title as title, F.image as image
+                    F.title as title, F.title_ar as title_ar, F.image as image
                  FROM [Sports].[dbo].[facility_requests] FR
                  LEFT JOIN [Sports].[dbo].[facilities] F ON FR.facility_id = F.id
                  WHERE FR.deletedAt IS NULL
@@ -171,12 +185,26 @@ class FacilityController {
                  WHERE deletedAt IS NULL`
             );
 
+            const uniqueEmails = [...new Set(result.map(r => r.email).filter(Boolean))];
+            const ciamNameArMap = {};
+            await Promise.all(
+                uniqueEmails.map(async (email) => {
+                    const nameAr = await getArabicNameByEmail(email);
+                    if (nameAr) ciamNameArMap[email] = nameAr;
+                })
+            );
+
+            const dataWithAr = result.map(r => ({
+                ...r,
+                name_ar: r.name_ar || ciamNameArMap[r.email] || r.name,
+            }));
+
             return res.success(
                 {
                     draw,
                     recordsTotal: resultTotal[0].countData,
                     recordsFiltered: resultTotal[0].countData,
-                    data: result,
+                    data: dataWithAr,
                 },
                 req.t ? req.t('Facilities requests loaded successfully') : 'Facilities requests loaded successfully'
             );

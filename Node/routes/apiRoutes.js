@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/api/authController'); // Capital 'A'
 const adminAuthController = require('../controllers/adminApi/adminAuthController');
 const { ensureAuthenticated, verifyToken } = require('../middlewares/authMiddleware');
+const optionalAuth = require('../middlewares/optionalAuth');
 const verifyAdminOrSuperAdmin = require('../middlewares/verifyAdminOrSuperAdmin');
 const verifySuperAdminOnly = require('../middlewares/verifySuperAdminOnly');
 const { authorizeResource } = require('../middlewares/resourceAuthorization');
@@ -92,7 +93,7 @@ router.post('/admin/reset-password', passwordLimiter, adminAuthController.resetP
 
 // Public form submissions – moderate limits
 router.post('/contact-us', publicFormLimiter, ContactUsController.contactStore);
-router.post('/facility-request', publicFormLimiter, facilitiesController.createFacilityRequest);
+router.post('/facility-request', publicFormLimiter, optionalAuth, facilitiesController.createFacilityRequest);
 
 // ═════════════════════════════════════════════════════════════════════
 // 🛡️ AUTHENTICATED ADMIN ROUTES (with adminLimiter)

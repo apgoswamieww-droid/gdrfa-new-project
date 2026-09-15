@@ -4,11 +4,13 @@ export interface FacilityRequest {
   id: number;
   facility_id: number;
   name: string;
+  name_ar?: string;
   email: string;
   date: string;
   status: string;
   createdAt: string;
   title?: string;
+  title_ar?: string;
   image?: string;
 }
 

@@ -2,6 +2,7 @@ const db = require('../../config/dbDirect');
 const responseFormatter = require('../../middlewares/responseFormatter');
 const { getLocalizedMessage } = require('../../utils/apiLanguageHelper');
 const { storeNotification } = require('../../utils/notificationHelper');
+const { trTitle, trMessage } = require('../../utils/translationSheet');
 const ciamService = require('../../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../../utils/ciamTokenHelper');
 const moment = require('moment');
@@ -94,13 +95,13 @@ class FacilitiesController {
             }
 
             await db.query(
-                `INSERT INTO facility_requests (facility_id, name, email, date, description, status, createdAt, updatedAt)
-                 VALUES (?, ?, ?, ?, ?, '0', GETDATE(), GETDATE())`,
-                [facility_id, name, email, dateTime, description]
+                `INSERT INTO facility_requests (facility_id, name, name_ar, email, date, description, status, createdAt, updatedAt)
+                 VALUES (?, ?, ?, ?, ?, ?, '0', GETDATE(), GETDATE())`,
+                [facility_id, name, req.user?.nameAr || null, email, dateTime, description]
             );
 
             const createdRequest = await db.queryOne(
-                `SELECT id, facility_id, name, email, 
+                `SELECT id, facility_id, name, name_ar, email, 
                         CAST(date AS DATE) as date,
                         FORMAT(date, 'hh:mm tt') as time_slot,
                         description, status, createdAt
@@ -126,10 +127,10 @@ class FacilitiesController {
                         try {
                             await storeNotification({
                                 userId: admin.userDomain,
-                                title_en: 'New Facility Booking Request',
-                                title_ar: 'طلب حجز منشأة جديد',
-                                message_en: `${name} has requested to book "${facility.title}" on ${formattedDate} at ${formattedTime}.`,
-                                message_ar: `قام ${name} بطلب حجز "${facility.title}" في ${formattedDate} الساعة ${formattedTime}.`,
+                                title_en: trTitle('D16', 'en'),
+                                title_ar: trTitle('D16', 'ar'),
+                                message_en: trMessage('D16', 'en', { Name: name, Facility: facility.title, startDate: formattedDate, startTime: formattedTime }),
+                                message_ar: trMessage('D16', 'ar', { name, facility: facility.title_ar || facility.title, startdate: formattedDate }),
                             });
                         } catch (notifErr) {
                             console.warn('Failed to store notification for admin:', admin.userDomain, notifErr.message);

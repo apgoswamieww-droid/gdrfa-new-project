@@ -6,22 +6,26 @@ import { useTranslation } from "../../hooks/useTranslation";
 interface KpiModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string }) => void;
-  initialData?: { name: string };
+  onSubmit: (data: { name: string; name_ar?: string }) => void;
+  initialData?: { name: string; name_ar?: string };
   title: string;
 }
 
 const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalProps) => {
   const { t } = useTranslation();
   const [name, setName] = useState("");
+  const [nameAr, setNameAr] = useState("");
   const [error, setError] = useState("");
+  const [errorAr, setErrorAr] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Sync state when modal opens or initialData changes
   useEffect(() => {
     if (isOpen) {
       setName(initialData?.name || "");
+      setNameAr(initialData?.name_ar || "");
       setError("");
+      setErrorAr("");
     }
   }, [isOpen, initialData]);
 
@@ -42,6 +46,7 @@ const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalPro
       return false;
     }
     setError("");
+    setErrorAr("");
     return true;
   };
 
@@ -50,12 +55,17 @@ const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalPro
     if (error) setError("");
   };
 
+  const handleNameArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameAr(e.target.value);
+    if (errorAr) setErrorAr("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
       setSubmitting(true);
       try {
-        await onSubmit({ name: name.trim() });
+        await onSubmit({ name: name.trim(), name_ar: nameAr.trim() });
       } finally {
         setSubmitting(false);
       }
@@ -83,6 +93,14 @@ const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalPro
             onChange={handleNameChange}
             error={error}
             required
+          />
+
+          <InputField
+            label={t.kpi.nameAr}
+            placeholder={t.kpi.placeholder}
+            value={nameAr}
+            onChange={handleNameArChange}
+            error={errorAr}
           />
 
           <div className="flex gap-3 pt-4">

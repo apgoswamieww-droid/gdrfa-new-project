@@ -10,11 +10,11 @@ interface PlanModalProps {
   onSubmit: (data: { year: string; kpi: number }, id?: number) => void;
   initialData?: { id: number; year: string; kpi: number } | null;
   title: string;
-  kpiOptions: { id: number; name: string }[];
+  kpiOptions: { id: number; name: string; name_ar?: string }[];
 }
 
 const PlanModal = ({ isOpen, onClose, onSubmit, initialData, title, kpiOptions }: PlanModalProps) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [year, setYear] = useState("");
   const [kpi, setKpi] = useState("");
   const [errors, setErrors] = useState<{ year?: string; kpi?: string }>({});
@@ -109,7 +109,7 @@ const PlanModal = ({ isOpen, onClose, onSubmit, initialData, title, kpiOptions }
               }}
               options={[
                 { value: "", label: t.plan.selectKpi || "Select KPI" },
-                ...kpiOptions.map(k => ({ value: k.id, label: k.name }))
+                ...kpiOptions.map(k => ({ value: k.id, label: language === "ar" ? (k.name_ar || k.name) : k.name }))
               ]}
               error={errors.kpi}
               required

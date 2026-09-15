@@ -3,6 +3,7 @@ import { apiRequest } from "./request";
 export interface Team {
   id: number;
   name: string;
+  name_ar?: string | null;
   activity: string;
   numberOfMembers: number;
   staffMembers: string | null;

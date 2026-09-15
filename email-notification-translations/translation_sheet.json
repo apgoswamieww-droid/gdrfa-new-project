@@ -1,0 +1,287 @@
+﻿{
+  "sheet": "GDRFA - Email & Notification Translation Sheet (English to Arabic)",
+  "instructions": {
+    "for_client": [
+      "Fill the 'ar' field for every entry.",
+      "Do NOT translate placeholder tokens inside {curly braces} — they are replaced at runtime with real data.",
+      "Keep emojis (📅 ✅ ❌ 👤 📋 👑 🏃 🌟 ✓ 🎯) where they appear.",
+      "Keep the brand name 'GDRFA' unchanged.",
+      "Return the completed file; the developer will integrate the Arabic into the system."
+    ],
+    "placeholders": [
+      { "token": "{User}", "meaning": "Recipient's name" },
+      { "token": "{Manager}", "meaning": "Recipient's name (manager)" },
+      { "token": "{Admin}", "meaning": "Recipient's name (admin)" },
+      { "token": "{Employee}", "meaning": "Recipient's name (employee)" },
+      { "token": "{Event}", "meaning": "Event name" },
+      { "token": "{Event Name}", "meaning": "Event name" },
+      { "token": "{Activity}", "meaning": "Activity name" },
+      { "token": "{Team}", "meaning": "Team name" },
+      { "token": "{Facility}", "meaning": "Facility name" },
+      { "token": "{Name}", "meaning": "Requester / user name" },
+      { "token": "{email}", "meaning": "Email address" },
+      { "token": "{Location}", "meaning": "Event location" },
+      { "token": "{startDate}", "meaning": "Date" },
+      { "token": "{endDate}", "meaning": "Date" },
+      { "token": "{Start} - {End}", "meaning": "Date range" },
+      { "token": "{startTime}", "meaning": "Time" },
+      { "token": "{endTime}", "meaning": "Time" },
+      { "token": "{Status}", "meaning": "Approval / rejection status text" },
+      { "token": "{Reason}", "meaning": "Rejection reason" },
+      { "token": "{comment}", "meaning": "Rejection reason" },
+      { "token": "{Level}", "meaning": "Approval level number" },
+      { "token": "{url}", "meaning": "Clickable link" },
+      { "token": "GDRFA", "meaning": "Keep as 'GDRFA' (brand name)" }
+    ]
+  },
+  "sections": [
+    {
+      "id": "A",
+      "name": "EMAIL SUBJECTS",
+      "items": [
+        { "id": "A1", "type": "Email Subject", "en": "GDRFA - Event Registration Cancelled", "ar": "إلغاء المشاركة في فعالية" },
+        { "id": "A2", "type": "Email Subject", "en": "GDRFA - Event Registration Re-approved", "ar": "إعادة اعتماد المشاركة في فعالية" },
+        { "id": "A3", "type": "Email Subject", "en": "GDRFA - Registration Approved: {Event Name}", "ar": "اعتماد طلب التسجيل لفعالية" },
+        { "id": "A4", "type": "Email Subject", "en": "GDRFA - Registration Advanced: {Event Name}", "ar": "تقدم عملية التسجيل" },
+        { "id": "A5", "type": "Email Subject", "en": "GDRFA - Approval Request: {Event Name}", "ar": "طلب اعتماد" },
+        { "id": "A6", "type": "Email Subject", "en": "GDRFA - Registration Rejected: {Event Name}", "ar": "رفض طلب التسجيل لفعالية" },
+        { "id": "A7", "type": "Email Subject", "en": "GDRFA - Your Facility Request Status Changed", "ar": " تحديث على حالة طلب حجز مرافق رياضية" },
+        { "id": "A8", "type": "Email Subject", "en": "GDRFA - Welcome to Our Platform!", "ar": "أهلاً بكم منصة الأنشطة الرياضية!" },
+        { "id": "A9", "type": "Email Subject", "en": "GDRFA - Reset Your Password", "ar": "إعادة ضبط كلمة المرور" },
+        { "id": "A10", "type": "Email Subject", "en": "GDRFA Admin - Reset Your Password", "ar": "قم بإعادة ضبط كلمة المرور الخاصة بك" },
+        { "id": "A11", "type": "Email Subject", "en": "GDRFA - Event Participation Request: {Event Name}", "ar": "طلب المشاركة بفعالية" },
+        { "id": "A12", "type": "Email Subject", "en": "GDRFA - New Participant Registered: {Event Name}", "ar": "تسجيل مشارك جديد" },
+        { "id": "A13", "type": "Email Subject", "en": "GDRFA - Activity Invitation: {Event Name}", "ar": "دعوة للمشاركة بفعالية" }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "EMAIL HEADER TITLES & BUTTON TEXT",
+      "items": [
+        { "id": "B1", "type": "Email Title", "en": "Registration Cancelled", "ar": "إلغاء طلب المشاركة" },
+        { "id": "B2", "type": "Email Title", "en": "Registration Re-approved", "ar": "إعادة اعتماد طلب المشاركة" },
+        { "id": "B3", "type": "Email Title", "en": "Registration Fully Approved", "ar": "الاعتماد النهائي لطلب المشاركة" },
+        { "id": "B4", "type": "Email Title", "en": "Registration Advanced", "ar": "تقدم عملية التسجيل" },
+        { "id": "B5", "type": "Email Title", "en": "New Approval Request", "ar": "اعتماد جديد" },
+        { "id": "B6", "type": "Email Title", "en": "Registration Rejected", "ar": "رفض طلب المشاركة" },
+        { "id": "B7", "type": "Email Title", "en": "Facility Request Status Changed", "ar": " تحديث على حالة طلب حجز مرافق رياضية " },
+        { "id": "B8", "type": "Email Title", "en": "Welcome to Our Platform!", "ar": "أهلاً بكم في منصة الأنشطة الرياضية" },
+        { "id": "B9", "type": "Email Button", "en": "Get Started", "ar": "ابدأ الآن" },
+        { "id": "B10", "type": "Email Title", "en": "Reset Your Password", "ar": "قم بإعادة ضبط كلمة المرور الخاصة بك" },
+        { "id": "B11", "type": "Email Button", "en": "Reset Password", "ar": "إعادة ضبط كلمة المرور" },
+        { "id": "B12", "type": "Email Title", "en": "Reset Your Admin Password", "ar": "قم بإعادة ضبط كلمة مرور مسؤول النظام" },
+        { "id": "B13", "type": "Email Title", "en": "Employee Event Participation Notification", "ar": "إشعار طلب مشاركة بفعالية" },
+        { "id": "B14", "type": "Email Title", "en": "New Event Participant Registration", "ar": "تسجيل مشارك جديد بالفعالية" },
+        { "id": "B15", "type": "Email Title", "en": "You're Invited to a Sports Activity!", "ar": "دعوة للمشاركة بفعالية رياضية" }
+      ]
+    },
+    {
+      "id": "C",
+      "name": "EMAIL BODY TEXT",
+      "subsections": [
+        {
+          "id": "C1",
+          "name": "Registration status email (cancelled / approved / advanced / rejected)",
+          "items": [
+            { "id": "C1-1", "type": "Email Body", "en": "Hello {User}!", "ar": "مرحباً {User}!" },
+            { "id": "C1-2", "type": "Email Body", "en": "Your request to participate in the following event has been {Status}.", "ar": "نود إعلامكم بأنه تمت مراجعة طلب المشاركة بفعالية رياضية و تم تحديث حالة الطلب إلى {Status}" },
+            { "id": "C1-3", "type": "Email Body", "en": "Reason: {Reason}", "ar": "" },
+            { "id": "C1-4", "type": "Email Body", "en": "Your registration has been cancelled by the event administrator.", "ar": "نود إعلامكم بأنة تم إلغاء مشاركتكم في الفعالية من قبل مسؤول النظام" },
+            { "id": "C1-5", "type": "Email Body", "en": "Your registration has been re-approved by the event administrator.", "ar": "نود إعلامكم بأنه تم إعادة اعتماد طلب مشاركتكم بالفعالية الرياضية" },
+            { "id": "C1-6", "type": "Email Body", "en": "Your request has been forwarded to the next approver.", "ar": "تمت إحالة طلبكم إلى جهة الاعتماد التالية لاستكمال خطوات الاعتماد " },
+            { "id": "C1-7", "type": "Email Body", "en": "Your request was not approved.", "ar": "لم تتم الموافقة على طلبك" },
+            { "id": "C1-8", "type": "Email Body", "en": "To {Start} - {End}", "ar": "إلى {start}-{end}" },
+            { "id": "C1-9", "type": "Email Body", "en": "✅ We look forward to your participation in the event.", "ar": "✅ يسعدنا مشاركتكم في الفعالية، و نتطلع إلى حضوركم و مشاركتكم" },
+            { "id": "C1-10", "type": "Email Body", "en": "❌ Your registration has been cancelled by the administrator.", "ar": "❌ نحيطكم علمًا بأنه تم إلغاء تسجيلكم من قِبل مسؤول النظام " },
+            { "id": "C1-11", "type": "Email Body", "en": "If you believe this is a mistake, please contact the event administrator.", "ar": " إذا كنتم تعتقدون أن هذا الإجراء قد تم عن طريق الخطأ، يرجى التواصل مع الجهة المسؤولة عن إدارة الفعالية." },
+            { "id": "C1-12", "type": "Email Body", "en": "❌ Unfortunately, your request could not be approved at this time.", "ar": "❌ نأسف لإبلاغكم بأنه تعذّر اعتماد طلبكم في الوقت الحالي" }
+          ]
+        },
+        {
+          "id": "C2",
+          "name": "Common table labels (registration status / admin notification emails)",
+          "items": [
+            { "id": "C2-1", "type": "Table Label", "en": "📅 Event Details", "ar": "تفاصيل الفعالية" },
+            { "id": "C2-2", "type": "Table Label", "en": "Event Name:", "ar": "اسم الفعالية" },
+            { "id": "C2-3", "type": "Table Label", "en": "Location:", "ar": "الموقع" },
+            { "id": "C2-4", "type": "Table Label", "en": "Start Date:", "ar": "تاريخ بدء الفعالية" },
+            { "id": "C2-5", "type": "Table Label", "en": "End Date:", "ar": "تاريخ انتهاء الفعالية" },
+            { "id": "C2-6", "type": "Table Label", "en": "Start Time:", "ar": "وقت بدء الفعالية" },
+            { "id": "C2-7", "type": "Table Label", "en": "End Time:", "ar": "وقت انتهاء الفعالية" },
+            { "id": "C2-8", "type": "Table Label", "en": "Activity:", "ar": "النشاط" },
+            { "id": "C2-9", "type": "Table Label", "en": "Date:", "ar": "التاريخ" },
+            { "id": "C2-10", "type": "Table Label", "en": "Time:", "ar": "الوقت" },
+            { "id": "C2-11", "type": "Table Label", "en": "Description:", "ar": "التفاصيل" },
+            { "id": "C2-12", "type": "Table Label", "en": "Status:", "ar": "الحالة" },
+            { "id": "C2-13", "type": "Table Label", "en": "N/A", "ar": "غير متاح" }
+          ]
+        },
+        {
+          "id": "C3",
+          "name": "Email sign-off / footer (all emails)",
+          "items": [
+            { "id": "C3-1", "type": "Email Footer", "en": "Best regards,", "ar": "و تفضلوا بقبول فائق الاحترام و التقدير" },
+            { "id": "C3-2", "type": "Email Footer", "en": "GDRFA Sports & Recreation Department", "ar": "إدارة الشؤون الرياضية" },
+            { "id": "C3-3", "type": "Email Footer", "en": "GDRFA Events Team", "ar": "فريق تنظيم الفعاليات" },
+            { "id": "C3-4", "type": "Email Footer", "en": "The GDRFA Team", "ar": "فريق الإدارة العامة للهوية و شؤون الأجانب" },
+            { "id": "C3-5", "type": "Email Footer", "en": "General Directorate of Residency and Foreigners Affairs", "ar": "الإدارة العامة للهوية و شؤون الأجانب" },
+            { "id": "C3-6", "type": "Email Footer", "en": "Sports & Recreation Department - Event Management System", "ar": "إدارة الشؤون الرياضية- تنظيم الفعاليات" },
+            { "id": "C3-7", "type": "Email Footer", "en": "Sports & Recreation Department", "ar": "إدارة الشؤون الرياضية" },
+            { "id": "C3-8", "type": "Email Footer", "en": "© 2025 GDRFA. All rights reserved.", "ar": "© 2025 الإدارة العامة للإقامة وشؤون الأجانب – جميع الحقوق محفوظة " }
+          ]
+        },
+        {
+          "id": "C4",
+          "name": "Manager notification email (team member registered)",
+          "items": [
+            { "id": "C4-1", "type": "Email Body", "en": "Hello {Manager},", "ar": " مرحباً {manager}" },
+            { "id": "C4-2", "type": "Email Body", "en": "We would like to inform you that your team member {Member} has successfully registered for an event. Please find the complete details below:", "ar": " نحيطكم علمًا بأن عضو فريقكم {Member} قد أتم بنجاح إجراءات التسجيل في الفعالية. يرجى التكرم بالاطلاع أدناه على كافة تفاصيل التسجيل" },
+            { "id": "C4-3", "type": "Email Body", "en": "User Details", "ar": "تفاصيل المستخدم" },
+            { "id": "C4-4", "type": "Email Body", "en": "Full Name:", "ar": "الاسم الكامل" },
+            { "id": "C4-5", "type": "Email Body", "en": "Email:", "ar": "البريد الإلكتروني" },
+            { "id": "C4-6", "type": "Email Body", "en": "Phone:", "ar": "رقم الهاتف" },
+            { "id": "C4-7", "type": "Email Body", "en": "User Link:", "ar": "رابط المستخدم:" },
+            { "id": "C4-8", "type": "Email Body", "en": "View User Details", "ar": "عرض تفاصيل المستخدم" },
+            { "id": "C4-9", "type": "Email Body", "en": "This is an automated notification to keep you informed about your team member's event participation. Please review the details and contact us if you require any additional information.", "ar": " هذا إشعار آلي لإحاطتكم علمًا بمشاركة عضو فريقكم في الفعالية. يرجى التكرم بمراجعة التفاصيل الواردة أعلاه، وفي حال الحاجة إلى أي معلومات إضافية، يرجى التواصل معنا" }
+          ]
+        },
+        {
+          "id": "C5",
+          "name": "Facility request status email",
+          "items": [
+            { "id": "C5-1", "type": "Email Body", "en": "Hello {Name},", "ar": " مرحباً{name}،" },
+            { "id": "C5-2", "type": "Email Body", "en": "Your facility booking request status has been updated. Here are the details:", "ar": "تم تحديث حالة طلب حجز المرافق الرياضية الخاص بكم. التفاصيل موضحة أدناه:" },
+            { "id": "C5-3", "type": "Email Body", "en": "Facility:", "ar": "المنشأة الرياضية" },
+            { "id": "C5-4", "type": "Email Body", "en": "If you have any questions regarding this request, please contact our support team.", "ar": " في حال وجود أي استفسارات أو ملاحظات تتعلق بهذا الطلب، يرجى التكرم بالتواصل مع فريق الدعم المختص للحصول على المساعدة والمعلومات اللازمة" }
+          ]
+        },
+        {
+          "id": "C6",
+          "name": "Password reset / welcome email",
+          "items": [
+            { "id": "C6-1", "type": "Email Body", "en": "Hello, {username}!", "ar": " مرحباً {username}،" },
+            { "id": "C6-2", "type": "Email Body", "en": "You recently requested to reset your password. Click the button below to reset it.", "ar": "لقد قمت بتقديم طلب لإعادة ضبط كلمة المرور الخاصة بكم. لإتمام عملية إعادة الضبط، يرجى الضغط على الزر أدناه واتباع التعليمات الظاهرة على الشاشة" },
+            { "id": "C6-3", "type": "Email Body", "en": "If you did not request a password reset, you can ignore this email.", "ar": " إذا لم تكونوا قد تقدمتم بطلب لإعادة ضبط كلمة المرور، فيرجى تجاهل هذه الرسالة وعدم اتخاذ أي إجراء بشأنها " },
+            { "id": "C6-4", "type": "Email Body", "en": "Thanks for choosing GDRFA Admin.", "ar": "شكراً لك على اختيارك" },
+            { "id": "C6-5", "type": "Email Body", "en": "Unsubscribe", "ar": "إلغاء مشاركة" },
+            { "id": "C6-6", "type": "Email Body", "en": "these alerts.", "ar": "هذه التنبيهات" }
+          ]
+        },
+        {
+          "id": "C7",
+          "name": "Admin - new participant registration email",
+          "items": [
+            { "id": "C7-1", "type": "Email Body", "en": "Hello {Admin}!", "ar": " مرحباً{admin}،" },
+            { "id": "C7-2", "type": "Email Body", "en": "A new participant has registered for your event {Event}. Please review the details below and take appropriate action if needed.", "ar": " نحيطكم علمًا بأنه تم تسجيل مشارك جديد في الفعالية {Event}. يرجى التكرم بالاطلاع على تفاصيل التسجيل أدناه، واتخاذ ما يلزم من إجراءات وفقًا لذلك" },
+            { "id": "C7-3", "type": "Email Body", "en": "👤 Participant Information", "ar": "بيانات المشارك" },
+            { "id": "C7-4", "type": "Email Body", "en": "Name:", "ar": "الاسم" },
+            { "id": "C7-5", "type": "Email Body", "en": "Mobile:", "ar": "رقم الهاتف المحمول" },
+            { "id": "C7-6", "type": "Email Body", "en": "Registration Type:", "ar": "نوع التسجيل" },
+            { "id": "C7-7", "type": "Email Body", "en": "🏃 Individual Participant", "ar": "مشارك فردي" },
+            { "id": "C7-8", "type": "Email Body", "en": "👑 Team Captain", "ar": "مشاركة فريق" },
+            { "id": "C7-9", "type": "Email Body", "en": "Registration Date:", "ar": "تاريخ التسجيل" },
+            { "id": "C7-10", "type": "Email Body", "en": "📋 Administrative Actions", "ar": "الاجراءات الإدارية" },
+            { "id": "C7-11", "type": "Email Body", "en": "Review participant's profile and eligibility", "ar": "مراجعة بيانات المشارك و أهليته للمشاركة" },
+            { "id": "C7-12", "type": "Email Body", "en": "Verify participant meets event requirements", "ar": " التحقق من استيفاء المشارك لمتطلبات الفعالية" },
+            { "id": "C7-13", "type": "Email Body", "en": "Contact participant if additional information is needed", "ar": " التواصل مع المشارك في حال الحاجة إلى معلومات إضافية" },
+            { "id": "C7-14", "type": "Email Body", "en": "Update event participant list and manage capacity", "ar": " تحديث قائمة المشاركين في الفعالية وإدارة الطاقة الاستيعابية  },
+            { "id": "C7-15", "type": "Email Body", "en": "Take action on pending approvals if required", "ar": " مراجعة طلبات الموافقة قيد الإجراء واتخاذ ما يلزم من إجراءات، حسب الحاجة " },
+            { "id": "C7-16", "type": "Email Button", "en": "View Participant Profile", "ar": "عرض بيانات المشارك" },
+            { "id": "C7-17", "type": "Email Button", "en": "Manage Event", "ar": "إدارة الفعالية" },
+            { "id": "C7-18", "type": "Email Body", "en": "This is an automated notification from the GDRFA Sports Management System.", "ar": " هذا إشعار آلي صادر عن نظام إدارة الأنشطة الرياضية التابع للإدارة العامة للإقامة وشؤون الأجانب" },
+            { "id": "C7-19", "type": "Email Body", "en": "You are receiving this email because you are listed as an administrator for this event.", "ar": " نود إفادتكم بأن هذا الإشعار موجّه إليكم بصفتكم المسؤول المعتمد عن إدارة الفعالية" }
+          ]
+        },
+        {
+          "id": "C8",
+          "name": "Activity invitation email (employee invited to sports activity)",
+          "items": [
+            { "id": "C8-1", "type": "Email Body", "en": "Hello {Employee}!", "ar": " مرحباً {employee}!" },
+            { "id": "C8-2", "type": "Email Body", "en": "We are excited to inform you that you have been invited to participate in a new activity. This is a great opportunity to engage in sports and recreational activities.", "ar": " يسرّنا إبلاغكم بأنه قد تمت دعوتكم للمشاركة في فعالية جديدة. وتمثل هذه الدعوة فرصة للمشاركة في الأنشطة الرياضية والترفيهية والاستفادة من البرامج والفعاليات المتاحة. " },
+            { "id": "C8-3", "type": "Email Body", "en": "Your Team Information", "ar": "بيانات فريقك" },
+            { "id": "C8-4", "type": "Email Body", "en": "How to Participate", "ar": "كيفية المشاركة" },
+            { "id": "C8-5", "type": "Email Body", "en": "Team Name:", "ar": "اسم الفريق" },
+            { "id": "C8-6", "type": "Email Body", "en": "Your Role:", "ar": "الدور الخاص بك" },
+            { "id": "C8-7", "type": "Email Body", "en": "Please log in to the GDRFA Sports Portal to view the full event details, check the schedule, and confirm your participation.", "ar": " يرجى تسجيل الدخول إلى منصة الأنشطة الرياضية التابعة للإدارة العامة للإقامة وشؤون الأجانب للاطلاع على التفاصيل الكاملة للفعالية، ومراجعة الجدول الزمني، وتأكيد مشاركتكم. " },
+            { "id": "C8-8", "type": "Email Body", "en": "If you have any questions, please contact your event coordinator.", "ar": " في حال وجود أي استفسارات، يرجى التكرم بالتواصل مع منسق الفعالية المعتمد. " },
+            { "id": "C8-9", "type": "Email Body", "en": "For any questions or concerns, please contact your event coordinator or system administrator.", "ar": " في حال وجود أي استفسارات أو ملاحظات، يرجى التكرم بالتواصل مع منسق الفعالية المعتمد أو مسؤول النظام " }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "IN-APP NOTIFICATIONS (title + message shown inside the portal/app)",
+      "items": [
+        { "id": "D1", "type": "Notification", "title": "New Sports Event: {Event}", "message": "{Event} is now live.", "titleAr": "فعالية جديدة", "messageAr": "جارية الآن" },
+        { "id": "D2", "type": "Notification", "message": "Start: {startDate}", "titleAr": "فعالية رياضية جديدة: {event}", "messageAr": "تاريخ البداية: {startdate}" },
+        { "id": "D3", "type": "Notification", "message": "End: {endDate}", "titleAr": "", "messageAr": "تاريخ الانتهاء: {enddate}" },
+        { "id": "D4", "type": "Notification", "message": "Location: {Location}", "titleAr": "", "messageAr": "الموقع" },
+        { "id": "D5", "type": "Notification", "message": "Open full event details: {url}", "titleAr": "", "messageAr": "تصفح كامل التفاصيل: {url}" },
+        { "id": "D6", "type": "Notification", "title": "Event Participant Status", "message": "Your approved registration has been cancelled by the administrator.", "titleAr": "حالة طلب المشاركة في الفعالية", "messageAr": "تم الغاء مشاركتك من قبل مسؤول النظام." },
+        { "id": "D7", "type": "Notification", "title": "Event Participant Status", "message": "Your registration has been re-approved by the administrator.", "titleAr": "حالة طلب المشاركة في الفعالية", "messageAr": "تمت إعادة اعتماد طلب مشاركتك" },
+        { "id": "D8", "type": "Notification", "title": "Registration Fully Approved", "message": "Your registration for \"{Event}\" has been fully approved.", "titleAr": " الموافقة النهائية على المشاركة", "messageAr": "تمت الموافقة النهائية على طلب مشاركتك" },
+        { "id": "D9", "type": "Notification", "title": "Registration Advanced", "message": "Your registration for \"{Event}\" has been approved and sent to the next level.", "titleAr": "تقدم عملية التسجيل", "messageAr": "نود إعلامكم بتقدم عملية اعتماد طلبكم للمشاركة بفعالية {event} " },
+        { "id": "D10", "type": "Notification", "title": "New Approval Request", "message": "Employee {Name} has requested approval for \"{Event}\".", "titleAr": "طلب اعتماد جديد", "messageAr": "تقدم الموظف {name} بطلب اعتماد للمشاركة في فعالية {event}" },
+        { "id": "D11", "type": "Notification", "title": "Fully Approved Registration", "message": "Registration for \"{Event}\" by {Name} is fully approved.", "titleAr": "اعتماد طلب مشاركة", "messageAr": "تم الاعتماد النهائي لطلب المشاركة بفعالية {event} و الذي تم تقديمه من قبل {name} " },
+        { "id": "D12", "type": "Notification", "title": "Participant Fully Approved", "message": "Registration for \"{Event}\" by {Name} is fully approved.", "titleAr": "اعتماد طلب مشاركة", "messageAr": "تم الاعتماد النهائي لطلب المشاركة بفعالية {event} و الذي تم تقديمه من قبل {name}" },
+        { "id": "D13", "type": "Notification", "title": "Registration Rejected", "message": "Your registration for \"{Event}\" was rejected.", "titleAr": "رفض طلب مشاركة", "messageAr": "تم رفض طلبكم للمشاركة بفعالية {event}" },
+        { "id": "D14", "type": "Notification", "title": "Registration Rejected (with reason)", "message": "Your registration for \"{Event}\" was rejected. Reason: {Reason}", "titleAr": "رفض طلب تسجيل لفعالية", "messageAr": "تم رفض طلبكم للمشاركة بفعالية {event} و ذلك بسبب {reason}" },
+        { "id": "D15", "type": "Notification", "title": "New Registration Approval Request", "message": "{Name} has registered for \"{Event}\" and requires your approval.", "titleAr": "طلب مشاركة جديد", "messageAr": "تقدم الموظف {name} بطلب مشاركة بفعالية {event} و يتطلب اتخاذ الإجراء اللازم" },
+        { "id": "D16", "type": "Notification", "title": "New Facility Booking Request", "message": "{Name} has requested to book \"{Facility}\" on {startDate} at {startTime}.", "titleAr": "طلب حجز مرافق رياضية", "messageAr": "تقدم الموظف {name} بطلب حجز {facility} بتاريخ {startdate} الساعة {startdate}" },
+        { "id": "D17", "type": "Notification", "title": "New Contact Message", "message": "{Name} ({email}) sent a message: {message}", "titleAr": "اشعار رسالة جديدة", "messageAr": "تم استلام رسالة جديدة من {name} ({email}). نص الرسالة: {message}" },
+        { "id": "D18", "type": "Notification", "title": "New Activity Invitation", "message": "You have been invited to the activity \"{Activity}\" for event \"{Event}\".", "titleAr": "دعوة للمشاركة بنشاط فعالية", "messageAr": "يسرنا دعوتكم للمشاركة بنشاط \{activity}\ ضمن فعالية \{event}\ " },
+        { "id": "D19", "type": "Notification", "title": "New Escalated Approval Request", "message": "The previous approver did not respond within 3 days. \"{Employee}\" request for \"{Event}\" has been escalated to you.", "titleAr": "تحويل طلب موافقة جديد", "messageAr": "لم يقم الشخص المخول بالاعتماد السابق باتخاذ اجراء لمدة 3 أيام.و عليه تم تحويل طلب الموظف {employee} للمشاركة بفعالية {event} لكم لاتخاذ  الإجراء اللازم" },
+        { "id": "D20", "type": "Notification", "title": "Request Escalated", "message": "Your registration request for \"{Event}\" was not actioned within 3 days at {Level} level and has been escalated to the next level.", "titleAr": "تحويل طلب", "messageAr": "لم يتم اتخاذ أي اجراء على طلب مشاركتك بفعالية {event} و تم تحويل الطلب للمسؤول التالي لاتخاذ الإجراء اللازم" }
+      ]
+    },
+    {
+      "id": "E",
+      "name": "PUSH NOTIFICATIONS (FCM / mobile + browser push)",
+      "items": [
+        { "id": "E1", "type": "Push", "title": "Event Assignment: {Event}", "message": "You have been assigned to participate in {Event}", "titleAr": "تعيين فعالية", "messageAr": "لقد تم تعيينكم للمشاركة بفعالية {event}" },
+        { "id": "E2", "type": "Push", "title": "Event Update: {Event}", "message": "Event {Event} has been updated", "titleAr": "تحديث فعالية", "messageAr": "تم تحديث فعالية {event}" },
+        { "id": "E3", "type": "Push", "title": "Event Reminder: {Event}", "message": "Don't forget about {Event} happening soon", "titleAr": "تذكير بموعد فعالية {event}", "messageAr": "نود تذكيركم بفعالية {event} و التي ستبدأ قريباً" },
+        { "id": "E4", "type": "Push", "title": "Event Completed: {Event}", "message": "Event {Event} has been completed successfully", "titleAr": "انتهاء فعالية {event}", "messageAr": "تم الانتهاء بنجاح من فعالية {event}" },
+        { "id": "E5", "type": "Push", "title": "Event Notification: {Event}", "message": "You have a notification about {Event}", "titleAr": "إشعار بخصوص فعالية {event}", "messageAr": "لديك إشعار بخصوص فعالية {event}" },
+        { "id": "E6", "type": "Push", "title": "Team Assignment: {Team}", "message": "You have been assigned to team {Team}", "titleAr": "تعيين ضمن فريق: {team}", "messageAr": " يسرنا إعلامكم بأنه تم تعيينكم ضمن الفريق الرياضي: {team}" },
+        { "id": "E7", "type": "Push", "title": "Team Captain: {Team}", "message": "You have been made captain of team {Team}", "titleAr": "رئيس الفريق", "messageAr": "يسرنا إعلامكم بأنه تم اختياركم لمنصب رئيس الفريق الرياضي: {team}" },
+        { "id": "E8", "type": "Push", "title": "Team Notification: {Team}", "message": "You have a notification about team {Team}", "titleAr": "إشعار بخصوص الفريق الرياضي: {team}", "messageAr": "لقد تلقيت إشعاراً بخصوص الفريق الرياضي: {team}" }
+      ]
+    },
+    {
+      "id": "F",
+      "name": "TEST / DEV ONLY (used only by test endpoints — optional to translate)",
+      "items": [
+        { "id": "F1", "type": "Push (Test only)", "title": "Test Notification", "message": "This is a test notification from the platform", "titleAr": "اشعار تجريبي", "messageAr": "تم إصدار هذا الإشعار التجريبي آلياً من منصة الأنشطة الرياضية" },
+        { "id": "F2", "type": "Push (Test only)", "title": "Test Notification", "message": "This is a test notification from GDRFA backend", "titleAr": "اشعار تجريبي", "messageAr": "تم إصدار هذا الإشعار التجريبي  آلياً من أنظمة الإدارة العامة للإقامة و شؤون الأجانب" },
+        { "id": "F3", "type": "Push (Test only)", "title": "Bulk Test Notification", "message": "This is a bulk test notification from GDRFA backend", "titleAr": "إشعار تجريبي جماعي", "messageAr": "تم إصدار هذا الإشعار التجريبي جماعياً بصورة آلية من أنظمة الإدارة العامة للإقامة و شؤون الأجانب" },
+        { "id": "F4", "type": "Push (Test only)", "title": "Role-based Test Notification", "message": "This is a role-based test notification from GDRFA backend", "titleAr": "اشعار تجريبي حسب الدور الوظيفي", "messageAr": "تم إصدار هذا الإشعار التجريبي من أنظمة الإدارة العامة للإقامة و شؤون الأجانب حسب الدور الوظيفي" },
+        { "id": "F5", "type": "Push (Test only)", "title": "Broadcast Test Notification", "message": "This is a broadcast test notification from GDRFA backend", "titleAr": "تعميم تجريبي", "messageAr": "تم إصدار هذا التعميم آلياً بواسطة أنظمة الإدارة العامة للإقامة و شؤون الأجانب" },
+        { "id": "F6", "type": "Push (Test only)", "title": "Test Notification for You!", "message": "This is a test notification sent to your account", "titleAr": "إشعار تجريبي", "messageAr": "لقد تلقيت إشعار تجريبي آلي" }
+      ]
+    },
+    {
+      "id": "G",
+      "name": "STANDALONE STATUS / FALLBACK VALUES",
+      "items": [
+        { "id": "G1", "type": "Status Value", "en": "Approved", "ar": "معتمد" },
+        { "id": "G2", "type": "Status Value", "en": "Cancelled", "ar": "ملغي" },
+        { "id": "G3", "type": "Status Value", "en": "Rejected", "ar": "مرفوض" },
+        { "id": "G4", "type": "Status Value", "en": "Individual", "ar": "فردي" },
+        { "id": "G5", "type": "Status Value", "en": "Team Captain", "ar": "رئيس الفريق" },
+        { "id": "G6", "type": "Status Value", "en": "Approved & Advanced", "ar": "تم الاعتماد و التحويل" },
+        { "id": "G7", "type": "Status Value", "en": "TBD", "ar": "يحدد لاحقاً" },
+        { "id": "G8", "type": "Status Value", "en": "Not provided", "ar": "غير متوفر" }
+      ]
+    }
+  ],
+  "notes_for_developer": [
+    "Source files examined: Node/controllers/commonController.js, Node/controllers/api/authController.js, Node/controllers/adminApi/adminAuthController.js, Node/controllers/api/pageController.js, Node/controllers/adminApi/participantController.js, Node/controllers/adminApi/eventAdminController.js, Node/controllers/api/facilitiesController.js, Node/controllers/api/contactUsController.js, Node/cron/autoEscalation.js, Node/utils/PushNotificationUtil.js, Node/utils/emailService.js, Node/controllers/api/notificationController.js, Node/controllers/api/testNotificationController.js.",
+    "Orphan email templates exist in Node/views/emails/ but are NOT wired to any sendEmail call (dead/legacy): team-player-assignment.ejs, regular-event-assignment.ejs, employee-add-to-manager.ejs, email-set-password-template.ejs, coordinator-template.ejs, admin-facility-request-notification.ejs. If translated, they would need wiring; consider removing or wiring separately.",
+    "Dead code: Node/legacy emailTemplates/resetPasswordTemplate.js references a non-existent reset-password.html.",
+    "Dead notification: commonController.js:888-898 has a commented-out 'Facility Request Status Changed' in-app notification.",
+    "Existing Arabic: some in-app notifications already store both title_ar/message_ar (D-table entries). The Arabic fields above should be filled with the client's Arabic to replace/verify the hardcoded Arabic already present."
+  ]
+}
+

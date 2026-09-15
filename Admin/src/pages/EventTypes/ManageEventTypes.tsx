@@ -5,24 +5,26 @@ import EventTypeModal from "./EventTypeModal";
 import { createEventTypeApi, updateEventTypeApi } from "../../api/event-types.api";
 import toast from "react-hot-toast";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ManageEventTypes = () => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
-  const [editData, setEditData] = useState<{ id: number; name: string } | null>(null);
+  const [editData, setEditData] = useState<{ id: number; name: string; name_ar?: string } | null>(null);
 
-  const handleSubmit = async (data: { name: string }, id?: number) => {
+  const handleSubmit = async (data: { name: string; name_ar?: string }, id?: number) => {
     const loadingToast = toast.loading(
-      id ? "Updating..." : "Creating..."
+      id ? t.eventType.updating : t.eventType.creating
     );
     try {
       if (id) {
         await updateEventTypeApi(id, data);
-        toast.success("Event Type updated successfully!", { id: loadingToast });
+        toast.success(t.eventType.successUpdate, { id: loadingToast });
       } else {
         await createEventTypeApi(data);
-        toast.success("Event Type created successfully!", { id: loadingToast });
+        toast.success(t.eventType.successCreate, { id: loadingToast });
       }
       setIsModalOpen(false);
       setEditData(null);
@@ -32,7 +34,7 @@ const ManageEventTypes = () => {
     }
   };
 
-  const handleEdit = (data: { id: number; name: string }) => {
+  const handleEdit = (data: { id: number; name: string; name_ar?: string }) => {
     setEditData(data);
     setIsModalOpen(true);
   };
@@ -42,7 +44,7 @@ const ManageEventTypes = () => {
       <div className="2xl:space-y-8 md:space-y-6 space-y-4 h-full flex flex-col">
         <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
           <SearchInput
-            placeholder="Search for Event Types.."
+            placeholder={t.eventType.search}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -75,7 +77,7 @@ const ManageEventTypes = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            Create Event Type
+            {t.eventType.create}
           </PrimaryBtn>
         </div>
         <EventTypesTable
@@ -93,7 +95,7 @@ const ManageEventTypes = () => {
         }}
         onSubmit={handleSubmit}
         initialData={editData}
-        title={editData ? "Edit Event Type" : "Create Event Type"}
+        title={editData ? t.eventType.edit : t.eventType.create}
       />
     </>
   );

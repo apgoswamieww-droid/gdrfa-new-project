@@ -143,6 +143,13 @@ export default function EventTypesTable({ searchTerm, onEdit, onRefresh }: { sea
       render: (value) => value,
     },
     {
+      key: "name_ar",
+      label: t.eventType.nameAr,
+      sortable: true,
+      className: "font-medium text-black 2xl:text-base/tight text-base/tight",
+      render: (value) => value || "—",
+    },
+    {
       key: "status",
       label: t.eventType.status,
       sortable: true,

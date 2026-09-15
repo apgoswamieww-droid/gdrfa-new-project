@@ -205,6 +205,13 @@ export default function TeamTable({ searchTerm, onEdit, onDelete }: TeamTablePro
       },
     },
     {
+      key: "name_ar",
+      label: t.team.nameAr,
+      sortable: true,
+      className: "font-medium text-black 2xl:text-base/tight text-base/tight",
+      render: (value, r: any) => value || r.name_ar || "—",
+    },
+    {
       key: "teamManager",
       label: t.team.manager,
       sortable: true,

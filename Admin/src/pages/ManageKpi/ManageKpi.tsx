@@ -14,7 +14,7 @@ const ManageKpi = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleCreateKpi = async (data: { name: string }) => {
+  const handleCreateKpi = async (data: { name: string; name_ar?: string }) => {
     const loadingToast = toast.loading(t.kpi.creating);
     try {
       await createKpiApi(data);

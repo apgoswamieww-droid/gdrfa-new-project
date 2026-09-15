@@ -13,6 +13,7 @@ const crypto = require("crypto");
 const { getApiLanguage, getLocalizedMessage } = require('../../utils/apiLanguageHelper');
 const ciamService = require('../../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../../utils/ciamTokenHelper');
+const { tr } = require('../../utils/translationSheet');
 require('dotenv').config();
 
 function minutesToHHMM(minutes) {
@@ -74,14 +75,14 @@ class ApiController {
 
             await sendEmail({
                 to: email,
-                subject: 'GDRFA - Welcome to Our Platform!',
+                subject: tr('A8'),
                 template: 'email-reset-password-template.ejs',
                 data: {
-                    title: 'Welcome to Our Platform!',
+                    title: tr('B8'),
                     username: name || 'User',
                     logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                     resetLink: `${process.env.APP_URL}/dashboard`,
-                    buttonText: 'Get Started',
+                    buttonText: tr('B9'),
                     role: 'user'
                 }
             });
@@ -584,14 +585,14 @@ class ApiController {
 
             await sendEmail({
                 to: email,
-                subject: 'GDRFA - Reset Your Password',
+                subject: tr('A9'),
                 template: 'email-reset-password-template.ejs',
                 data: {
                     resetLink,
-                    title: 'Reset Your Password',
+                    title: tr('B10'),
                     logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                     username: user.name || 'User',
-                    buttonText: 'Reset Password',
+                    buttonText: tr('B11'),
                     role: 'user'
                 }
             });

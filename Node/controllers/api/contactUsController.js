@@ -2,6 +2,7 @@ const db = require('../../config/dbDirect');
 const responseFormatter = require('../../middlewares/responseFormatter');
 const { getLocalizedMessage } = require('../../utils/apiLanguageHelper');
 const { storeNotification } = require('../../utils/notificationHelper');
+const { trTitle, trMessage } = require('../../utils/translationSheet');
 require('dotenv').config();
 
 class ContactUsController {
@@ -46,10 +47,10 @@ class ContactUsController {
                 for (const admin of adminUsers) {
                     await storeNotification({
                         userId: admin.userDomain,
-                        title_en: 'New Contact Message',
-                        title_ar: 'رسالة اتصال جديدة',
-                        message_en: `${name} (${email}) sent a message: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`,
-                        message_ar: `${name} (${email}) أرسل رسالة: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`,
+                        title_en: trTitle('D17', 'en'),
+                        title_ar: trTitle('D17', 'ar'),
+                        message_en: trMessage('D17', 'en', { Name: name, email, message: message.substring(0, 100) + (message.length > 100 ? '...' : '') }),
+                        message_ar: trMessage('D17', 'ar', { name, email, message: message.substring(0, 100) + (message.length > 100 ? '...' : '') }),
                     });
                 }
             }

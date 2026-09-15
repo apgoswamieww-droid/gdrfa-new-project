@@ -29,7 +29,7 @@ const ManageSponsor = () => {
       setRefreshKey((prev) => prev + 1);
     } catch (error: any) {
       console.error("Failed to save sponsor:", error);
-      toast.error(error.message || "Something went wrong", { id: loadingToast });
+      toast.error(error.message || t.sponsor.errorSave, { id: loadingToast });
     }
   };
 
@@ -59,7 +59,7 @@ const ManageSponsor = () => {
                 setRefreshKey((prev) => prev + 1);
               } catch (error: any) {
                 console.error("Failed to delete sponsor:", error);
-                toast.error(error.message || "Failed to delete sponsor", { id: loadingToast });
+                toast.error(error.message || t.sponsor.errorFetch, { id: loadingToast });
               }
             }}
             className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer"

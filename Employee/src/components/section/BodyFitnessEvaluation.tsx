@@ -51,7 +51,7 @@ export default function BodyFitnessEvaluationYo() {
 
                     if (response.data?.categories) {
                         // console.log(`[BodyFitnessEvaluation] 🔵 STEP 4: Setting ${response.data.categories.length} categories into state`);
-                        response.data.categories.forEach((cat: any, i: number) => {
+                        response.data.categories.forEach((_cat: any, _i: number) => {
                             // console.log(`[BodyFitnessEvaluation]   Category[${i}]:`, {
                             //     category_id: cat.category_id,
                             //     category_name: cat.category_name,

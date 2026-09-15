@@ -42,8 +42,8 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
 
   const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = "Sponsor name is required";
-    if (!websiteUrl.trim()) newErrors.websiteUrl = "Website URL is required";
+    if (!name.trim()) newErrors.name = t.sponsor.nameRequired;
+    if (!websiteUrl.trim()) newErrors.websiteUrl = t.sponsor.websiteUrlRequired;
 
     if (field) {
       setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
@@ -90,14 +90,14 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
 
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      toast.error("Only image files (JPG, PNG, GIF, WebP) are allowed.");
+      toast.error(t.sponsor.onlyImages);
       e.target.value = "";
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error("Image size must be less than 5 MB.");
+      toast.error(t.sponsor.imageSize);
       e.target.value = "";
       return;
     }
@@ -155,7 +155,7 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
                 <div className="relative group pointer-events-none">
                   <img src={logoPreview} alt="Preview" className="w-24 h-24 rounded-lg object-cover border" />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg text-white text-xs pointer-events-none">
-                    Change
+                    {t.sponsor.change}
                   </div>
                 </div>
               ) : (
@@ -163,8 +163,8 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
                   <svg className="w-8 h-8 text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-medium text-secondary">Click to upload logo</span>
-                  <span className="text-[10px] text-secondary/50">PNG, JPG up to 5MB</span>
+                  <span className="text-sm font-medium text-secondary">{t.sponsor.clickToUpload}</span>
+                  <span className="text-[10px] text-secondary/50">{t.sponsor.fileHint}</span>
                 </div>
               )}
             </div>

@@ -21,7 +21,7 @@ class PlanController {
             }
             
             const plans = await db.query(`
-                SELECT p.id, p.year, p.kpi, p.status, p.createdAt, p.updatedAt, k.name as kpi_name 
+                SELECT p.id, p.year, p.kpi, p.status, p.createdAt, p.updatedAt, k.name as kpi_name, k.name_ar as kpi_name_ar
                 FROM plans p
                 LEFT JOIN kpis k ON p.kpi = k.id
                 WHERE p.deletedAt IS NULL 
@@ -137,7 +137,7 @@ class PlanController {
 
     static async getKpis(req, res) {
         try {
-            const kpis = await db.query(`SELECT id, name FROM kpis WHERE status = '1' AND deletedAt IS NULL ORDER BY name`);
+            const kpis = await db.query(`SELECT id, name, name_ar FROM kpis WHERE status = '1' AND deletedAt IS NULL ORDER BY name`);
             return res.json({
                 status: true,
                 message: 'KPIs retrieved successfully',

@@ -44,9 +44,9 @@ export default function PlansTable({ searchTerm, onEdit, onRefresh, kpiOptions =
   searchTerm: string; 
   onEdit: (data: Plan) => void; 
   onRefresh: () => void;
-  kpiOptions?: { id: number; name: string }[];
+  kpiOptions?: { id: number; name: string; name_ar?: string }[];
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [data, setData] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -68,19 +68,24 @@ export default function PlansTable({ searchTerm, onEdit, onRefresh, kpiOptions =
     fetchPlans();
   }, []);
 
-  const getKpiName = (kpiId: number) => {
-    if (!kpiOptions) return `KPI #${kpiId}`;
-    const kpi = kpiOptions.find(k => k.id === kpiId);
-    return kpi ? kpi.name : `KPI #${kpiId}`;
+  const getKpiName = (plan: Plan) => {
+    if (!kpiOptions) return `KPI #${plan.kpi}`;
+    const kpi = kpiOptions.find(k => k.id === plan.kpi);
+    if (kpi) {
+      return language === "ar" ? (kpi.name_ar || kpi.name) : kpi.name;
+    }
+    return language === "ar"
+      ? (plan.kpi_name_ar || plan.kpi_name || `KPI #${plan.kpi}`)
+      : (plan.kpi_name || plan.kpi_name_ar || `KPI #${plan.kpi}`);
   };
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
     return data.filter((plan) =>
       plan.year?.toString().includes(searchTerm) ||
-      getKpiName(plan.kpi).toLowerCase().includes(searchTerm.toLowerCase())
+      getKpiName(plan).toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [data, searchTerm, kpiOptions]);
+  }, [data, searchTerm, kpiOptions, language]);
 
   const handleToggleStatus = async (row: Plan) => {
     const newStatus = row.status === "1" ? "0" : "1";
@@ -159,7 +164,7 @@ export default function PlansTable({ searchTerm, onEdit, onRefresh, kpiOptions =
       label: t.plan.kpi || "KPI",
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
-      render: (_value, row) => getKpiName(row.kpi),
+      render: (_value, row) => getKpiName(row),
     },
     {
       key: "status",

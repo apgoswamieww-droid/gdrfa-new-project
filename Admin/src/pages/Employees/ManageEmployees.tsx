@@ -2,8 +2,10 @@ import { useState } from "react";
 import EmployeesTable from "./EmployeesTable";
 import EmployeeViewModal from "./EmployeeViewModal";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ManageEmployees = () => {
+  const { t } = useTranslation();
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, _setRefreshKey] = useState(0);
@@ -36,7 +38,7 @@ const ManageEmployees = () => {
       <div className="2xl:space-y-8 md:space-y-6 space-y-4 h-full flex flex-col">
         <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
           <SearchInput
-            placeholder="Search for Employees.."
+            placeholder={t.employee.search}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Faq } from "../../api/faqs.api";
 import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
+import { useTranslation } from "../../hooks/useTranslation";
 
 interface FaqModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface FaqModalProps {
 }
 
 const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     question: "",
     question_ar: "",
@@ -46,10 +48,10 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.question.trim()) newErrors.question = "Question (EN) is required";
-    if (!formData.question_ar.trim()) newErrors.question_ar = "Question (AR) is required";
-    if (!formData.answer.trim()) newErrors.answer = "Answer (EN) is required";
-    if (!formData.answer_ar.trim()) newErrors.answer_ar = "Answer (AR) is required";
+    if (!formData.question.trim()) newErrors.question = t.faq.questionEnRequired;
+    if (!formData.question_ar.trim()) newErrors.question_ar = t.faq.questionArRequired;
+    if (!formData.answer.trim()) newErrors.answer = t.faq.answerEnRequired;
+    if (!formData.answer_ar.trim()) newErrors.answer_ar = t.faq.answerArRequired;
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -82,8 +84,8 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
           <form onSubmit={handleSubmit} className="p-4 space-y-6">
           <div className="grid grid-cols-1 gap-3">
             <InputField
-              label="Question (English)"
-              placeholder="Question"
+              label={t.faq.questionEnLabel}
+              placeholder={t.faq.questionPlaceholder}
               value={formData.question}
               onChange={(e) => {
                 setFormData({ ...formData, question: e.target.value });
@@ -94,12 +96,12 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
             />
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-secondary/50 text-right">
-                السؤال (بالعربية)
+                {t.faq.questionArLabel}
                 <span className="text-red-500 mr-0.5">*</span>
               </label>
               <input
                 className={`transition-all duration-200 bg-white border rounded-full py-1.5 px-4 w-full focus:outline-none text-sm text-gray-700 placeholder-gray-400 text-right ${errors.question_ar ? "border-red-400 focus:ring-1 focus:ring-red-100" : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10"}`}
-                placeholder="السؤال"
+                placeholder={t.faq.questionPlaceholder}
                 value={formData.question_ar}
                 onChange={(e) => {
                   setFormData({ ...formData, question_ar: e.target.value });
@@ -112,7 +114,7 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-secondary/50">Answer (English) <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-semibold text-secondary/50">{t.faq.answerEnLabel} <span className="text-red-500">*</span></label>
               <textarea
                 className={`w-full px-4 py-3 bg-white border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/10 min-h-20 resize-none transition-all ${errors.answer ? "border-red-400" : "border-[#364B9B66]"}`}
                 value={formData.answer}
@@ -120,13 +122,13 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
                   setFormData({ ...formData, answer: e.target.value });
                   if (errors.answer) setErrors({ ...errors, answer: "" });
                 }}
-                placeholder="Answer..."
+                placeholder={t.faq.answerPlaceholder}
               />
               {errors.answer && <p className="text-xs text-red-500 ps-1">{errors.answer}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-secondary/50 text-right">الإجابة (بالعربية) <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-semibold text-secondary/50 text-right">{t.faq.answerArLabel} <span className="text-red-500">*</span></label>
               <textarea
                 className={`w-full px-4 py-3 bg-white border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/10 min-h-20 resize-none transition-all text-right ${errors.answer_ar ? "border-red-400" : "border-[#364B9B66]"}`}
                 value={formData.answer_ar}
@@ -134,7 +136,7 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
                   setFormData({ ...formData, answer_ar: e.target.value });
                   if (errors.answer_ar) setErrors({ ...errors, answer_ar: "" });
                 }}
-                placeholder="الإجابة..."
+                placeholder={t.faq.answerPlaceholder}
               />
               {errors.answer_ar && <p className="text-xs text-red-500 pr-1 text-right">{errors.answer_ar}</p>}
             </div>
@@ -146,10 +148,10 @@ const FaqModal = ({ isOpen, onClose, onSubmit, initialData, title }: FaqModalPro
               onClick={onClose}
               className="flex justify-center items-center font-bold text-sm rounded-lg px-6 border border-gray-200 py-1.5 text-gray-600 hover:bg-gray-50 transition-all cursor-pointer flex-1"
             >
-              Cancel
+              {t.faq.cancel}
             </button>
             <PrimaryBtn type="submit" className="flex-1" disabled={submitting}>
-              {submitting ? "Saving..." : (initialData ? "Update FAQ" : "Create FAQ")}
+              {submitting ? t.faq.saving : (initialData ? t.faq.updateFaq : t.faq.createFaq)}
             </PrimaryBtn>
           </div>
         </form>

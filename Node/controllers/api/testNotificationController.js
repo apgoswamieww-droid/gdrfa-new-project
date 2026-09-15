@@ -1,6 +1,7 @@
 const PushNotificationUtil = require('../../utils/PushNotificationUtil');
 const User = require('../../models/User');
 const { validationResult } = require('express-validator');
+const { tr, trTitle, trMessage } = require('../../utils/translationSheet');
 
 /**
  * Test controller for push notifications using PushNotificationUtil
@@ -25,10 +26,10 @@ class TestNotificationController {
 
             const result = await PushNotificationUtil.sendToUser({
                 userId: parseInt(userId),
-                title: title || 'Test Notification',
-                body: body || 'This is a test notification from GDRFA backend',
-                titleAr: titleAr || 'إشعار تجريبي',
-                bodyAr: bodyAr || 'هذا إشعار تجريبي من الخلفية GDRFA',
+                title: title || trTitle('F6', 'en'),
+                body: body || trMessage('F6', 'en'),
+                titleAr: titleAr || trTitle('F6', 'ar'),
+                bodyAr: bodyAr || trMessage('F6', 'ar'),
                 data: data || { type: 'test', timestamp: new Date().toISOString() },
                 saveToDb: true
             });
@@ -60,10 +61,10 @@ class TestNotificationController {
 
             const result = await PushNotificationUtil.sendToUsers({
                 userIds: userIds.map(id => parseInt(id)),
-                title: title || 'Bulk Test Notification',
-                body: body || 'This is a bulk test notification from GDRFA backend',
-                titleAr: titleAr || 'إشعار جماعي تجريبي',
-                bodyAr: bodyAr || 'هذا إشعار جماعي تجريبي من الخلفية GDRFA',
+                title: title || trTitle('F3', 'en'),
+                body: body || trMessage('F3', 'en'),
+                titleAr: titleAr || trTitle('F3', 'ar'),
+                bodyAr: bodyAr || trMessage('F3', 'ar'),
                 data: data || { type: 'bulk_test', timestamp: new Date().toISOString() },
                 saveToDb: true
             });
@@ -95,10 +96,10 @@ class TestNotificationController {
 
             const result = await PushNotificationUtil.sendToRole({
                 roleNames: roleNames,
-                title: title || 'Role-based Test Notification',
-                body: body || 'This is a role-based test notification from GDRFA backend',
-                titleAr: titleAr || 'إشعار تجريبي حسب الدور',
-                bodyAr: bodyAr || 'هذا إشعار تجريبي حسب الدور من الخلفية GDRFA',
+                title: title || trTitle('F4', 'en'),
+                body: body || trMessage('F4', 'en'),
+                titleAr: titleAr || trTitle('F4', 'ar'),
+                bodyAr: bodyAr || trMessage('F4', 'ar'),
                 data: data || { type: 'role_test', roles: roleNames, timestamp: new Date().toISOString() },
                 saveToDb: true
             });
@@ -120,10 +121,10 @@ class TestNotificationController {
             const { title, body, titleAr, bodyAr, data } = req.body;
 
             const result = await PushNotificationUtil.sendBroadcast({
-                title: title || 'Broadcast Test Notification',
-                body: body || 'This is a broadcast test notification from GDRFA backend',
-                titleAr: titleAr || 'إشعار بث تجريبي',
-                bodyAr: bodyAr || 'هذا إشعار بث تجريبي من الخلفية GDRFA',
+                title: title || trTitle('F5', 'en'),
+                body: body || trMessage('F5', 'en'),
+                titleAr: titleAr || trTitle('F5', 'ar'),
+                bodyAr: bodyAr || trMessage('F5', 'ar'),
                 data: data || { type: 'broadcast_test', timestamp: new Date().toISOString() },
                 saveToDb: true
             });

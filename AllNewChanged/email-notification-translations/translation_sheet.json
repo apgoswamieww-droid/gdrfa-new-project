@@ -1,0 +1,286 @@
+{
+  "sheet": "GDRFA - Email & Notification Translation Sheet (English to Arabic)",
+  "instructions": {
+    "for_client": [
+      "Fill the 'ar' field for every entry.",
+      "Do NOT translate placeholder tokens inside {curly braces} — they are replaced at runtime with real data.",
+      "Keep emojis (📅 ✅ ❌ 👤 📋 👑 🏃 🌟 ✓ 🎯) where they appear.",
+      "Keep the brand name 'GDRFA' unchanged.",
+      "Return the completed file; the developer will integrate the Arabic into the system."
+    ],
+    "placeholders": [
+      { "token": "{User}", "meaning": "Recipient's name" },
+      { "token": "{Manager}", "meaning": "Recipient's name (manager)" },
+      { "token": "{Admin}", "meaning": "Recipient's name (admin)" },
+      { "token": "{Employee}", "meaning": "Recipient's name (employee)" },
+      { "token": "{Event}", "meaning": "Event name" },
+      { "token": "{Event Name}", "meaning": "Event name" },
+      { "token": "{Activity}", "meaning": "Activity name" },
+      { "token": "{Team}", "meaning": "Team name" },
+      { "token": "{Facility}", "meaning": "Facility name" },
+      { "token": "{Name}", "meaning": "Requester / user name" },
+      { "token": "{email}", "meaning": "Email address" },
+      { "token": "{Location}", "meaning": "Event location" },
+      { "token": "{startDate}", "meaning": "Date" },
+      { "token": "{endDate}", "meaning": "Date" },
+      { "token": "{Start} - {End}", "meaning": "Date range" },
+      { "token": "{startTime}", "meaning": "Time" },
+      { "token": "{endTime}", "meaning": "Time" },
+      { "token": "{Status}", "meaning": "Approval / rejection status text" },
+      { "token": "{Reason}", "meaning": "Rejection reason" },
+      { "token": "{comment}", "meaning": "Rejection reason" },
+      { "token": "{Level}", "meaning": "Approval level number" },
+      { "token": "{url}", "meaning": "Clickable link" },
+      { "token": "GDRFA", "meaning": "Keep as 'GDRFA' (brand name)" }
+    ]
+  },
+  "sections": [
+    {
+      "id": "A",
+      "name": "EMAIL SUBJECTS",
+      "items": [
+        { "id": "A1", "type": "Email Subject", "en": "GDRFA - Event Registration Cancelled", "ar": "" },
+        { "id": "A2", "type": "Email Subject", "en": "GDRFA - Event Registration Re-approved", "ar": "" },
+        { "id": "A3", "type": "Email Subject", "en": "GDRFA - Registration Approved: {Event Name}", "ar": "" },
+        { "id": "A4", "type": "Email Subject", "en": "GDRFA - Registration Advanced: {Event Name}", "ar": "" },
+        { "id": "A5", "type": "Email Subject", "en": "GDRFA - Approval Request: {Event Name}", "ar": "" },
+        { "id": "A6", "type": "Email Subject", "en": "GDRFA - Registration Rejected: {Event Name}", "ar": "" },
+        { "id": "A7", "type": "Email Subject", "en": "GDRFA - Your Facility Request Status Changed", "ar": "" },
+        { "id": "A8", "type": "Email Subject", "en": "GDRFA - Welcome to Our Platform!", "ar": "" },
+        { "id": "A9", "type": "Email Subject", "en": "GDRFA - Reset Your Password", "ar": "" },
+        { "id": "A10", "type": "Email Subject", "en": "GDRFA Admin - Reset Your Password", "ar": "" },
+        { "id": "A11", "type": "Email Subject", "en": "GDRFA - Event Participation Request: {Event Name}", "ar": "" },
+        { "id": "A12", "type": "Email Subject", "en": "GDRFA - New Participant Registered: {Event Name}", "ar": "" },
+        { "id": "A13", "type": "Email Subject", "en": "GDRFA - Activity Invitation: {Event Name}", "ar": "" }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "EMAIL HEADER TITLES & BUTTON TEXT",
+      "items": [
+        { "id": "B1", "type": "Email Title", "en": "Registration Cancelled", "ar": "" },
+        { "id": "B2", "type": "Email Title", "en": "Registration Re-approved", "ar": "" },
+        { "id": "B3", "type": "Email Title", "en": "Registration Fully Approved", "ar": "" },
+        { "id": "B4", "type": "Email Title", "en": "Registration Advanced", "ar": "" },
+        { "id": "B5", "type": "Email Title", "en": "New Approval Request", "ar": "" },
+        { "id": "B6", "type": "Email Title", "en": "Registration Rejected", "ar": "" },
+        { "id": "B7", "type": "Email Title", "en": "Facility Request Status Changed", "ar": "" },
+        { "id": "B8", "type": "Email Title", "en": "Welcome to Our Platform!", "ar": "" },
+        { "id": "B9", "type": "Email Button", "en": "Get Started", "ar": "" },
+        { "id": "B10", "type": "Email Title", "en": "Reset Your Password", "ar": "" },
+        { "id": "B11", "type": "Email Button", "en": "Reset Password", "ar": "" },
+        { "id": "B12", "type": "Email Title", "en": "Reset Your Admin Password", "ar": "" },
+        { "id": "B13", "type": "Email Title", "en": "Employee Event Participation Notification", "ar": "" },
+        { "id": "B14", "type": "Email Title", "en": "New Event Participant Registration", "ar": "" },
+        { "id": "B15", "type": "Email Title", "en": "You're Invited to a Sports Activity!", "ar": "" }
+      ]
+    },
+    {
+      "id": "C",
+      "name": "EMAIL BODY TEXT",
+      "subsections": [
+        {
+          "id": "C1",
+          "name": "Registration status email (cancelled / approved / advanced / rejected)",
+          "items": [
+            { "id": "C1-1", "type": "Email Body", "en": "Hello {User}!", "ar": "" },
+            { "id": "C1-2", "type": "Email Body", "en": "Your request to participate in the following event has been {Status}.", "ar": "" },
+            { "id": "C1-3", "type": "Email Body", "en": "Reason: {Reason}", "ar": "" },
+            { "id": "C1-4", "type": "Email Body", "en": "Your registration has been cancelled by the event administrator.", "ar": "" },
+            { "id": "C1-5", "type": "Email Body", "en": "Your registration has been re-approved by the event administrator.", "ar": "" },
+            { "id": "C1-6", "type": "Email Body", "en": "Your request has been forwarded to the next approver.", "ar": "" },
+            { "id": "C1-7", "type": "Email Body", "en": "Your request was not approved.", "ar": "" },
+            { "id": "C1-8", "type": "Email Body", "en": "To {Start} - {End}", "ar": "" },
+            { "id": "C1-9", "type": "Email Body", "en": "✅ We look forward to your participation in the event.", "ar": "" },
+            { "id": "C1-10", "type": "Email Body", "en": "❌ Your registration has been cancelled by the administrator.", "ar": "" },
+            { "id": "C1-11", "type": "Email Body", "en": "If you believe this is a mistake, please contact the event administrator.", "ar": "" },
+            { "id": "C1-12", "type": "Email Body", "en": "❌ Unfortunately, your request could not be approved at this time.", "ar": "" }
+          ]
+        },
+        {
+          "id": "C2",
+          "name": "Common table labels (registration status / admin notification emails)",
+          "items": [
+            { "id": "C2-1", "type": "Table Label", "en": "📅 Event Details", "ar": "" },
+            { "id": "C2-2", "type": "Table Label", "en": "Event Name:", "ar": "" },
+            { "id": "C2-3", "type": "Table Label", "en": "Location:", "ar": "" },
+            { "id": "C2-4", "type": "Table Label", "en": "Start Date:", "ar": "" },
+            { "id": "C2-5", "type": "Table Label", "en": "End Date:", "ar": "" },
+            { "id": "C2-6", "type": "Table Label", "en": "Start Time:", "ar": "" },
+            { "id": "C2-7", "type": "Table Label", "en": "End Time:", "ar": "" },
+            { "id": "C2-8", "type": "Table Label", "en": "Activity:", "ar": "" },
+            { "id": "C2-9", "type": "Table Label", "en": "Date:", "ar": "" },
+            { "id": "C2-10", "type": "Table Label", "en": "Time:", "ar": "" },
+            { "id": "C2-11", "type": "Table Label", "en": "Description:", "ar": "" },
+            { "id": "C2-12", "type": "Table Label", "en": "Status:", "ar": "" },
+            { "id": "C2-13", "type": "Table Label", "en": "N/A", "ar": "" }
+          ]
+        },
+        {
+          "id": "C3",
+          "name": "Email sign-off / footer (all emails)",
+          "items": [
+            { "id": "C3-1", "type": "Email Footer", "en": "Best regards,", "ar": "" },
+            { "id": "C3-2", "type": "Email Footer", "en": "GDRFA Sports & Recreation Department", "ar": "" },
+            { "id": "C3-3", "type": "Email Footer", "en": "GDRFA Events Team", "ar": "" },
+            { "id": "C3-4", "type": "Email Footer", "en": "The GDRFA Team", "ar": "" },
+            { "id": "C3-5", "type": "Email Footer", "en": "General Directorate of Residency and Foreigners Affairs", "ar": "" },
+            { "id": "C3-6", "type": "Email Footer", "en": "Sports & Recreation Department - Event Management System", "ar": "" },
+            { "id": "C3-7", "type": "Email Footer", "en": "Sports & Recreation Department", "ar": "" },
+            { "id": "C3-8", "type": "Email Footer", "en": "© 2025 GDRFA. All rights reserved.", "ar": "" }
+          ]
+        },
+        {
+          "id": "C4",
+          "name": "Manager notification email (team member registered)",
+          "items": [
+            { "id": "C4-1", "type": "Email Body", "en": "Hello {Manager},", "ar": "" },
+            { "id": "C4-2", "type": "Email Body", "en": "We would like to inform you that your team member {Member} has successfully registered for an event. Please find the complete details below:", "ar": "" },
+            { "id": "C4-3", "type": "Email Body", "en": "User Details", "ar": "" },
+            { "id": "C4-4", "type": "Email Body", "en": "Full Name:", "ar": "" },
+            { "id": "C4-5", "type": "Email Body", "en": "Email:", "ar": "" },
+            { "id": "C4-6", "type": "Email Body", "en": "Phone:", "ar": "" },
+            { "id": "C4-7", "type": "Email Body", "en": "User Link:", "ar": "" },
+            { "id": "C4-8", "type": "Email Body", "en": "View User Details", "ar": "" },
+            { "id": "C4-9", "type": "Email Body", "en": "This is an automated notification to keep you informed about your team member's event participation. Please review the details and contact us if you require any additional information.", "ar": "" }
+          ]
+        },
+        {
+          "id": "C5",
+          "name": "Facility request status email",
+          "items": [
+            { "id": "C5-1", "type": "Email Body", "en": "Hello {Name},", "ar": "" },
+            { "id": "C5-2", "type": "Email Body", "en": "Your facility request status has been updated. Here are the details:", "ar": "" },
+            { "id": "C5-3", "type": "Email Body", "en": "Facility:", "ar": "" },
+            { "id": "C5-4", "type": "Email Body", "en": "If you have any questions regarding this request, please contact our support team.", "ar": "" }
+          ]
+        },
+        {
+          "id": "C6",
+          "name": "Password reset / welcome email",
+          "items": [
+            { "id": "C6-1", "type": "Email Body", "en": "Hello, {username}!", "ar": "" },
+            { "id": "C6-2", "type": "Email Body", "en": "You recently requested to reset your password. Click the button below to reset it.", "ar": "" },
+            { "id": "C6-3", "type": "Email Body", "en": "If you did not request a password reset, you can ignore this email.", "ar": "" },
+            { "id": "C6-4", "type": "Email Body", "en": "Thanks for choosing GDRFA Admin.", "ar": "" },
+            { "id": "C6-5", "type": "Email Body", "en": "Unsubscribe", "ar": "" },
+            { "id": "C6-6", "type": "Email Body", "en": "these alerts.", "ar": "" }
+          ]
+        },
+        {
+          "id": "C7",
+          "name": "Admin - new participant registration email",
+          "items": [
+            { "id": "C7-1", "type": "Email Body", "en": "Hello {Admin}!", "ar": "" },
+            { "id": "C7-2", "type": "Email Body", "en": "A new participant has registered for your event {Event}. Please review the details below and take appropriate action if needed.", "ar": "" },
+            { "id": "C7-3", "type": "Email Body", "en": "👤 Participant Information", "ar": "" },
+            { "id": "C7-4", "type": "Email Body", "en": "Name:", "ar": "" },
+            { "id": "C7-5", "type": "Email Body", "en": "Mobile:", "ar": "" },
+            { "id": "C7-6", "type": "Email Body", "en": "Registration Type:", "ar": "" },
+            { "id": "C7-7", "type": "Email Body", "en": "🏃 Individual Participant", "ar": "" },
+            { "id": "C7-8", "type": "Email Body", "en": "👑 Team Captain", "ar": "" },
+            { "id": "C7-9", "type": "Email Body", "en": "Registration Date:", "ar": "" },
+            { "id": "C7-10", "type": "Email Body", "en": "📋 Administrative Actions", "ar": "" },
+            { "id": "C7-11", "type": "Email Body", "en": "Review participant's profile and eligibility", "ar": "" },
+            { "id": "C7-12", "type": "Email Body", "en": "Verify participant meets event requirements", "ar": "" },
+            { "id": "C7-13", "type": "Email Body", "en": "Contact participant if additional information is needed", "ar": "" },
+            { "id": "C7-14", "type": "Email Body", "en": "Update event participant list and manage capacity", "ar": "" },
+            { "id": "C7-15", "type": "Email Body", "en": "Take action on pending approvals if required", "ar": "" },
+            { "id": "C7-16", "type": "Email Button", "en": "View Participant Profile", "ar": "" },
+            { "id": "C7-17", "type": "Email Button", "en": "Manage Event", "ar": "" },
+            { "id": "C7-18", "type": "Email Body", "en": "This is an automated notification from the GDRFA Sports Management System.", "ar": "" },
+            { "id": "C7-19", "type": "Email Body", "en": "You are receiving this email because you are listed as an administrator for this event.", "ar": "" }
+          ]
+        },
+        {
+          "id": "C8",
+          "name": "Activity invitation email (employee invited to sports activity)",
+          "items": [
+            { "id": "C8-1", "type": "Email Body", "en": "Hello {Employee}!", "ar": "" },
+            { "id": "C8-2", "type": "Email Body", "en": "We are excited to inform you that you have been invited to participate in a new activity. This is a great opportunity to engage in sports and recreational activities.", "ar": "" },
+            { "id": "C8-3", "type": "Email Body", "en": "Your Team Information", "ar": "" },
+            { "id": "C8-4", "type": "Email Body", "en": "How to Participate", "ar": "" },
+            { "id": "C8-5", "type": "Email Body", "en": "Team Name:", "ar": "" },
+            { "id": "C8-6", "type": "Email Body", "en": "Your Role:", "ar": "" },
+            { "id": "C8-7", "type": "Email Body", "en": "Please log in to the GDRFA Sports Portal to view the full event details, check the schedule, and confirm your participation.", "ar": "" },
+            { "id": "C8-8", "type": "Email Body", "en": "If you have any questions, please contact your event coordinator.", "ar": "" },
+            { "id": "C8-9", "type": "Email Body", "en": "For any questions or concerns, please contact your event coordinator or system administrator.", "ar": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "IN-APP NOTIFICATIONS (title + message shown inside the portal/app)",
+      "items": [
+        { "id": "D1", "type": "Notification", "title": "New Sports Event: {Event}", "message": "{Event} is now live.", "titleAr": "", "messageAr": "" },
+        { "id": "D2", "type": "Notification", "message": "Start: {startDate}", "titleAr": "", "messageAr": "" },
+        { "id": "D3", "type": "Notification", "message": "End: {endDate}", "titleAr": "", "messageAr": "" },
+        { "id": "D4", "type": "Notification", "message": "Location: {Location}", "titleAr": "", "messageAr": "" },
+        { "id": "D5", "type": "Notification", "message": "Open full event details: {url}", "titleAr": "", "messageAr": "" },
+        { "id": "D6", "type": "Notification", "title": "Event Participant Status", "message": "Your approved registration has been cancelled by the administrator.", "titleAr": "", "messageAr": "" },
+        { "id": "D7", "type": "Notification", "title": "Event Participant Status", "message": "Your registration has been re-approved by the administrator.", "titleAr": "", "messageAr": "" },
+        { "id": "D8", "type": "Notification", "title": "Registration Fully Approved", "message": "Your registration for \"{Event}\" has been fully approved.", "titleAr": "", "messageAr": "" },
+        { "id": "D9", "type": "Notification", "title": "Registration Advanced", "message": "Your registration for \"{Event}\" has been approved and sent to the next level.", "titleAr": "", "messageAr": "" },
+        { "id": "D10", "type": "Notification", "title": "New Approval Request", "message": "Employee {Name} has requested approval for \"{Event}\".", "titleAr": "", "messageAr": "" },
+        { "id": "D11", "type": "Notification", "title": "Fully Approved Registration", "message": "Registration for \"{Event}\" by {Name} is fully approved.", "titleAr": "", "messageAr": "" },
+        { "id": "D12", "type": "Notification", "title": "Participant Fully Approved", "message": "Registration for \"{Event}\" by {Name} is fully approved.", "titleAr": "", "messageAr": "" },
+        { "id": "D13", "type": "Notification", "title": "Registration Rejected", "message": "Your registration for \"{Event}\" was rejected.", "titleAr": "", "messageAr": "" },
+        { "id": "D14", "type": "Notification", "title": "Registration Rejected (with reason)", "message": "Your registration for \"{Event}\" was rejected. Reason: {Reason}", "titleAr": "", "messageAr": "" },
+        { "id": "D15", "type": "Notification", "title": "New Registration Approval Request", "message": "{Name} has registered for \"{Event}\" and requires your approval.", "titleAr": "", "messageAr": "" },
+        { "id": "D16", "type": "Notification", "title": "New Facility Booking Request", "message": "{Name} has requested to book \"{Facility}\" on {startDate} at {startTime}.", "titleAr": "", "messageAr": "" },
+        { "id": "D17", "type": "Notification", "title": "New Contact Message", "message": "{Name} ({email}) sent a message: {message}", "titleAr": "", "messageAr": "" },
+        { "id": "D18", "type": "Notification", "title": "New Activity Invitation", "message": "You have been invited to the activity \"{Activity}\" for event \"{Event}\".", "titleAr": "", "messageAr": "" },
+        { "id": "D19", "type": "Notification", "title": "New Escalated Approval Request", "message": "The previous approver did not respond within 3 days. \"{Employee}\" request for \"{Event}\" has been escalated to you.", "titleAr": "", "messageAr": "" },
+        { "id": "D20", "type": "Notification", "title": "Request Escalated", "message": "Your registration request for \"{Event}\" was not actioned within 3 days at {Level} level and has been escalated to the next level.", "titleAr": "", "messageAr": "" }
+      ]
+    },
+    {
+      "id": "E",
+      "name": "PUSH NOTIFICATIONS (FCM / mobile + browser push)",
+      "items": [
+        { "id": "E1", "type": "Push", "title": "Event Assignment: {Event}", "message": "You have been assigned to participate in {Event}", "titleAr": "", "messageAr": "" },
+        { "id": "E2", "type": "Push", "title": "Event Update: {Event}", "message": "Event {Event} has been updated", "titleAr": "", "messageAr": "" },
+        { "id": "E3", "type": "Push", "title": "Event Reminder: {Event}", "message": "Don't forget about {Event} happening soon", "titleAr": "", "messageAr": "" },
+        { "id": "E4", "type": "Push", "title": "Event Completed: {Event}", "message": "Event {Event} has been completed successfully", "titleAr": "", "messageAr": "" },
+        { "id": "E5", "type": "Push", "title": "Event Notification: {Event}", "message": "You have a notification about {Event}", "titleAr": "", "messageAr": "" },
+        { "id": "E6", "type": "Push", "title": "Team Assignment: {Team}", "message": "You have been assigned to team {Team}", "titleAr": "", "messageAr": "" },
+        { "id": "E7", "type": "Push", "title": "Team Captain: {Team}", "message": "You have been made captain of team {Team}", "titleAr": "", "messageAr": "" },
+        { "id": "E8", "type": "Push", "title": "Team Notification: {Team}", "message": "You have a notification about team {Team}", "titleAr": "", "messageAr": "" }
+      ]
+    },
+    {
+      "id": "F",
+      "name": "TEST / DEV ONLY (used only by test endpoints — optional to translate)",
+      "items": [
+        { "id": "F1", "type": "Push (Test only)", "title": "Test Notification", "message": "This is a test notification from the platform", "titleAr": "", "messageAr": "" },
+        { "id": "F2", "type": "Push (Test only)", "title": "Test Notification", "message": "This is a test notification from GDRFA backend", "titleAr": "", "messageAr": "" },
+        { "id": "F3", "type": "Push (Test only)", "title": "Bulk Test Notification", "message": "This is a bulk test notification from GDRFA backend", "titleAr": "", "messageAr": "" },
+        { "id": "F4", "type": "Push (Test only)", "title": "Role-based Test Notification", "message": "This is a role-based test notification from GDRFA backend", "titleAr": "", "messageAr": "" },
+        { "id": "F5", "type": "Push (Test only)", "title": "Broadcast Test Notification", "message": "This is a broadcast test notification from GDRFA backend", "titleAr": "", "messageAr": "" },
+        { "id": "F6", "type": "Push (Test only)", "title": "Test Notification for You!", "message": "This is a test notification sent to your account", "titleAr": "", "messageAr": "" }
+      ]
+    },
+    {
+      "id": "G",
+      "name": "STANDALONE STATUS / FALLBACK VALUES",
+      "items": [
+        { "id": "G1", "type": "Status Value", "en": "Approved", "ar": "" },
+        { "id": "G2", "type": "Status Value", "en": "Cancelled", "ar": "" },
+        { "id": "G3", "type": "Status Value", "en": "Rejected", "ar": "" },
+        { "id": "G4", "type": "Status Value", "en": "Individual", "ar": "" },
+        { "id": "G5", "type": "Status Value", "en": "Team Captain", "ar": "" },
+        { "id": "G6", "type": "Status Value", "en": "Approved & Advanced", "ar": "" },
+        { "id": "G7", "type": "Status Value", "en": "TBD", "ar": "" },
+        { "id": "G8", "type": "Status Value", "en": "Not provided", "ar": "" }
+      ]
+    }
+  ],
+  "notes_for_developer": [
+    "Source files examined: Node/controllers/commonController.js, Node/controllers/api/authController.js, Node/controllers/adminApi/adminAuthController.js, Node/controllers/api/pageController.js, Node/controllers/adminApi/participantController.js, Node/controllers/adminApi/eventAdminController.js, Node/controllers/api/facilitiesController.js, Node/controllers/api/contactUsController.js, Node/cron/autoEscalation.js, Node/utils/PushNotificationUtil.js, Node/utils/emailService.js, Node/controllers/api/notificationController.js, Node/controllers/api/testNotificationController.js.",
+    "Orphan email templates exist in Node/views/emails/ but are NOT wired to any sendEmail call (dead/legacy): team-player-assignment.ejs, regular-event-assignment.ejs, employee-add-to-manager.ejs, email-set-password-template.ejs, coordinator-template.ejs, admin-facility-request-notification.ejs. If translated, they would need wiring; consider removing or wiring separately.",
+    "Dead code: Node/legacy emailTemplates/resetPasswordTemplate.js references a non-existent reset-password.html.",
+    "Dead notification: commonController.js:888-898 has a commented-out 'Facility Request Status Changed' in-app notification.",
+    "Existing Arabic: some in-app notifications already store both title_ar/message_ar (D-table entries). The Arabic fields above should be filled with the client's Arabic to replace/verify the hardcoded Arabic already present."
+  ]
+}

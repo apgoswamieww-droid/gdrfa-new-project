@@ -66,7 +66,7 @@ export default function FacilitiesList() {
                 {t("facilities.title")}
               </h1>
             </div>
-            <p className="text-secondary/60 md:text-lg font-medium lg:max-w-105 text-start">
+            <p className="text-secondary/60 md:text-lg font-medium lg:max-w-105 text-right">
               {t("facilities.subtitle")}
             </p>
           </div>

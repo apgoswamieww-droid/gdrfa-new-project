@@ -12,8 +12,10 @@ import { changeStatusApi } from "../../api/request";
 import type { Facility } from "../../api/facilities.api";
 import toast from "react-hot-toast";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ViewFacilities = () => {
+  const { t } = useTranslation();
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,7 +106,7 @@ const ViewFacilities = () => {
     <div className="p-4 2xl:space-y-8 space-y-6 flex flex-col h-full text-start">
       <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
         <SearchInput
-          placeholder="Search by facility title or description..."
+          placeholder={t.facility.search}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -137,7 +139,7 @@ const ViewFacilities = () => {
               strokeLinejoin="round"
             />
           </svg>
-          Add New Facility
+          {t.facility.addNew}
         </PrimaryBtn>
       </div>
 
@@ -158,7 +160,7 @@ const ViewFacilities = () => {
         }}
         onSubmit={handleSubmit}
         initialData={editingData}
-        title={editingData ? "Edit Facility" : "Create New Facility"}
+        title={editingData ? t.facility.edit : t.facility.createNew}
       />
     </div>
   );

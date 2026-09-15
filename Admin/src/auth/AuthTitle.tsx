@@ -1,5 +1,6 @@
 import { LogoBlack } from "../assets/images/images";
 import { Heading, Text } from "../component/Typography/Typography";
+import { useTranslation } from "../hooks/useTranslation";
 
 const GDRFALogo = () => (
   <div className="flex items-center gap-2">
@@ -12,6 +13,7 @@ const GDRFALogo = () => (
 );
 
 const AuthTitle = () => {
+  const { t } = useTranslation();
   return (
     <>
       <header className="px-6 lg:py-4 pb-4 xl:absolute 2xl:top-5 top-3 2xl:inset-s-3 inset-s-0">
@@ -23,11 +25,11 @@ const AuthTitle = () => {
           variant="h2"
           className="text-base/tight sm:text-lg/tight xl:text-xl/tight 2xl:text-2xl/tight font-bold mb-1"
         >
-          <span className="text-black">Welcome to </span>{" "}
-          <span className="text-primary">GDRFA Sports Portal</span>
+          <span className="text-black">{t.login.welcomeTo}</span>{" "}
+          <span className="text-primary">{t.login.gdrfaSportsPortal}</span>
         </Heading>
         <Text variant="textBase" className=" text-secondary/50 font-bold">
-          Your Gateway to Health &amp; Excellence
+          {t.login.gatewayToHealth}
         </Text>
       </div>
     </>

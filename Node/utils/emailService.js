@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 const path = require('path');
+const { tr } = require('./translationSheet');
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -34,7 +35,7 @@ const sendEmail = async ({ to, subject, template, data, html, text }) => {
         // If template is provided, render it
         if (template) {
             const templatePath = path.join(__dirname, '../views/emails/', template);
-            htmlContent = await ejs.renderFile(templatePath, data || {});
+            htmlContent = await ejs.renderFile(templatePath, { ...(data || {}), tr });
         }
 
         const mailOptions = {

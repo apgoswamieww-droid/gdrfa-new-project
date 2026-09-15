@@ -3,6 +3,7 @@ import type { Facility } from "../../api/facilities.api";
 import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
 import { validateImageDimensions } from "../../utils/validateImage";
+import { useTranslation } from "../../hooks/useTranslation";
 
 interface FacilityModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface FacilityModalProps {
 }
 
 const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: FacilityModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: "",
     title_ar: "",
@@ -148,11 +150,11 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
                   <svg className="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Photo</p>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">{t.facility.image}</p>
                 </div>
               )}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                <p className="text-white text-[10px] font-bold uppercase tracking-widest">Change</p>
+                <p className="text-white text-[10px] font-bold uppercase tracking-widest">{t.facility.change}</p>
               </div>
             </div>
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
@@ -162,8 +164,8 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField
-              label="Title (English)"
-              placeholder="Facility name"
+              label={t.facility.title}
+              placeholder={t.facility.placeholder}
               value={formData.title}
               onChange={(e) => {
                 setFormData({ ...formData, title: e.target.value });
@@ -174,7 +176,7 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
             />
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-secondary/50 text-right">
-                العنوان (بالعربية)
+                {t.facility.titleAr}
                 <span className="text-red-500 mr-0.5">*</span>
               </label>
               <input
@@ -192,7 +194,7 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-secondary/50">Description (English) <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-semibold text-secondary/50">{t.facility.description} <span className="text-red-500">*</span></label>
               <textarea
                 className={`w-full px-4 py-3 bg-white border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/10 min-h-20 resize-none transition-all ${errors.description ? "border-red-400" : "border-[#364B9B66]"}`}
                 value={formData.description}
@@ -200,13 +202,13 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
                   setFormData({ ...formData, description: e.target.value });
                   if (errors.description) setErrors({ ...errors, description: "" });
                 }}
-                placeholder="Details about the facility..."
+                placeholder={t.facility.descriptionPlaceholder}
               />
               {errors.description && <p className="text-xs text-red-500 ps-1">{errors.description}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-secondary/50 text-right">الوصف (بالعربية) <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-semibold text-secondary/50 text-right">{t.facility.descriptionAr} <span className="text-red-500">*</span></label>
               <textarea
                 className={`w-full px-4 py-3 bg-white border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/10 min-h-20 resize-none transition-all text-right ${errors.description_ar ? "border-red-400" : "border-[#364B9B66]"}`}
                 value={formData.description_ar}
@@ -226,10 +228,10 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
               onClick={onClose}
               className="flex justify-center items-center font-bold text-sm rounded-lg px-6 border border-gray-200 py-1.5 text-gray-600 hover:bg-gray-50 transition-all cursor-pointer flex-1"
             >
-              Cancel
+              {t.facility.cancel}
             </button>
             <PrimaryBtn type="submit" className="flex-1" disabled={submitting}>
-              {submitting ? "Saving..." : (initialData ? "Update Facility" : "Create Facility")}
+              {submitting ? t.facility.saving : (initialData ? t.facility.updateFacility : t.facility.create)}
             </PrimaryBtn>
           </div>
         </form>

@@ -41,7 +41,7 @@ const StatusBadge = ({ status, onClick }: { status: string; onClick?: () => void
 
 // ─── Main Component ────────────────────────────────────────────────
 export default function KpiTable({ searchTerm }: { searchTerm: string }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -72,7 +72,7 @@ export default function KpiTable({ searchTerm }: { searchTerm: string }) {
     );
   }, [data, searchTerm]);
 
-  const handleUpdateKpi = async (updatedData: { name: string }) => {
+  const handleUpdateKpi = async (updatedData: { name: string; name_ar?: string }) => {
     if (!editKpi) return;
     const loadingToast = toast.loading(t.kpi.updating);
     try {
@@ -155,7 +155,7 @@ export default function KpiTable({ searchTerm }: { searchTerm: string }) {
       label: t.kpi.name,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/tight text-base/tight",
-      render: (value) => value,
+      render: (value, row) => (language === "ar" ? (row.name_ar || value || "-") : (value || row.name_ar || "-")),
     },
     {
       key: "status",
@@ -219,7 +219,7 @@ export default function KpiTable({ searchTerm }: { searchTerm: string }) {
           isOpen={!!editKpi}
           onClose={() => setEditKpi(null)}
           onSubmit={handleUpdateKpi}
-          initialData={{ name: editKpi.name }}
+          initialData={{ name: editKpi.name, name_ar: editKpi.name_ar }}
           title={t.kpi.edit}
         />
       )}

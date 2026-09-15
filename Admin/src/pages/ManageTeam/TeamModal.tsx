@@ -18,6 +18,7 @@ interface TeamModalProps {
 const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalProps) => {
   const { t } = useTranslation();
   const [name, setName] = useState("");
+  const [nameAr, setNameAr] = useState("");
   const [activity, setActivity] = useState("");
   const [numberOfMembers, setNumberOfMembers] = useState<number>(0);
   const [staffMembers, setStaffMembers] = useState<string[]>([]);
@@ -53,6 +54,7 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
       fetchData();
       if (initialData) {
         setName(initialData.name);
+        setNameAr(initialData.name_ar || "");
         setActivity(initialData.activity);
         setNumberOfMembers(initialData.numberOfMembers);
         setStaffMembers(initialData.staffMembers ? initialData.staffMembers.split(",") : []);
@@ -60,6 +62,7 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
         setImagePreview(initialData.image ? `${import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/"}${initialData.image}` : null);
       } else {
         setName("");
+        setNameAr("");
         setActivity("");
         setNumberOfMembers(0);
         setStaffMembers([]);
@@ -89,6 +92,7 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
 
   const handleFieldChange = (field: string, value: string | number) => {
     if (field === "name") setName(value as string);
+    else if (field === "name_ar") setNameAr(value as string);
     else if (field === "activity") setActivity(value as string);
     else if (field === "numberOfMembers") setNumberOfMembers(Number(value) || 0);
     else if (field === "status") setStatus(value as string);
@@ -107,6 +111,7 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
     if (validate()) {
       const formData = new FormData();
       formData.append("name", name);
+      formData.append("name_ar", nameAr.trim());
       formData.append("activity", activity);
       formData.append("numberOfMembers", numberOfMembers.toString());
       formData.append("staffMembers", staffMembers.join(","));
@@ -171,6 +176,13 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
               onBlur={() => handleBlur("name")}
               error={errors.name}
               required
+            />
+
+            <InputField
+              label={t.team.nameAr}
+              placeholder={t.team.placeholderAr}
+              value={nameAr}
+              onChange={(e) => handleFieldChange("name_ar", e.target.value)}
             />
 
             <Selectfield

@@ -336,36 +336,38 @@ class PushNotificationUtil {
             let title, body, titleAr, bodyAr;
 
             // Determine notification content based on type
+            const { trTitle, trMessage } = require('./translationSheet');
+            const eventKey = event.name_ar || event.name;
             switch (type) {
                 case 'assignment':
-                    title = `Event Assignment: ${event.name}`;
-                    body = `You have been assigned to participate in ${event.name}`;
-                    titleAr = `تعيين فعالية: ${event.name}`;
-                    bodyAr = `تم تعيينك للمشاركة في ${event.name}`;
+                    title = trTitle('E1', 'en', { Event: event.name });
+                    body = trMessage('E1', 'en', { Event: event.name });
+                    titleAr = trTitle('E1', 'ar');
+                    bodyAr = trMessage('E1', 'ar', { event: eventKey });
                     break;
                 case 'update':
-                    title = `Event Update: ${event.name}`;
-                    body = `Event ${event.name} has been updated`;
-                    titleAr = `تحديث الفعالية: ${event.name}`;
-                    bodyAr = `تم تحديث الفعالية ${event.name}`;
+                    title = trTitle('E2', 'en', { Event: event.name });
+                    body = trMessage('E2', 'en', { Event: event.name });
+                    titleAr = trTitle('E2', 'ar');
+                    bodyAr = trMessage('E2', 'ar', { event: eventKey });
                     break;
                 case 'reminder':
-                    title = `Event Reminder: ${event.name}`;
-                    body = `Don't forget about ${event.name} happening soon`;
-                    titleAr = `تذكير الفعالية: ${event.name}`;
-                    bodyAr = `لا تنس ${event.name} التي ستحدث قريباً`;
+                    title = trTitle('E3', 'en', { Event: event.name });
+                    body = trMessage('E3', 'en', { Event: event.name });
+                    titleAr = trTitle('E3', 'ar', { event: eventKey });
+                    bodyAr = trMessage('E3', 'ar', { event: eventKey });
                     break;
                 case 'completion':
-                    title = `Event Completed: ${event.name}`;
-                    body = `Event ${event.name} has been completed successfully`;
-                    titleAr = `اكتملت الفعالية: ${event.name}`;
-                    bodyAr = `تم إنجاز الفعالية ${event.name} بنجاح`;
+                    title = trTitle('E4', 'en', { Event: event.name });
+                    body = trMessage('E4', 'en', { Event: event.name });
+                    titleAr = trTitle('E4', 'ar', { event: eventKey });
+                    bodyAr = trMessage('E4', 'ar', { event: eventKey });
                     break;
                 default:
-                    title = `Event Notification: ${event.name}`;
-                    body = `You have a notification about ${event.name}`;
-                    titleAr = `إشعار الفعالية: ${event.name}`;
-                    bodyAr = `لديك إشعار حول ${event.name}`;
+                    title = trTitle('E5', 'en', { Event: event.name });
+                    body = trMessage('E5', 'en', { Event: event.name });
+                    titleAr = trTitle('E5', 'ar');
+                    bodyAr = trMessage('E5', 'ar', { event: eventKey });
             }
 
             return await this.sendToUsers({
@@ -405,26 +407,28 @@ class PushNotificationUtil {
                 return { success: false, error: 'team and userIds are required' };
             }
 
-            let title, body, titleAr, bodyAr;
+let title, body, titleAr, bodyAr;
 
+            const { trTitle, trMessage } = require('./translationSheet');
+            const teamKey = team.name_ar || team.name;
             switch (type) {
                 case 'assignment':
-                    title = `Team Assignment: ${team.name}`;
-                    body = `You have been assigned to team ${team.name}`;
-                    titleAr = `تعيين الفريق: ${team.name}`;
-                    bodyAr = `تم تعيينك في الفريق ${team.name}`;
+                    title = trTitle('E6', 'en', { Team: team.name });
+                    body = trMessage('E6', 'en', { Team: team.name });
+                    titleAr = trTitle('E6', 'ar', { team: teamKey });
+                    bodyAr = trMessage('E6', 'ar', { team: teamKey });
                     break;
                 case 'captain':
-                    title = `Team Captain: ${team.name}`;
-                    body = `You have been made captain of team ${team.name}`;
-                    titleAr = `قائد الفريق: ${team.name}`;
-                    bodyAr = `تم تعيينك كقائد للفريق ${team.name}`;
+                    title = trTitle('E7', 'en', { Team: team.name });
+                    body = trMessage('E7', 'en', { Team: team.name });
+                    titleAr = trTitle('E7', 'ar');
+                    bodyAr = trMessage('E7', 'ar', { team: teamKey });
                     break;
                 default:
-                    title = `Team Notification: ${team.name}`;
-                    body = `You have a notification about team ${team.name}`;
-                    titleAr = `إشعار الفريق: ${team.name}`;
-                    bodyAr = `لديك إشعار حول الفريق ${team.name}`;
+                    title = trTitle('E8', 'en', { Team: team.name });
+                    body = trMessage('E8', 'en', { Team: team.name });
+                    titleAr = trTitle('E8', 'ar', { team: teamKey });
+                    bodyAr = trMessage('E8', 'ar', { team: teamKey });
             }
 
             return await this.sendToUsers({

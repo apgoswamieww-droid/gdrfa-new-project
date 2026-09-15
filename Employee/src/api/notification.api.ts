@@ -1,8 +1,9 @@
 import { apiRequest } from "./request";
 
-export async function getNotifications(page = 1, limit = 10) {
+export async function getNotifications(page = 1, limit = 10, type?: "unread" | "all") {
+  const typeQuery = type ? `&type=${type}` : "";
   return apiRequest({
-    url: `/notifications?page=${page}&limit=${limit}`,
+    url: `/notifications?page=${page}&limit=${limit}${typeQuery}`,
     method: "GET",
   });
 }

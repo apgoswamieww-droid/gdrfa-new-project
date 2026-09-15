@@ -1,28 +1,8 @@
-const placeholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%23999' font-size='12'%3EImage%3C/text%3E%3C/svg%3E";
+export * from "./images.tsx";
 
-export const AccordionImgOne = placeholder;
-export const AvtarImage = placeholder;
-export const HeroFirst = placeholder;
-export const HeroSecond = placeholder;
-export const HeroThird = placeholder;
-export const HeroFourth = placeholder;
-export const CertificateImg = placeholder;
-export const CertificateSecBg = placeholder;
-export const CloseIcon = placeholder;
-export const EventImg = placeholder;
-export const EventImgThree = placeholder;
-export const EventImgTwo = placeholder;
-export const EvolutionHeadingImg = placeholder;
-export const Fitness1 = placeholder;
-export const Fitness2 = placeholder;
-export const Fitness3 = placeholder;
-export const FooterBg = placeholder;
-export const HeroBanner = placeholder;
-export const LogoImage = placeholder;
-export const MenuIcon = placeholder;
-export const RunningPerson = placeholder;
-export const SportsActivitiesFive = placeholder;
-export const SportsActivitiesFour = placeholder;
-export const SportsActivitiesOne = placeholder;
-export const SportsActivitiesThree = placeholder;
-export const SportsActivitiesTwo = placeholder;
+import { HeroBanner } from "./images.tsx";
+
+export const HeroFirst = HeroBanner;
+export const HeroSecond = HeroBanner;
+export const HeroThird = HeroBanner;
+export const HeroFourth = HeroBanner;

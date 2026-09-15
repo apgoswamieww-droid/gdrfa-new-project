@@ -33,6 +33,7 @@ export default function CmsPageWrapper() {
     if (!slug) return;
     let cancelled = false;
     async function fetchPage() {
+      if (!slug) return;
       setLoading(true);
       setNotFound(false);
       try {

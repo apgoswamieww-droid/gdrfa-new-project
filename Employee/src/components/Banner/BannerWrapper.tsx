@@ -87,7 +87,7 @@ const BannerWrapper = () => {
   return (
     <main className="flex-1 h-full">
       <section
-        className="relative 2xl:py-[6vw] md:py-40 py-20 bg-cover bg-bottom bg-no-repeat xl:h-200 lg:h-175 md:h-120 sm:h-100 xs:h-140 h-135 max-[375px]:h-120 overflow-hidden"
+        className="relative 2xl:py-[6vw] md:py-40 py-20 bg-cover bg-center bg-no-repeat md:h-120 sm:h-100 xs:h-140 h-135 max-[375px]:h-120 lg:h-auto lg:aspect-[1440/800] 2xl:max-h-[900px] overflow-hidden mx-auto"
       >
         <div className="absolute inset-0">
           {slides.map((slide, index) => (
@@ -104,14 +104,27 @@ const BannerWrapper = () => {
                   muted
                   loop
                   playsInline
-                  className="w-full h-full object-cover object-bottom"
+                  className="absolute inset-0"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    objectPosition: "center center",
+                  }}
                 />
               ) : (
-                <img
-                  src={slide.src}
-                  alt={slide.title || ""}
-                  className="w-full h-full object-cover object-bottom"
-                  draggable={false}
+                <div
+                  role="img"
+                  aria-label={slide.title || ""}
+                  className="absolute inset-0"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundImage: `url(${slide.src})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center center",
+                    backgroundRepeat: "no-repeat",
+                  }}
                 />
               )}
             </div>

@@ -18,7 +18,7 @@ const LIBRARIES: ("places" | "drawing" | "geometry")[] = ["places"];
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
 
 const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
@@ -45,7 +45,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [years, setYears] = useState<Array<{ id: number; year: number }>>([]);
+  const [years, setYears] = useState<Array<{ id: number; year: number; name?: string; name_ar?: string }>>([]);
   const [coordinators, setCoordinators] = useState<Array<{ id: string; name: string }>>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -414,7 +414,12 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                 }}
                 options={[
                   { value: "", label: t.events?.selectYear || "Select Year" },
-                  ...years.map((y) => ({ value: y.year, label: y.year.toString() })),
+                  ...years.map((y) => ({
+                    value: y.year,
+                    label: language === "ar"
+                      ? `${y.year} - ${y.name_ar || y.name || ""}`
+                      : `${y.year} - ${y.name || y.name_ar || ""}`,
+                  })),
                 ]}
                 error={errors.year}
                 required
@@ -471,7 +476,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <InputField
                 label={t.events?.name || "Event Name (English)"}
-                placeholder="Enter event name"
+                placeholder={t.events?.namePlaceholder || "Enter event name"}
                 name="name"
                 value={formData.name || ""}
                 onChange={handleChange}
@@ -509,7 +514,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                       ? "border-red-400 focus:ring-1 focus:ring-red-100 bg-red-50"
                       : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10 bg-white"
                     } focus:outline-none`}
-                  placeholder="Select Registration Start Date"
+                  placeholder={t.events?.regStartDatePlaceholder || "Select Registration Start Date"}
                 />
                 {errors.regStartDate && <p className="text-xs text-red-500 ps-1 mt-1">{errors.regStartDate}</p>}
               </div>
@@ -530,7 +535,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                       ? "border-red-400 focus:ring-1 focus:ring-red-100 bg-red-50"
                       : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10 bg-white"
                     } focus:outline-none`}
-                  placeholder="Select Registration End Date"
+                  placeholder={t.events?.regEndDatePlaceholder || "Select Registration End Date"}
                 />
                 {errors.regEndDate && <p className="text-xs text-red-500 ps-1 mt-1">{errors.regEndDate}</p>}
               </div>
@@ -553,7 +558,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                       ? "border-red-400 focus:ring-1 focus:ring-red-100 bg-red-50"
                       : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10 bg-white"
                     } focus:outline-none`}
-                  placeholder="Select Start Date"
+                  placeholder={t.events?.startDatePlaceholder || "Select Start Date"}
                 />
                 {errors.startDate && <p className="text-xs text-red-500 ps-1 mt-1">{errors.startDate}</p>}
               </div>
@@ -574,7 +579,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                       ? "border-red-400 focus:ring-1 focus:ring-red-100 bg-red-50"
                       : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10 bg-white"
                     } focus:outline-none`}
-                  placeholder="Select End Date"
+                  placeholder={t.events?.endDatePlaceholder || "Select End Date"}
                 />
                 {errors.endDate && <p className="text-xs text-red-500 ps-1 mt-1">{errors.endDate}</p>}
               </div>
@@ -644,7 +649,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                 name="eventDescription"
                 value={formData.eventDescription || ""}
                 onChange={handleChange}
-                placeholder="Describe the event..."
+                placeholder={t.events?.descriptionPlaceholder || "Describe the event..."}
                 rows={4}
                 className={`w-full px-4 py-1.5 rounded-lg border bg-white text-sm focus:outline-none focus:ring-1 transition-colors resize-none ${errors.eventDescription
                     ? "border-red-400 focus:ring-red-100"
@@ -698,7 +703,7 @@ const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
                     name="location"
                     value={formData.location || ""}
                     onChange={handleChange}
-                    placeholder="Search for a location"
+                    placeholder={t.events?.locationPlaceholder || "Search for a location"}
                     className={`w-full px-4 py-1.5 rounded-lg border text-sm transition-colors ${errors.location
                         ? "border-red-400 focus:ring-1 focus:ring-red-100 bg-red-50"
                         : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10 bg-white"

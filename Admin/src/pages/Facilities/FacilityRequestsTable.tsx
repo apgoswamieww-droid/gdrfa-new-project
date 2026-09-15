@@ -81,11 +81,13 @@ interface FacilityRequest {
   id: number;
   facility_id: number;
   name: string;
+  name_ar?: string;
   email: string;
   date: string;
   status: string;
   createdAt: string;
   title?: string;
+  title_ar?: string;
   image?: string;
 }
 
@@ -97,7 +99,7 @@ interface FacilityRequestsTableProps {
 
 // ─── Main Component ──────────────────────────────────────────────
 export default function FacilityRequestsTable({ searchTerm, onView, onStatusClick }: FacilityRequestsTableProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [data, setData] = useState<FacilityRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage] = useState(1);
@@ -190,7 +192,9 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
         <div className="flex items-center gap-3">
           <FacilityImage title={row.title} image={row.image} />
           <div>
-            <div className="font-semibold text-gray-900 text-sm">{row.title || "-"}</div>
+            <div className="font-semibold text-gray-900 text-sm">
+              {language === "ar" ? row.title_ar || row.title || "-" : row.title || "-"}
+            </div>
             <div className="text-xs text-gray-500">#{row.facility_id || "-"}</div>
           </div>
         </div>
@@ -202,7 +206,9 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
       sortable: true,
       render: (_, row) => (
         <div>
-          <div className="font-semibold text-gray-900 text-sm">{row.name || "-"}</div>
+          <div className="font-semibold text-gray-900 text-sm">
+            {language === "ar" ? row.name_ar || row.name || "-" : row.name || "-"}
+          </div>
           <div className="text-xs text-gray-500">{row.email || "-"}</div>
         </div>
       ),
@@ -222,7 +228,11 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
       render: (_, row) => (
         <StatusBadge 
           status={row.status} 
-          onClick={() => onStatusClick?.(row.id, row.name, row.title || "Unknown Facility")}
+          onClick={() => onStatusClick?.(
+            row.id,
+            language === "ar" ? row.name_ar || row.name : row.name,
+            language === "ar" ? row.title_ar || row.title || "Unknown Facility" : row.title || "Unknown Facility"
+          )}
           t={t}
         />
       ),

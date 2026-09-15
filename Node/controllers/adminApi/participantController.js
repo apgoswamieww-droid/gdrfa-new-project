@@ -4,6 +4,7 @@ const ciamService = require('../../ciam/ciam.service');
 const approvalWorkflow = require('../../services/approvalWorkflowService');
 const { storeNotification } = require('../../utils/notificationHelper');
 const { sendEmail } = require('../../utils/emailService');
+const { tr, trTitle, trMessage } = require('../../utils/translationSheet');
 const moment = require('moment');
 
 class ParticipantController {
@@ -369,7 +370,7 @@ class ParticipantController {
                         [participant.event_id]
                     );
                     const activityDetails = await db.queryOne(
-                        `SELECT sa.name, at.name as activityTypeName FROM sport_activities sa LEFT JOIN activity_types at ON sa.activityType = at.id WHERE sa.id = ? AND sa.deletedAt IS NULL`,
+                        `SELECT sa.name, sa.name_ar, at.name as activityTypeName, at.name_ar as activityTypeNameAr FROM sport_activities sa LEFT JOIN activity_types at ON sa.activityType = at.id WHERE sa.id = ? AND sa.deletedAt IS NULL`,
                         [participant.activity_id]
                     );
                     const scheduleDetails = await db.queryOne(
@@ -392,10 +393,13 @@ class ParticipantController {
                             if (nextRecord && nextRecord.approver_id) {
                                 await storeNotification({
                                     userId: nextRecord.approver_id,
-                                    title_en: 'New Approval Request',
-                                    title_ar: 'طلب موافقة جديد',
-                                    message_en: 'Employee ' + (employeeCiam?.nameEn || employeeDomain) + ' requests approval for "' + (eventDetails?.name || 'Event') + '".',
-                                    message_ar: '\u0627\u0644\u0645\u0648\u0638\u0641 ' + (employeeCiam?.nameAr || employeeCiam?.nameEn || employeeDomain) + ' \u064A\u0637\u0644\u0628 \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 "' + (eventDetails?.name_ar || eventDetails?.name || '\u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629') + '".',
+                                    title_en: trTitle('D10', 'en'),
+                                    title_ar: trTitle('D10', 'ar'),
+                                    message_en: trMessage('D10', 'en', { Name: employeeCiam?.nameEn || employeeDomain, Event: eventDetails?.name || 'Event' }),
+                                    message_ar: trMessage('D10', 'ar', {
+                                        name: employeeCiam?.nameAr || employeeCiam?.nameEn || employeeDomain,
+                                        event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية',
+                                    }),
                                 });
                             }
                         }
@@ -407,20 +411,20 @@ class ParticipantController {
                             if (employeeCiam?.emailAddress) {
                                 await sendEmail({
                                     to: employeeCiam.emailAddress,
-                                    subject: `GDRFA - Registration Approved: ${eventDetails?.name || 'Event'}`,
+                                    subject: tr('A3'),
                                     template: 'request-status-from-manager.ejs',
                                     data: {
-                                        title: 'Registration Fully Approved',
-                                        userFullName: employeeCiam.nameEn || employeeDomain,
+                                        title: tr('B3'),
+                                        userFullName: employeeCiam.nameAr || employeeCiam.nameEn || employeeDomain,
                                         status: 'Approved',
-                                        eventName: eventDetails?.name || 'N/A',
-                                        eventLocation: eventDetails?.location || 'N/A',
-                                        startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : 'N/A',
-                                        endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : 'N/A',
+                                        eventName: eventDetails?.name_ar || eventDetails?.name || tr('C2-13'),
+                                        eventLocation: eventDetails?.location || tr('C2-13'),
+                                        startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : tr('C2-13'),
+                                        endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : tr('C2-13'),
                                         startTime: scheduleDetails?.start_time || null,
                                         endTime: scheduleDetails?.end_time || null,
-                                        activityName: activityDetails?.name || 'N/A',
-                                        activityType: activityDetails?.activityTypeName || 'N/A',
+                                        activityName: activityDetails?.name_ar || activityDetails?.name || tr('C2-13'),
+                                        activityType: activityDetails?.activityTypeNameAr || activityDetails?.activityTypeName || tr('C2-13'),
                                         rejectionReason: '',
                                         logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                     },
@@ -440,10 +444,13 @@ class ParticipantController {
                                 for (const approverId of uniqueApprovers) {
                                     await storeNotification({
                                         userId: approverId,
-                                        title_en: 'Participant Fully Approved',
-                                        title_ar: 'تمت الموافقة الكاملة على المشارك',
-                                        message_en: `Registration for "${eventDetails?.name || 'Event'}" by ${employeeCiam?.nameEn || employeeDomain} is fully approved.`,
-                                        message_ar: `تمت الموافقة الكاملة على تسجيل "${eventDetails?.name_ar || eventDetails?.name || 'الفعالية'}" من قبل ${employeeCiam?.nameAr || employeeCiam?.nameEn || employeeDomain}.`,
+                                        title_en: trTitle('D11', 'en'),
+                                        title_ar: trTitle('D11', 'ar'),
+                                        message_en: trMessage('D11', 'en', { Event: eventDetails?.name || 'Event', Name: employeeCiam?.nameEn || employeeDomain }),
+                                        message_ar: trMessage('D11', 'ar', {
+                                            event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية',
+                                            name: employeeCiam?.nameAr || employeeCiam?.nameEn || employeeDomain,
+                                        }),
                                     });
                                 }
                             }
@@ -482,10 +489,13 @@ class ParticipantController {
                                     if (adminDomain) {
                                         await storeNotification({
                                             userId: adminDomain,
-                                            title_en: 'Fully Approved Registration',
-                                            title_ar: 'تسجيل تمت الموافقة عليه بالكامل',
-                                            message_en: `Registration for "${eventDetails?.name || 'Event'}" by ${employeeCiam?.nameEn || employeeDomain} is fully approved.`,
-                                            message_ar: `تمت الموافقة الكاملة على تسجيل "${eventDetails?.name_ar || eventDetails?.name || 'الفعالية'}" من قبل ${employeeCiam?.nameAr || employeeCiam?.nameEn || employeeDomain}.`,
+                                            title_en: trTitle('D11', 'en'),
+                                            title_ar: trTitle('D11', 'ar'),
+                                            message_en: trMessage('D11', 'en', { Event: eventDetails?.name || 'Event', Name: employeeCiam?.nameEn || employeeDomain }),
+                                            message_ar: trMessage('D11', 'ar', {
+                                                event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية',
+                                                name: employeeCiam?.nameAr || employeeCiam?.nameEn || employeeDomain,
+                                            }),
                                         });
                                     }
                                 }
@@ -495,34 +505,34 @@ class ParticipantController {
                         // ── REJECTED: notify employee ──
                         await storeNotification({
                             userId: employeeDomain,
-                            title_en: 'Registration Rejected',
-                            title_ar: 'تم رفض التسجيل',
+                            title_en: trTitle('D13', 'en'),
+                            title_ar: trTitle('D13', 'ar'),
                             message_en: comment
-                                ? `Your registration for "${eventDetails?.name || 'Event'}" was rejected. Reason: ${comment}`
-                                : `Your registration for "${eventDetails?.name || 'Event'}" was rejected.`,
+                                ? trMessage('D14', 'en', { Event: eventDetails?.name || 'Event', Reason: comment })
+                                : trMessage('D13', 'en', { Event: eventDetails?.name || 'Event' }),
                             message_ar: comment
-                                ? '\u062A\u0645 \u0631\u0641\u0636 \u062A\u0633\u062C\u064A\u0644\u0643 \u0641\u064A "' + (eventDetails?.name_ar || eventDetails?.name || '\u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629') + '". \u0627\u0644\u0633\u0628\u0628: ' + comment
-                                : '\u062A\u0645 \u0631\u0641\u0636 \u062A\u0633\u062C\u064A\u0644\u0643 \u0641\u064A "' + (eventDetails?.name_ar || eventDetails?.name || '\u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629') + '".',
+                                ? trMessage('D14', 'ar', { event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية', reason: comment })
+                                : trMessage('D13', 'ar', { event: eventDetails?.name_ar || eventDetails?.name || 'الفعالية' }),
                         });
 
                         if (employeeCiam?.emailAddress) {
                             await sendEmail({
                                 to: employeeCiam.emailAddress,
-                                subject: `GDRFA - Registration Rejected: ${eventDetails?.name || 'Event'}`,
+                                subject: tr('A6'),
                                 template: 'request-status-from-manager.ejs',
                                 data: {
-                                    title: 'Registration Rejected',
-                                    userFullName: employeeCiam.nameEn || employeeDomain,
+                                    title: tr('B6'),
+                                    userFullName: employeeCiam.nameAr || employeeCiam.nameEn || employeeDomain,
                                     status: 'Rejected',
-                                    eventName: eventDetails?.name || 'N/A',
-                                    eventLocation: eventDetails?.location || 'N/A',
-                                    startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : 'N/A',
-                                    endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : 'N/A',
+                                    eventName: eventDetails?.name_ar || eventDetails?.name || tr('C2-13'),
+                                    eventLocation: eventDetails?.location || tr('C2-13'),
+                                    startDate: eventDetails?.startDate ? moment(eventDetails.startDate).format('DD-MM-YYYY') : tr('C2-13'),
+                                    endDate: eventDetails?.endDate ? moment(eventDetails.endDate).format('DD-MM-YYYY') : tr('C2-13'),
                                     startTime: scheduleDetails?.start_time || null,
                                     endTime: scheduleDetails?.end_time || null,
-                                    activityName: activityDetails?.name || 'N/A',
-                                    activityType: activityDetails?.activityTypeName || 'N/A',
-                                    rejectionReason: comment || 'Your request was not approved.',
+                                    activityName: activityDetails?.name_ar || activityDetails?.name || tr('C2-13'),
+                                    activityType: activityDetails?.activityTypeNameAr || activityDetails?.activityTypeName || tr('C2-13'),
+                                    rejectionReason: comment || tr('C1-7'),
                                     logoUrl: `${getServerBaseUrl()}/assets/images/Group.png`,
                                 },
                             });

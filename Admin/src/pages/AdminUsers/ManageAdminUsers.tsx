@@ -5,8 +5,10 @@ import { getRolesForSelectApi, createAdminUserApi, updateAdminUserApi } from "..
 import toast from "react-hot-toast";
 import { formatDate } from "../../utils/dateUtils";
 import SearchInput from "../../component/Input/SearchInput";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ManageAdminUsers = () => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -59,7 +61,7 @@ const ManageAdminUsers = () => {
       <div className="2xl:space-y-8 md:space-y-6 space-y-4 h-full flex flex-col">
         <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
           <SearchInput
-            placeholder="Search for Admins.."
+            placeholder={t.adminUser.search}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

@@ -34,7 +34,7 @@ class TeamController {
       }
 
       let query = `
-                SELECT t.id, t.name, t.activity, t.numberOfMembers, t.image, t.status, t.createdAt, t.staffMembers,
+                SELECT t.id, t.name, t.name_ar, t.activity, t.numberOfMembers, t.image, t.status, t.createdAt, t.staffMembers,
                        CASE WHEN tp.id IS NOT NULL THEN 1 ELSE 0 END as hasPlayers,
                        tp.player_id as captainId
                 FROM teams t
@@ -109,6 +109,7 @@ class TeamController {
         return {
           id: team.id,
           name: team.name,
+          name_ar: team.name_ar,
           activity: team.activity,
           numberOfMembers: team.numberOfMembers,
           staffMembers: team.staffMembers,
@@ -146,7 +147,7 @@ class TeamController {
   static async listAll(req, res) {
     try {
       const activityFilter = req.query.activity_id || '';
-      let query = `SELECT t.id, t.name, t.activity, t.numberOfMembers
+      let query = `SELECT t.id, t.name, t.name_ar, t.activity, t.numberOfMembers
                    FROM teams t
                    WHERE t.deletedAt IS NULL AND t.status = '1'`;
       const params = [];
@@ -173,7 +174,7 @@ class TeamController {
   // ==================== STORE (CREATE) ====================
   static async store(req, res) {
     try {
-      const { name, activity, numberOfMembers, staffMembers, status } =
+      const { name, name_ar, activity, numberOfMembers, staffMembers, status } =
         req.body;
       let image = null;
 
@@ -198,10 +199,11 @@ class TeamController {
       }
 
       await db.query(
-        `INSERT INTO teams (name, activity, numberOfMembers, staffMembers, image, status, createdAt, updatedAt)
-                 VALUES (?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())`,
+        `INSERT INTO teams (name, name_ar, activity, numberOfMembers, staffMembers, image, status, createdAt, updatedAt)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())`,
         [
           name,
+          (name_ar || '').trim() || null,
           activityValue,
           numberOfMembers,
           staffMembersValue || null,
@@ -221,7 +223,7 @@ class TeamController {
   static async update(req, res) {
     try {
       const teamId = req.params.id;
-      const { name, activity, numberOfMembers, staffMembers, status } =
+      const { name, name_ar, activity, numberOfMembers, staffMembers, status } =
         req.body;
 
       const team = await db.queryOne(
@@ -257,10 +259,11 @@ class TeamController {
       }
 
       await db.query(
-        `UPDATE teams SET name = ?, activity = ?, numberOfMembers = ?, staffMembers = ?, image = ?, status = ?, updatedAt = SYSDATETIME()
+        `UPDATE teams SET name = ?, name_ar = ?, activity = ?, numberOfMembers = ?, staffMembers = ?, image = ?, status = ?, updatedAt = SYSDATETIME()
                  WHERE id = ?`,
         [
           name,
+          (name_ar || '').trim() || null,
           activityValue,
           numberOfMembers,
           staffMembersValue || null,

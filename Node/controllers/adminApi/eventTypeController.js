@@ -6,7 +6,7 @@ const db = require('../../config/dbDirect');
 class EventTypeController {
     static async list(req, res) {
         try {
-            const eventTypes = await db.query(`SELECT id, name, status, createdAt FROM activity_types WHERE deletedAt IS NULL ORDER BY createdAt DESC`);
+            const eventTypes = await db.query(`SELECT id, name, name_ar, status, createdAt FROM activity_types WHERE deletedAt IS NULL ORDER BY createdAt DESC`);
             return res.json({
                 status: true,
                 message: 'Event Types retrieved successfully',
@@ -23,7 +23,7 @@ class EventTypeController {
 
     static async store(req, res) {
         try {
-            const { name, status } = req.body;
+            const { name, name_ar, status } = req.body;
             if (!name) {
                 return res.status(400).json({ status: false, message: 'Event Type name is required' });
             }
@@ -34,8 +34,8 @@ class EventTypeController {
                 return res.status(409).json({ status: false, message: 'Event Type name already exists' });
             }
 
-            const sql = `INSERT INTO activity_types (name, status, createdAt, updatedAt) VALUES (?, ?, SYSDATETIME(), SYSDATETIME())`;
-            await db.query(sql, [name.trim(), status || '1']);
+            const sql = `INSERT INTO activity_types (name, name_ar, status, createdAt, updatedAt) VALUES (?, ?, ?, SYSDATETIME(), SYSDATETIME())`;
+            await db.query(sql, [name.trim(), (name_ar || '').trim() || null, status || '1']);
             
             return res.json({ 
                 status: true, 
@@ -49,7 +49,7 @@ class EventTypeController {
 
     static async update(req, res) {
         try {
-            const { name, status } = req.body;
+            const { name, name_ar, status } = req.body;
             const eventTypeId = req.params.id;
 
             if (!name) {
@@ -68,11 +68,11 @@ class EventTypeController {
             // Only update status if provided
             let sql, params;
             if (status !== undefined) {
-                sql = `UPDATE activity_types SET name = ?, status = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
-                params = [name.trim(), status, eventTypeId];
+                sql = `UPDATE activity_types SET name = ?, name_ar = ?, status = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
+                params = [name.trim(), (name_ar || '').trim() || null, status, eventTypeId];
             } else {
-                sql = `UPDATE activity_types SET name = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
-                params = [name.trim(), eventTypeId];
+                sql = `UPDATE activity_types SET name = ?, name_ar = ?, updatedAt = SYSDATETIME() WHERE id = ?`;
+                params = [name.trim(), (name_ar || '').trim() || null, eventTypeId];
             }
 
             await db.query(sql, params);
