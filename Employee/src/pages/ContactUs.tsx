@@ -25,7 +25,7 @@ const suspiciousPattern =
 const fieldLimits: Record<keyof ContactForm, number> = {
   name: 80,
   email: 120,
-  phone: 9,
+  phone: 10,
   message: 800,
 };
 
@@ -221,7 +221,7 @@ export default function ContactUs() {
                 prefix="+971"
                 onChange={(value) => handleChange("phone", value)}
               />
-             
+
             </div>
 
             <label className="mt-4 block text-start">
@@ -232,9 +232,8 @@ export default function ContactUs() {
                 placeholder={t("contactUs.messagePlaceholder")}
                 rows={5}
                 maxLength={fieldLimits.message}
-                className={`w-full resize-none rounded-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${
-                  errors.message ? "border-primary" : "border-secondary/10"
-                }`}
+                className={`w-full resize-none rounded-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${errors.message ? "border-primary" : "border-secondary/10"
+                  }`}
               />
             </label>
             <div className="mt-2 flex items-center justify-between gap-3">
@@ -292,9 +291,8 @@ function ContactField({
             placeholder={placeholder}
             autoComplete={autoComplete}
             maxLength={maxLength}
-            className={`w-full rounded-r-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${
-              error ? "border-primary" : "border-secondary/10"
-            }`}
+            className={`w-full rounded-r-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${error ? "border-primary" : "border-secondary/10"
+              }`}
           />
         </div>
       ) : (
@@ -305,9 +303,8 @@ function ContactField({
           placeholder={placeholder}
           autoComplete={autoComplete}
           maxLength={maxLength}
-          className={`w-full rounded-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${
-            error ? "border-primary" : "border-secondary/10"
-          }`}
+          className={`w-full rounded-2xl border bg-white px-4 py-3 text-secondary text-sm font-semibold outline-none transition-all placeholder:text-secondary/35 focus:border-primary focus:ring-4 focus:ring-primary/10 ${error ? "border-primary" : "border-secondary/10"
+            }`}
         />
       )}
       <span className="mt-2 block min-h-4 text-primary text-xs font-bold">{error || ""}</span>
