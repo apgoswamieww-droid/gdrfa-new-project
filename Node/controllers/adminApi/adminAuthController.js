@@ -2,10 +2,9 @@ const { getServerBaseUrl } = require('../../utils/baseUrl');
 const ciamService = require('../../ciam/ciam.service');
 const { attemptTokenRefresh } = require('../../utils/ciamTokenHelper');
 const { decryptRole } = require('../../config/role-decryption');
-const { getUserPermissions } = require('../../utils/permissionChecker');
+const { getUserPermissions, resolveHighestPriorityRole } = require('../../utils/permissionChecker');
 const crypto = require('crypto');
 const { sendEmail } = require('../../utils/emailService');
-const { isPermissionsBypass } = require('../../utils/permissionsBypass');
 const { tr } = require('../../utils/translationSheet');
 
 const SUPER_ADMIN_ROLE_ID = String(process.env.SUPERADMINROLEID || '').trim();
@@ -32,21 +31,25 @@ class AdminAuthController {
       }
 
       const user = responseOfAuth.value;
-      const decryptedPermissionArray = await decryptRole(user.encryptedRoles);
-      let roleId = decryptedPermissionArray[0]?.ClientRoleId?.toString() || '';
+
+      // Use mockRoleId directly if present (mock users), otherwise decrypt encryptedRoles
+      let roleId;
+      if (user.mockRoleId) {
+        roleId = String(user.mockRoleId).trim();
+        console.log(`[Admin Login] Mock mode — using roleId: ${roleId}`);
+      } else {
+        const decryptedRoles = await decryptRole(user.encryptedRoles);
+        roleId = resolveHighestPriorityRole(decryptedRoles);
+        console.log(`[Admin Login] Resolved roleId from ${decryptedRoles?.length || 0} role(s): ${roleId}`);
+      }
 
       if (!roleId) {
         return res.error(req.t ? req.t('Your role does not have access to admin panel.') : 'Your role does not have access to admin panel.');
       }
 
-      // PERMISSIONS_BYPASS: override roleId to SuperAdmin so frontend shows all modules
-      if (isPermissionsBypass() && SUPER_ADMIN_ROLE_ID) {
-        roleId = SUPER_ADMIN_ROLE_ID;
-      }
-
       const permissions = await getUserPermissions(roleId, user.accessToken, user.userDomain);
 
-      if (!isPermissionsBypass() && roleId !== '1' && !permissions.includes('can-login')) {
+      if (roleId !== '1' && !permissions.includes('can-login')) {
         return res.error(req.t ? req.t('Your role does not have access to admin panel.') : 'Your role does not have access to admin panel.');
       }
 
@@ -181,8 +184,8 @@ class AdminAuthController {
       }
 
       // PERMISSIONS_BYPASS: ensure both roleId and permissions reflect SuperAdmin access
-      const bypassRoleId = isPermissionsBypass() && SUPER_ADMIN_ROLE_ID ? SUPER_ADMIN_ROLE_ID : req.user.roleId;
-      const bypassPermissions = isPermissionsBypass() ? ['*'] : (req.user.permissions || []);
+      const bypassRoleId = req.user.roleId;
+      const bypassPermissions = req.user.permissions || [];
 
       return res.success({
         id: req.user.id,

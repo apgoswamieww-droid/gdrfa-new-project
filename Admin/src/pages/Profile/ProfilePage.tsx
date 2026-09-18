@@ -52,11 +52,11 @@ const ProfilePage = () => {
           });
         }
 
-        // Only fetch uploaded profile-image as enhancement;
-        // if CIAM image exists (from login), keep it.
+        // Fetch uploaded profile-image (user_profile_image table by user_domain).
+        // Table image takes priority over CIAM image.
         try {
           const imgRes: any = await apiRequest({ url: "/api/profile-image" });
-          if (imgRes?.data?.image && !imageUrl) {
+          if (imgRes?.data?.image) {
             imageUrl = imgRes.data.image;
           }
         } catch {
@@ -164,7 +164,7 @@ const ProfilePage = () => {
                   const raw = profile?.image;
                   const BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
                   return raw
-                    ? raw.startsWith("http")
+                    ? (raw.startsWith("http") || raw.startsWith("data:"))
                       ? raw
                       : `${BASE_URL}${raw}`
                     : UserImg;

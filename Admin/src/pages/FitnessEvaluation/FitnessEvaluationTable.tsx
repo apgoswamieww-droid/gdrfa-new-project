@@ -38,7 +38,8 @@ export default function FitnessEvaluationTable({
   loading?: boolean;
   totalRecords?: number;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
   const columns: Column<FitnessEvaluation>[] = useMemo(() => [
     {
       key: "id",
@@ -59,7 +60,7 @@ export default function FitnessEvaluationTable({
       label: t.fitnessEvaluation.name,
       sortable: true,
       className: "font-medium text-black 2xl:text-base/light text-base/light",
-      render: (value) => String(value ?? ""),
+      render: (value, row) => String((isArabic ? row.employee_name_ar || value : value || row.employee_name_ar) ?? ""),
     },
     {
       key: "total_points",
@@ -71,7 +72,7 @@ export default function FitnessEvaluationTable({
           return (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-600">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              {Number(value).toFixed(2).replace(/\.00$/, '')} pts
+              {Number(value).toFixed(2).replace(/\.00$/, '')} {t.fitnessEvaluation.points}
             </span>
           );
         }
@@ -95,21 +96,21 @@ export default function FitnessEvaluationTable({
   const actions = (row: FitnessEvaluation) => (
     <div className="flex items-center gap-1.5">
       <button
-        title="View Details"
+        title={t.fitnessEvaluation.viewDetails}
         onClick={() => onView(row)}
         className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors cursor-pointer hover:bg-green-100"
       >
         <ViewIcon />
       </button>
       <button
-        title="Edit"
+        title={t.fitnessEvaluation.edit}
         onClick={() => onEdit(row)}
         className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors cursor-pointer hover:bg-blue-100"
       >
         <EditIcon />
       </button>
       <button
-        title="Delete"
+        title={t.fitnessEvaluation.delete}
         onClick={() => onDelete(row)}
         className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 transition-colors cursor-pointer hover:bg-red-100"
       >

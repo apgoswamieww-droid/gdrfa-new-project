@@ -5,6 +5,7 @@ import { getFitnessCategoriesApi, calculateScoresApi } from "../../api/evaluatio
 import type { FitnessCategory } from "../../api/evaluation.api";
 import toast from "react-hot-toast";
 import ConfirmModal from "../../component/ConfirmModal/ConfirmModal";
+import { useTranslation } from "../../hooks/useTranslation";
 
 function secondsToMMSS(seconds: number): string {
   if (isNaN(seconds) || seconds < 0) return String(seconds ?? "");
@@ -41,6 +42,11 @@ const SectionCard = ({ title, subtitle, icon, children, className }: { title: st
 const FitnessEvaluationForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const fallback = (english: string, arabic: string) => (isArabic ? arabic : english);
+  const localized = (english?: string | null, arabic?: string | null, empty = "-") =>
+    (isArabic ? arabic || english : english || arabic) || empty;
   const [evaluation, setEvaluation] = useState<FitnessEvaluation | null>(null);
   const [categories, setCategories] = useState<FitnessCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +76,7 @@ const FitnessEvaluationForm = () => {
     const r = evaluation?.results?.find(x => x.id === editingResultId);
     if (!r) return;
     if (!gender || !dob) {
-      toast.error("Please set Gender and DOB in Scoring Configuration first");
+      toast.error(t.fitnessEvaluation.genderDobEditRequired);
       return;
     }
     try {
@@ -88,12 +94,12 @@ const FitnessEvaluationForm = () => {
           }
         }
         setEditScore(String(pts));
-        toast.success(`Recalculated: ${pts} pts`);
+        toast.success(t.fitnessEvaluation.recalculated.replace("{points}", String(pts)));
       } else {
-        toast.error("Recalculation returned no scores");
+        toast.error(t.fitnessEvaluation.recalcNoScores);
       }
     } catch (err: any) {
-      toast.error(err.message || "Recalculation failed");
+      toast.error(err.message || fallback("Recalculation failed", "فشلت إعادة الحساب"));
     }
   };
 
@@ -104,12 +110,12 @@ const FitnessEvaluationForm = () => {
         result: parseFloat(editScore) || 0,
       });
       if (res.status) {
-        toast.success("Result updated");
+        toast.success(t.fitnessEvaluation.resultUpdated);
         const refreshed = await getFitnessEvaluationApi(Number(id));
         if (refreshed.status && refreshed.data) setEvaluation(refreshed.data);
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to update");
+      toast.error(err.message || t.fitnessEvaluation.failedUpdate);
     } finally {
       setEditingResultId(null);
       setEditValue("");
@@ -120,19 +126,19 @@ const FitnessEvaluationForm = () => {
   const handleDeleteSession = async (resultIds: number[]) => {
     setConfirmModal({
       open: true,
-      title: "Delete Session",
-      message: "Are you sure you want to delete this entire evaluation session? All results will be removed.",
+      title: t.fitnessEvaluation.deleteSession,
+      message: t.fitnessEvaluation.deleteSessionMessage,
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, open: false }));
         try {
           const res = await deleteEvaluationSessionApi(Number(id), resultIds);
           if (res.status) {
-            toast.success(res.message || "Session deleted");
+            toast.success(res.message || t.fitnessEvaluation.sessionDeleted);
             const refreshed = await getFitnessEvaluationApi(Number(id));
             if (refreshed.status && refreshed.data) setEvaluation(refreshed.data);
           }
         } catch (err: any) {
-          toast.error(err.message || "Failed to delete session");
+          toast.error(err.message || t.fitnessEvaluation.failedDeleteSession);
         }
       }
     });
@@ -153,6 +159,9 @@ const FitnessEvaluationForm = () => {
         try {
           const lookupRes = await lookupUserByGrpApi(Number(id));
           if (lookupRes.status && lookupRes.data) {
+            if (lookupRes.data.nameAr) {
+              setEvaluation((current) => current ? { ...current, employee_name_ar: lookupRes.data.nameAr } : current);
+            }
             if (lookupRes.data.gender) setGender(lookupRes.data.gender);
             if (lookupRes.data.dob) setDob(lookupRes.data.dob);
           } else if (lookupRes.status && !lookupRes.data) {
@@ -170,7 +179,7 @@ const FitnessEvaluationForm = () => {
         setCategories(categoriesRes.data);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to load data");
+      toast.error(error.message || t.fitnessEvaluation.failedLoad);
       navigate("/fitness-evaluation");
     } finally {
       setLoading(false);
@@ -267,10 +276,10 @@ const FitnessEvaluationForm = () => {
     sortedKeys.forEach((key, i) => {
       const items = map.get(key)!;
       const total = items.reduce((s, r) => s + Number(r.result), 0);
-      groups.push({ key, resultIds: items.map(r => r.id), label: i === 0 ? "Current Results" : `Previous — ${key}`, results: items, total });
+      groups.push({ key, resultIds: items.map(r => r.id), label: i === 0 ? t.fitnessEvaluation.currentResults : `${t.fitnessEvaluation.previous} — ${key}`, results: items, total });
     });
     return groups;
-  }, [evaluation?.results]);
+  }, [evaluation?.results, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,12 +287,12 @@ const FitnessEvaluationForm = () => {
 
     const hasValues = Object.values(formValues).some(v => v.value !== "");
     if (!hasValues) {
-      toast.error("Please enter at least one evaluation value");
+      toast.error(t.fitnessEvaluation.valueRequired);
       return;
     }
 
     if (!gender || !dob) {
-      toast.error("Please set Gender and DOB in Scoring Configuration before saving");
+      toast.error(t.fitnessEvaluation.genderDobRequired);
       return;
     }
 
@@ -303,7 +312,7 @@ const FitnessEvaluationForm = () => {
 
       const res = await updateFitnessEvaluationResultsApi(Number(id), payload);
       if (res.status) {
-        toast.success(res.message || "Evaluation updated successfully");
+        toast.success(res.message || t.fitnessEvaluation.evaluationUpdated);
         skipPrefillRef.current = true;
         const refreshed = await getFitnessEvaluationApi(Number(id));
         if (refreshed.status && refreshed.data) {
@@ -316,7 +325,7 @@ const FitnessEvaluationForm = () => {
         setLiveScores({});
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to save evaluation");
+      toast.error(error.message || t.fitnessEvaluation.failedSave);
     } finally {
       setSubmitting(false);
     }
@@ -326,7 +335,7 @@ const FitnessEvaluationForm = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center">
         <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full" />
-        <p className="mt-4 text-secondary/60 font-medium">Loading...</p>
+        <p className="mt-4 text-secondary/60 font-medium">{t.fitnessEvaluation.loading}</p>
       </div>
     );
   }
@@ -340,31 +349,31 @@ const FitnessEvaluationForm = () => {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          <span className="font-semibold text-sm">Back to Fitness Evaluations</span>
+          <span className="font-semibold text-sm">{fallback("Back to Fitness Evaluations", "العودة إلى تقييمات اللياقة")}</span>
         </Link>
       </div>
 
       {/* ── Imported Data Summary ── */}
-      <SectionCard title="Employee Details">
+      <SectionCard title={t.fitnessEvaluation.employeeDetails}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Name</p>
-            <p className="text-sm font-bold text-secondary">{evaluation.employee_name || "-"}</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.name}</p>
+            <p className="text-sm font-bold text-secondary">{localized(evaluation.employee_name, evaluation.employee_name_ar)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Rank</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.rank}</p>
             <p className="text-sm font-bold text-secondary">{evaluation.rank || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">GRP</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.grp}</p>
             <p className="text-sm font-bold text-secondary">{evaluation.grp || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Sector</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.sector}</p>
             <p className="text-sm font-bold text-secondary">{evaluation.sector || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Year</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.year}</p>
             <p className="text-sm font-bold text-secondary">{evaluation.year || "-"}</p>
           </div>
         </div>
@@ -373,27 +382,27 @@ const FitnessEvaluationForm = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT COLUMN: Score + Gender/DOB ── */}
         <div className="lg:col-span-1 space-y-6">
-          <SectionCard title="Evaluation Score">
+          <SectionCard title={t.fitnessEvaluation.evaluationResult}>
             <div className="text-center p-4">
-              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1">Total Points</p>
+              <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1">{t.fitnessEvaluation.totalPoints}</p>
               <div className="text-5xl font-black text-primary">{totalPoints.toFixed(2).replace(/\.00$/, '')}</div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Scoring Configuration">
+          <SectionCard title={t.fitnessEvaluation.scoringConfiguration}>
             <div className="space-y-3">
               {showManualFields ? (
                 <>
                   <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gender</span>
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.gender}</span>
                     <select value={gender} onChange={(e) => setGender(e.target.value)} className="text-sm font-bold text-secondary capitalize border border-gray-200 rounded-lg px-2 py-1 bg-white">
-                      <option value="">Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
+                      <option value="">{t.fitnessEvaluation.selectGender}</option>
+                      <option value="male">{t.fitnessEvaluation.male}</option>
+                      <option value="female">{t.fitnessEvaluation.female}</option>
                     </select>
                   </div>
                   <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">DOB</span>
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.dob}</span>
                     <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="text-sm font-bold text-secondary border border-gray-200 rounded-lg px-2 py-1 bg-white" />
                   </div>
                 </>
@@ -401,31 +410,31 @@ const FitnessEvaluationForm = () => {
                 <>
                   {gender ? (
                     <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gender</span>
-                      <span className="text-sm font-bold text-secondary capitalize">{gender}</span>
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.gender}</span>
+                      <span className="text-sm font-bold text-secondary capitalize">{gender === "male" ? t.fitnessEvaluation.male : t.fitnessEvaluation.female}</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gender</span>
-                      <span className="text-sm text-gray-400">Not available</span>
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.gender}</span>
+                      <span className="text-sm text-gray-400">{t.fitnessEvaluation.notAvailable}</span>
                     </div>
                   )}
                   {dob ? (
                     <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">DOB</span>
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.dob}</span>
                       <span className="text-sm font-bold text-secondary">{dob}</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">DOB</span>
-                      <span className="text-sm text-gray-400">Not available</span>
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.dob}</span>
+                      <span className="text-sm text-gray-400">{t.fitnessEvaluation.notAvailable}</span>
                     </div>
                   )}
                 </>
               )}
               {gender && dob && (
                 <div className="flex items-center gap-1.5 text-xs text-primary font-semibold">
-                  Scores auto-calculated from age & gender
+                  {t.fitnessEvaluation.autoCalculated}
                 </div>
               )}
             </div>
@@ -436,8 +445,8 @@ const FitnessEvaluationForm = () => {
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <SectionCard
-              title="Fitness Categories"
-              subtitle="Enter the results for each fitness test"
+              title={t.fitnessEvaluation.fitnessCategories}
+              subtitle={t.fitnessEvaluation.categoriesHint}
               icon={
                 <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -449,33 +458,33 @@ const FitnessEvaluationForm = () => {
                   {showManualFields ? (
                     <>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <span className="text-secondary/50">Gender:</span>
+                        <span className="text-secondary/50">{t.fitnessEvaluation.gender}:</span>
                         <select value={gender} onChange={(e) => setGender(e.target.value)} className="font-bold text-secondary capitalize border border-gray-200 rounded-lg px-2 py-1 bg-white text-sm">
-                          <option value="">Select</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
+                          <option value="">{t.fitnessEvaluation.selectGender}</option>
+                          <option value="male">{t.fitnessEvaluation.male}</option>
+                          <option value="female">{t.fitnessEvaluation.female}</option>
                         </select>
                       </div>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <span className="text-secondary/50">DOB:</span>
+                        <span className="text-secondary/50">{t.fitnessEvaluation.dob}:</span>
                         <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="font-bold text-secondary border border-gray-200 rounded-lg px-2 py-1 bg-white text-sm" />
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <span className="text-secondary/50">Gender:</span>
-                        <span className="font-bold text-secondary capitalize">{gender || "Not specified"}</span>
+                        <span className="text-secondary/50">{t.fitnessEvaluation.gender}:</span>
+                        <span className="font-bold text-secondary capitalize">{gender === "male" ? t.fitnessEvaluation.male : gender === "female" ? t.fitnessEvaluation.female : t.fitnessEvaluation.notSpecified}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <span className="text-secondary/50">DOB:</span>
-                        <span className="font-bold text-secondary">{dob || "Not set"}</span>
+                        <span className="text-secondary/50">{t.fitnessEvaluation.dob}:</span>
+                        <span className="font-bold text-secondary">{dob || t.fitnessEvaluation.notAvailable}</span>
                       </div>
                     </>
                   )}
                   {gender && dob && (
                     <div className="flex items-center gap-1.5 text-xs text-primary font-semibold">
-                      Scores auto-calculated from age & gender
+                      {t.fitnessEvaluation.autoCalculated}
                     </div>
                   )}
                 </div>
@@ -485,15 +494,15 @@ const FitnessEvaluationForm = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex-1">
                         <label className="block text-sm font-bold text-secondary mb-1">
-                          {cat.name}
+                          {localized(cat.name, cat.name_ar)}
                           <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold ${cat.unit_type === "time" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>
-                            {cat.unit_type === "time" ? "Time (MM:SS)" : "Count"}
+                            {cat.unit_type === "time" ? t.fitnessEvaluation.time : t.fitnessEvaluation.count}
                           </span>
                         </label>
                         <p className="text-xs text-gray-400">
                           {cat.unit_type === "time"
-                            ? "Enter time in MM:SS format (e.g. 12:30)"
-                            : "Enter the number completed"}
+                            ? t.fitnessEvaluation.timeHint
+                            : t.fitnessEvaluation.countHint}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
@@ -523,7 +532,7 @@ const FitnessEvaluationForm = () => {
 
                 {categories.length === 0 && (
                   <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <p className="text-gray-400 text-sm italic">No active fitness categories found.</p>
+                    <p className="text-gray-400 text-sm italic">{t.fitnessEvaluation.noCategories}</p>
                   </div>
                 )}
               </div>
@@ -535,7 +544,7 @@ const FitnessEvaluationForm = () => {
                 onClick={() => navigate("/fitness-evaluation")}
                 className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t.fitnessEvaluation.cancel}
               </button>
               <button
                 type="submit"
@@ -545,10 +554,10 @@ const FitnessEvaluationForm = () => {
                 {submitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
+                    {t.fitnessEvaluation.saving}
                   </>
                 ) : (
-                  "Save Evaluation"
+                  t.fitnessEvaluation.saveEvaluation
                 )}
               </button>
             </div>
@@ -558,7 +567,7 @@ const FitnessEvaluationForm = () => {
 
       {/* ── Evaluation History (full width, one card = one session) ── */}
       {groupedResults.length > 0 && (
-        <SectionCard title="Evaluation History" icon={
+        <SectionCard title={t.fitnessEvaluation.evaluationHistory} icon={
           <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -567,10 +576,10 @@ const FitnessEvaluationForm = () => {
             {groupedResults.map((group, gi) => (
               <div key={group.key} className="rounded-lg border border-gray-100 bg-white shadow-sm overflow-hidden">
                 <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-secondary">{gi === 0 ? "Latest" : group.label}</span>
+                  <span className="text-[11px] font-bold text-secondary">{gi === 0 ? t.fitnessEvaluation.latest : group.label}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold text-primary">{group.total.toFixed(2).replace(/\.00$/, '')} pts</span>
-                    <button onClick={() => handleDeleteSession(group.resultIds)} className="text-gray-400 hover:text-red-500 transition-colors p-0.5" title="Delete session">
+                    <span className="text-[13px] font-bold text-primary">{group.total.toFixed(2).replace(/\.00$/, '')} {t.fitnessEvaluation.points}</span>
+                    <button onClick={() => handleDeleteSession(group.resultIds)} className="text-gray-400 hover:text-red-500 transition-colors p-0.5" title={t.fitnessEvaluation.deleteSession}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                     </button>
                   </div>
@@ -579,12 +588,12 @@ const FitnessEvaluationForm = () => {
                   {group.results.map(r => (
                     <div key={r.id} className="flex items-center justify-between px-2 py-1.5 rounded bg-gray-50/50">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-[11px] font-semibold text-gray-600 truncate">{r.categoryName || `Cat #${r.fitness_category_id}`}</span>
+                        <span className="text-[11px] font-semibold text-gray-600 truncate">{localized(r.categoryName, r.categoryNameAr, `Cat #${r.fitness_category_id}`)}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-[11px] text-gray-500">{displayValue(r.value, r.unit_type)}</span>
-                        <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{r.result} pts</span>
-                        <button onClick={() => handleEditResult(r.id)} className="text-gray-400 hover:text-blue-600 transition-colors p-0.5" title="Edit">
+                        <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{r.result} {t.fitnessEvaluation.points}</span>
+                        <button onClick={() => handleEditResult(r.id)} className="text-gray-400 hover:text-blue-600 transition-colors p-0.5" title={t.fitnessEvaluation.edit}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </button>
                       </div>
@@ -599,22 +608,22 @@ const FitnessEvaluationForm = () => {
                         value={editValue}
                         onChange={e => setEditValue(e.target.value)}
                         className="flex-1 px-1.5 py-0.5 text-[11px] border border-blue-200 rounded"
-                        placeholder="Value"
+                        placeholder={t.fitnessEvaluation.value}
                       />
                       <input
                         type="number"
                         value={editScore}
                         onChange={e => setEditScore(e.target.value)}
                         className="w-14 px-1.5 py-0.5 text-[11px] border border-blue-200 rounded"
-                        placeholder="Pts"
+                        placeholder={t.fitnessEvaluation.points}
                       />
-                      <button onClick={() => handleSaveEdit(editingResultId)} className="text-green-600 hover:text-green-700 p-0.5" title="Save">
+                      <button onClick={() => handleSaveEdit(editingResultId)} className="text-green-600 hover:text-green-700 p-0.5" title={t.fitnessEvaluation.update}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       </button>
-                      {gender && dob && <button onClick={handleRecalcEdit} className="text-orange-500 hover:text-orange-600 p-0.5" title="Recalculate">
+                      {gender && dob && <button onClick={handleRecalcEdit} className="text-orange-500 hover:text-orange-600 p-0.5" title={t.fitnessEvaluation.recalculated.split(":")[0]}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
                       </button>}
-                      <button onClick={() => setEditingResultId(null)} className="text-gray-400 hover:text-gray-600 p-0.5" title="Cancel">
+                      <button onClick={() => setEditingResultId(null)} className="text-gray-400 hover:text-gray-600 p-0.5" title={t.fitnessEvaluation.cancel}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>

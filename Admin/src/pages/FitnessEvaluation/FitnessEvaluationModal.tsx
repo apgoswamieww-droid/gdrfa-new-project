@@ -5,6 +5,7 @@ import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
 import toast from "react-hot-toast";
 import { useTranslation } from "../../hooks/useTranslation";
+import { lookupUserByGrpApi } from "../../api/fitnessEvaluation.api";
 
 interface FitnessEvaluationModalProps {
   isOpen: boolean;
@@ -16,7 +17,19 @@ interface FitnessEvaluationModalProps {
 }
 
 const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title, mode }: FitnessEvaluationModalProps) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const fallback = (english: string, arabic: string) => (isArabic ? arabic : english);
+  const localizedFitnessStatus = (status?: string | null) => {
+    const normalized = String(status || "").trim().toLowerCase();
+    if (["pass", "passed", "success", "successful", "نجاح", "ناجح", "اجتاز", "مقبول"].includes(normalized)) {
+      return t.fitnessEvaluation.passed;
+    }
+    if (["fail", "failed", "failure", "unsuccessful", "فشل", "راسب", "غير مجتاز", "غير مجتازة", "غير مقبول"].includes(normalized)) {
+      return t.fitnessEvaluation.failed;
+    }
+    return status || "-";
+  };
   const [formData, setFormData] = useState({
     rank: "",
     grp: "",
@@ -31,6 +44,14 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
   const [parsing, setParsing] = useState(false);
   const [parseProgress, setParseProgress] = useState(0);
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [resolvedEmployeeData, setResolvedEmployeeData] = useState<{
+    nameEn?: string | null;
+    nameAr?: string | null;
+    rankEn?: string | null;
+    rankAr?: string | null;
+    sectorEn?: string | null;
+    sectorAr?: string | null;
+  }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>(null);
 
@@ -60,6 +81,27 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
     };
   }, [initialData, isOpen, mode]);
 
+  useEffect(() => {
+    if (!isOpen || mode !== "view" || !initialData?.id) {
+      setResolvedEmployeeData({});
+      return;
+    }
+    lookupUserByGrpApi(initialData.id)
+      .then((response) => {
+        if (response.status && response.data) {
+          setResolvedEmployeeData({
+            nameEn: response.data.nameEn || response.data.name || null,
+            nameAr: response.data.nameAr || null,
+            rankEn: response.data.rankEn || null,
+            rankAr: response.data.rankAr || null,
+            sectorEn: response.data.sectorEn || null,
+            sectorAr: response.data.sectorAr || null,
+          });
+        }
+      })
+      .catch(() => setResolvedEmployeeData({}));
+  }, [initialData?.id, isOpen, mode]);
+
   if (!isOpen) return null;
 
   const REQUIRED_COLUMNS = ["rank", "grp", "employee_name", "sector", "fitness_status", "year"];
@@ -72,7 +114,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
     // Validate file type
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!ext || !["xlsx", "xls"].includes(ext)) {
-      toast.error("Only Excel files (.xlsx, .xls) are allowed.");
+      toast.error(t.fitnessEvaluation.onlyExcel);
       e.target.value = "";
       setSelectedFileName("");
       return;
@@ -103,7 +145,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         if (!worksheet) {
           setParsing(false);
           setParseProgress(0);
-          toast.error("The Excel file appears to be empty or invalid.");
+          toast.error(t.fitnessEvaluation.emptyExcel);
           e.target.value = "";
           return;
         }
@@ -116,7 +158,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         if (headers.length === 0 || headers.every(h => !h)) {
           setParsing(false);
           setParseProgress(0);
-          toast.error("The Excel file is missing a header row. Please ensure the first row contains column names.");
+          toast.error(t.fitnessEvaluation.missingHeader);
           e.target.value = "";
           return;
         }
@@ -137,7 +179,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         if (jsonData.length === 0) {
           setParsing(false);
           setParseProgress(0);
-          toast.error("The Excel file is empty. Please upload a file with data.");
+          toast.error(t.fitnessEvaluation.emptyData);
           e.target.value = "";
           return;
         }
@@ -168,7 +210,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
             const idx = REQUIRED_COLUMNS.indexOf(c);
             return REQUIRED_LABELS[idx];
           });
-          toast.error(`Missing required columns: ${missingLabels.join(", ")}`);
+          toast.error(t.fitnessEvaluation.missingColumns.replace("{columns}", missingLabels.join(", ")));
           e.target.value = "";
           return;
         }
@@ -194,7 +236,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         if (progressTimerRef.current) clearInterval(progressTimerRef.current);
         setParsing(false);
         setParseProgress(0);
-        toast.error("Failed to parse Excel file: " + (err.message || "Invalid format"));
+        toast.error(t.fitnessEvaluation.parseFailed.replace("{message}", err.message || fallback("Invalid format", "تنسيق غير صالح")));
         e.target.value = "";
       }
     };
@@ -202,7 +244,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       setParsing(false);
       setParseProgress(0);
-      toast.error("Failed to read file");
+      toast.error(t.fitnessEvaluation.readFailed);
       e.target.value = "";
     };
     reader.readAsArrayBuffer(file);
@@ -211,9 +253,9 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (mode === "upload") {
-      if (parsedRecords.length === 0) newErrors.file = "Please upload an Excel file with valid data";
+      if (parsedRecords.length === 0) newErrors.file = t.fitnessEvaluation.uploadValidation;
     } else if (mode === "edit") {
-      if (!formData.employee_name.trim()) newErrors.employee_name = "Employee name is required";
+      if (!formData.employee_name.trim()) newErrors.employee_name = t.fitnessEvaluation.employeeNameRequired;
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -267,7 +309,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
       {parsing && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500 font-medium">Reading file...</span>
+            <span className="text-gray-500 font-medium">{t.fitnessEvaluation.readingFile}</span>
             <span className="text-primary font-bold">{parseProgress}%</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
@@ -281,25 +323,25 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
       </div>
 
       <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-        <p className="text-xs font-semibold text-gray-500 mb-1">{t.fitnessEvaluation.expectedColumns || "Expected Excel columns:"}</p>
+        <p className="text-xs font-semibold text-gray-500 mb-1">{t.fitnessEvaluation.expectedColumns}</p>
         <code className="text-xs text-primary">id, rank, grp, employee_name, sector, fitness_status, year</code>
       </div>
 
       {!parsing && parsedRecords.length > 0 && (
         <div>
           <p className="text-sm font-semibold text-secondary mb-2">
-            Preview: {parsedRecords.length} record(s) found
+            {t.fitnessEvaluation.preview.replace("{count}", String(parsedRecords.length))}
           </p>
           <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
             <table className="w-full text-xs">
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
                   <th className="px-2 py-1 text-start font-semibold text-gray-500">#</th>
-                  <th className="px-2 py-1 text-start font-semibold text-gray-500">GRP</th>
-                  <th className="px-2 py-1 text-start font-semibold text-gray-500">Name</th>
-                  <th className="px-2 py-1 text-start font-semibold text-gray-500">Sector</th>
-                  <th className="px-2 py-1 text-start font-semibold text-gray-500">Status</th>
-                  <th className="px-2 py-1 text-start font-semibold text-gray-500">Year</th>
+                  <th className="px-2 py-1 text-start font-semibold text-gray-500">{t.fitnessEvaluation.grp}</th>
+                  <th className="px-2 py-1 text-start font-semibold text-gray-500">{t.fitnessEvaluation.name}</th>
+                  <th className="px-2 py-1 text-start font-semibold text-gray-500">{t.fitnessEvaluation.sector}</th>
+                  <th className="px-2 py-1 text-start font-semibold text-gray-500">{t.fitnessEvaluation.fitnessStatus}</th>
+                  <th className="px-2 py-1 text-start font-semibold text-gray-500">{t.fitnessEvaluation.year}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -309,14 +351,14 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
                     <td className="px-2 py-1 font-medium">{rec.grp || "-"}</td>
                     <td className="px-2 py-1">{rec.employee_name || "-"}</td>
                     <td className="px-2 py-1">{rec.sector || "-"}</td>
-                    <td className="px-2 py-1">{rec.fitness_status || "-"}</td>
+                    <td className="px-2 py-1">{localizedFitnessStatus(rec.fitness_status)}</td>
                     <td className="px-2 py-1">{rec.year || "-"}</td>
                   </tr>
                 ))}
                 {parsedRecords.length > 50 && (
                   <tr>
                     <td colSpan={6} className="px-2 py-2 text-center text-gray-400 italic">
-                      ... and {parsedRecords.length - 50} more records
+                      {t.fitnessEvaluation.moreRecords.replace("{count}", String(parsedRecords.length - 50))}
                     </td>
                   </tr>
                 )}
@@ -332,21 +374,21 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <InputField
-          label="Rank"
-          placeholder="Enter rank"
+          label={t.fitnessEvaluation.rank}
+          placeholder={t.fitnessEvaluation.enterRank}
           value={formData.rank}
           onChange={(e) => setFormData({ ...formData, rank: e.target.value })}
         />
         <InputField
-          label="GRP"
-          placeholder="Enter group"
+          label={t.fitnessEvaluation.grp}
+          placeholder={t.fitnessEvaluation.enterGroup}
           value={formData.grp}
           onChange={(e) => setFormData({ ...formData, grp: e.target.value })}
         />
       </div>
       <InputField
-        label="Employee Name"
-        placeholder="Enter employee name"
+        label={t.fitnessEvaluation.employeeName}
+        placeholder={t.fitnessEvaluation.enterEmployeeName}
         value={formData.employee_name}
         onChange={(e) => {
           setFormData({ ...formData, employee_name: e.target.value });
@@ -357,14 +399,14 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <InputField
-          label="Sector"
-          placeholder="Enter sector"
+          label={t.fitnessEvaluation.sector}
+          placeholder={t.fitnessEvaluation.enterSector}
           value={formData.sector}
           onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
         />
         <InputField
-          label="Fitness Status"
-          placeholder="e.g. Pass/Fail"
+          label={t.fitnessEvaluation.fitnessStatus}
+          placeholder={t.fitnessEvaluation.passFail}
           value={formData.fitness_status}
           onChange={(e) => setFormData({ ...formData, fitness_status: e.target.value })}
         />
@@ -387,54 +429,60 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">ID</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.id}</p>
             <p className="text-sm font-bold text-secondary">{initialData?.id || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Rank</p>
-            <p className="text-sm font-bold text-secondary">{initialData?.rank || "-"}</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.rank}</p>
+            <p className="text-sm font-bold text-secondary">{isArabic
+              ? resolvedEmployeeData.rankAr || initialData?.rank_ar || resolvedEmployeeData.rankEn || initialData?.rank || "-"
+              : resolvedEmployeeData.rankEn || initialData?.rank || resolvedEmployeeData.rankAr || initialData?.rank_ar || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">GRP</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.grp}</p>
             <p className="text-sm font-bold text-secondary">{initialData?.grp || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Employee Name</p>
-            <p className="text-sm font-bold text-secondary">{initialData?.employee_name || "-"}</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.employeeName}</p>
+            <p className="text-sm font-bold text-secondary">{isArabic
+              ? resolvedEmployeeData.nameAr || initialData?.employee_name_ar || resolvedEmployeeData.nameEn || initialData?.employee_name || "-"
+              : resolvedEmployeeData.nameEn || initialData?.employee_name || resolvedEmployeeData.nameAr || initialData?.employee_name_ar || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Sector</p>
-            <p className="text-sm font-bold text-secondary">{initialData?.sector || "-"}</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.sector}</p>
+            <p className="text-sm font-bold text-secondary">{isArabic
+              ? resolvedEmployeeData.sectorAr || initialData?.sector_ar || resolvedEmployeeData.sectorEn || initialData?.sector || "-"
+              : resolvedEmployeeData.sectorEn || initialData?.sector || resolvedEmployeeData.sectorAr || initialData?.sector_ar || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Fitness Status</p>
-            <p className="text-sm font-bold text-secondary">{initialData?.fitness_status || "-"}</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.fitnessStatus}</p>
+            <p className="text-sm font-bold text-secondary">{localizedFitnessStatus(initialData?.fitness_status)}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Year</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">{t.fitnessEvaluation.year}</p>
             <p className="text-sm font-bold text-secondary">{initialData?.year || "-"}</p>
           </div>
         </div>
 
         {results.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Evaluation Results</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t.fitnessEvaluation.evaluationResults}</p>
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-2 text-start font-semibold text-gray-500 text-xs uppercase">Category</th>
-                    <th className="px-3 py-2 text-start font-semibold text-gray-500 text-xs uppercase">Value</th>
-                    <th className="px-3 py-2 text-end font-semibold text-gray-500 text-xs uppercase">Points</th>
+                    <th className="px-3 py-2 text-start font-semibold text-gray-500 text-xs uppercase">{t.fitnessEvaluation.category}</th>
+                    <th className="px-3 py-2 text-start font-semibold text-gray-500 text-xs uppercase">{t.fitnessEvaluation.value}</th>
+                    <th className="px-3 py-2 text-end font-semibold text-gray-500 text-xs uppercase">{t.fitnessEvaluation.resultPoints}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {results.map((r) => (
                     <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="px-3 py-2 font-medium text-secondary">{r.categoryName || r.slug || `Category #${r.fitness_category_id}`}</td>
+                      <td className="px-3 py-2 font-medium text-secondary">{isArabic ? r.categoryNameAr || r.categoryName || r.slug : r.categoryName || r.categoryNameAr || r.slug || `Category #${r.fitness_category_id}`}</td>
                       <td className="px-3 py-2 text-gray-600">
                         {r.value}
-                        {r.unit_type === 'time' ? ' sec' : ''}
+                        {r.unit_type === 'time' ? ` ${t.fitnessEvaluation.seconds}` : ''}
                       </td>
                       <td className="px-3 py-2 text-end font-semibold text-primary">{Number(r.result).toFixed(2).replace(/\.00$/, '')}</td>
                     </tr>
@@ -446,13 +494,13 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
         )}
 
         <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Points</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.fitnessEvaluation.totalPoints}</p>
           <p className="text-lg font-bold text-primary">
             {total !== null && total !== undefined
-              ? `${Number(total).toFixed(2).replace(/\.00$/, '')} pts`
+              ? `${Number(total).toFixed(2).replace(/\.00$/, '')} ${t.fitnessEvaluation.points}`
               : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-                  Pending
+                  {t.fitnessEvaluation.pendingStatus}
                 </span>
             }
           </p>
@@ -508,7 +556,7 @@ const FitnessEvaluationModal = ({ isOpen, onClose, onSubmit, initialData, title,
                 onClick={onClose}
                 className="flex justify-center items-center font-bold text-sm rounded-lg px-6 border border-gray-200 py-1.5 text-gray-600 hover:bg-gray-50 transition-all cursor-pointer w-full"
               >
-                Close
+                {t.fitnessEvaluation.close}
               </button>
             )}
           </div>

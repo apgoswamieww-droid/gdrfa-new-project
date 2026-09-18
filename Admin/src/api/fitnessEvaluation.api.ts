@@ -7,6 +7,7 @@ export interface FitnessEvaluationResult {
   value: string;
   result: number;
   categoryName?: string;
+  categoryNameAr?: string;
   slug?: string;
   unit_type?: string;
   createdAt?: string;
@@ -18,7 +19,10 @@ export interface FitnessEvaluation {
   rank: string | null;
   grp: string | null;
   employee_name: string | null;
+  employee_name_ar?: string | null;
   sector: string | null;
+  sector_ar?: string | null;
+  rank_ar?: string | null;
   fitness_status: string | null;
   year: number | null;
   total_points: number | null;

@@ -33,21 +33,36 @@ const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalPro
 
   const validate = () => {
     const val = name.trim();
+    const valAr = nameAr.trim();
+    let isValid = true;
+
     if (!val) {
-      setError("KPI Name is required");
-      return false;
+      setError(t.kpi.nameRequired);
+      isValid = false;
+    } else if (val.length < 3) {
+      setError(t.kpi.nameMinLength);
+      isValid = false;
+    } else if (/<[^>]*>/g.test(val)) {
+      setError(t.kpi.htmlNotAllowed);
+      isValid = false;
+    } else {
+      setError("");
     }
-    if (val.length < 3) {
-      setError("KPI Name must be at least 3 characters long");
-      return false;
+
+    if (!valAr) {
+      setErrorAr(t.kpi.nameArRequired);
+      isValid = false;
+    } else if (valAr.length < 3) {
+      setErrorAr(t.kpi.nameArMinLength);
+      isValid = false;
+    } else if (/<[^>]*>/g.test(valAr)) {
+      setErrorAr(t.kpi.htmlNotAllowed);
+      isValid = false;
+    } else {
+      setErrorAr("");
     }
-    if (/<[^>]*>/g.test(val)) {
-      setError("HTML tags are not allowed");
-      return false;
-    }
-    setError("");
-    setErrorAr("");
-    return true;
+
+    return isValid;
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +116,7 @@ const KpiModal = ({ isOpen, onClose, onSubmit, initialData, title }: KpiModalPro
             value={nameAr}
             onChange={handleNameArChange}
             error={errorAr}
+            required
           />
 
           <div className="flex gap-3 pt-4">

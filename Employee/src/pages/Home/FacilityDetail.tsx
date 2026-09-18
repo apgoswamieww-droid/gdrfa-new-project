@@ -136,6 +136,15 @@ export default function FacilityDetail() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      setToast({ message: t("auth.required"), type: "error" });
+      setTimeout(() => {
+        navigate("/login", { state: { from: { pathname: `/facilities/${facilityId}` } } });
+      }, 2000);
+      return;
+    }
+
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -271,8 +280,9 @@ export default function FacilityDetail() {
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleInputChange}
+                        disabled={!!user}
                         placeholder={t("facilities.fullName")}
-                        className={`w-full bg-secondary/5 border rounded-2xl px-5 py-4 text-secondary font-bold placeholder:text-secondary/30 focus:outline-none transition-colors ${errors.fullName ? "border-primary" : "border-secondary/10 focus:border-primary"
+                        className={`w-full bg-secondary/5 border rounded-2xl px-5 py-4 text-secondary font-bold placeholder:text-secondary/30 focus:outline-none transition-colors ${user ? "opacity-60 cursor-not-allowed" : ""} ${errors.fullName ? "border-primary" : "border-secondary/10 focus:border-primary"
                           }`}
                       />
                       {errors.fullName && (
@@ -285,8 +295,9 @@ export default function FacilityDetail() {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
+                        disabled={!!user}
                         placeholder={t("facilities.emailId")}
-                        className={`w-full bg-secondary/5 border rounded-2xl px-5 py-4 text-secondary font-bold placeholder:text-secondary/30 focus:outline-none transition-colors ${errors.email ? "border-primary" : "border-secondary/10 focus:border-primary"
+                        className={`w-full bg-secondary/5 border rounded-2xl px-5 py-4 text-secondary font-bold placeholder:text-secondary/30 focus:outline-none transition-colors ${user ? "opacity-60 cursor-not-allowed" : ""} ${errors.email ? "border-primary" : "border-secondary/10 focus:border-primary"
                           }`}
                       />
                       {errors.email && (

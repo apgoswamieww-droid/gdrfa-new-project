@@ -89,7 +89,7 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
         setData(response.data.data);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to fetch media");
+      toast.error(error.message || t.media.errorFetch);
     }
   };
 
@@ -103,7 +103,7 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
         fetchMedia();
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to update status", { id: loadingToast });
+      toast.error(error.message || t.media.errorUpdateStatus, { id: loadingToast });
     }
   };
 
@@ -172,7 +172,7 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
   const actions = (row: any) => (
     <div className="flex items-center gap-1.5">
       <button
-        title="View"
+        title={t.common.view}
         onClick={() => navigate(`/cms/media/view/${row.id}`)}
         className="2xl:min-w-10 min-w-8 2xl:w-10 w-8 2xl:h-10 h-8 flex items-center justify-center rounded-lg bg-[#364B9B]/10 transition-colors cursor-pointer hover:bg-[#364B9B]/20"
       >
@@ -180,7 +180,7 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
       </button>
       <span className="text-primary text-base">|</span>
       <button
-        title="Edit"
+        title={t.common.actions}
         onClick={() => navigate(`/cms/media/edit/${row.id}`)}
         className="2xl:min-w-10 min-w-8 2xl:w-10 w-8 2xl:h-10 h-8 flex items-center justify-center rounded-lg bg-light-blue/20 transition-colors cursor-pointer hover:bg-light-blue/10"
       >
@@ -188,7 +188,7 @@ export default function MediaTable({ searchTerm, onDelete }: MediaTableProps) {
       </button>
       <span className="text-primary text-base">|</span>
       <button
-        title="Delete"
+        title={t.media.delete}
         onClick={() => onDelete(row.id)}
         className="2xl:min-w-10 min-w-8 2xl:w-10 w-8 2xl:h-10 h-8 flex items-center justify-center rounded-lg bg-primary/20 transition-colors cursor-pointer hover:bg-primary/10"
       >

@@ -27,6 +27,7 @@ export interface Evaluation {
 export interface FitnessCategory {
   id: number;
   name: string;
+  name_ar?: string;
   slug: string;
   unit_type: string;
   unit?: string;

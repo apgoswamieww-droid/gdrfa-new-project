@@ -329,6 +329,7 @@ class TeamController {
 
       const captainMap = new Map();
       const staffMap = new Map();
+      const staffMapAr = new Map();
       const accessToken = req.headers.authorization?.split(" ")[1];
 
       const allDomainIds = [];
@@ -361,6 +362,7 @@ class TeamController {
                 user.nameEn || user.nameAr || user.emailAddress || "-";
               captainMap.set(domainId, displayName);
               staffMap.set(domainId, displayName);
+              staffMapAr.set(domainId, user.nameAr || displayName);
             }
           });
         }
@@ -372,6 +374,14 @@ class TeamController {
             .map((id) => String(id).trim())
             .filter(Boolean)
             .map((id) => staffMap.get(id))
+            .filter(Boolean)
+        : [];
+      const managerNamesAr = team.staffMembers
+        ? String(team.staffMembers)
+            .split(",")
+            .map((id) => String(id).trim())
+            .filter(Boolean)
+            .map((id) => staffMapAr.get(id))
             .filter(Boolean)
         : [];
 
@@ -489,18 +499,23 @@ class TeamController {
           .filter(Boolean);
         if (activityIds.length > 0) {
           const activities = await db.query(
-            `SELECT sa.name FROM sport_activities sa 
+            `SELECT sa.name, sa.name_ar FROM sport_activities sa 
                          WHERE sa.id IN (${activityIds.map(() => "?").join(",")}) AND sa.deletedAt IS NULL`,
             activityIds,
           );
           activityNames = activities.map((a) => a.name).join(", ");
+          var activityNamesAr = activities
+            .map((a) => a.name_ar || a.name)
+            .join(", ");
         }
       }
 
       const formattedTeam = {
         id: team.id,
         name: team.name,
+        name_ar: team.name_ar,
         activity: activityNames,
+        activity_ar: activityNamesAr || activityNames,
         numberOfMembers: team.numberOfMembers,
         staffMembers: team.staffMembers,
         image: team.image,
@@ -512,6 +527,7 @@ class TeamController {
           ? { id: team.captainId, name: captainMap.get(String(team.captainId)) }
           : null,
         teamManager: managerNames.length ? managerNames.join(", ") : "-",
+        teamManagerAr: managerNamesAr.length ? managerNamesAr.join(", ") : "-",
         players: formattedPlayers,
       };
 
@@ -589,6 +605,7 @@ class TeamController {
       }
 
       let activityNames = "";
+      let activityNamesAr = "";
       if (team.activity) {
         const activityIds = String(team.activity)
           .split(",")
@@ -597,10 +614,11 @@ class TeamController {
 
         if (activityIds.length > 0) {
           const activities = await db.query(
-            `SELECT name FROM sport_activities WHERE id IN (${activityIds.map(() => "?").join(",")}) AND deletedAt IS NULL`,
+            `SELECT name, name_ar FROM sport_activities WHERE id IN (${activityIds.map(() => "?").join(",")}) AND deletedAt IS NULL`,
             activityIds,
           );
           activityNames = activities.map((a) => a.name).join(", ");
+          activityNamesAr = activities.map((a) => a.name_ar || a.name).join(", ");
         }
       }
 
@@ -682,12 +700,15 @@ class TeamController {
                   user.emailAddress ||
                   user.email ||
                   "-",
+                nameAr: user.nameAr || "-",
                 email: user.emailAddress || user.email || "-",
                 gender,
                 age,
                 mobile: user.mobile || "-",
                 jobTitle: user.jobTitleEN || user.jobTitleAR || "-",
+                jobTitleAr: user.jobTitleAR || "-",
                 department: user.deptNameEN || user.deptNameAR || "-",
+                departmentAr: user.deptNameAR || "-",
                 status: user.active === 1 ? "Active" : "Inactive",
               };
             })
@@ -702,7 +723,7 @@ class TeamController {
         status: true,
         message: "Team members loaded successfully",
         data: {
-          team: { ...team, activityNames, staffNames },
+          team: { ...team, activityNames, activityNamesAr, staffNames },
           allPlayers,
           selectedPlayers: selectedPlayers.map((p) => p.player_id), // Keep as string (user domain ID)
           captainId: captain?.player_id || null,
@@ -793,7 +814,7 @@ class TeamController {
       }
 
       const events = await db.query(
-        `SELECT DISTINCT e.id, e.name, e.year, e.image, e.startDate, e.endDate, e.location,
+        `SELECT DISTINCT e.id, e.name, e.name_ar, e.year, e.image, e.startDate, e.endDate, e.location,
                 e.eventDescription, e.eventStatus, e.eventActiveStatus, e.status,
                 e.teamName, e.activityId, e.targetType, e.createdAt
          FROM participates p
@@ -820,29 +841,35 @@ class TeamController {
       const activityMap = {};
       if (activityIds.length > 0) {
         const activities = await db.query(
-          `SELECT id, name FROM sport_activities WHERE id IN (${activityIds.map(() => "?").join(",")}) AND deletedAt IS NULL`,
+          `SELECT id, name, name_ar FROM sport_activities WHERE id IN (${activityIds.map(() => "?").join(",")}) AND deletedAt IS NULL`,
           activityIds,
         );
         activities.forEach((a) => {
-          activityMap[a.id] = a.name;
+          activityMap[a.id] = { name: a.name, name_ar: a.name_ar };
         });
       }
 
       const formattedEvents = events.map((e) => {
         let activityNames = "";
+        let activityNamesAr = "";
         if (e.activityId) {
           const ids = String(e.activityId)
             .split(",")
             .map((id) => parseInt(id.trim()))
             .filter(Boolean);
           activityNames = ids
-            .map((id) => activityMap[id] || null)
+            .map((id) => activityMap[id]?.name || null)
+            .filter(Boolean)
+            .join(", ");
+          activityNamesAr = ids
+            .map((id) => activityMap[id]?.name_ar || activityMap[id]?.name || null)
             .filter(Boolean)
             .join(", ");
         }
         return {
           id: e.id,
           name: e.name,
+          name_ar: e.name_ar,
           year: e.year,
           image: e.image,
           startDate: e.startDate,
@@ -855,6 +882,7 @@ class TeamController {
           teamName: e.teamName,
           activityId: e.activityId,
           activityNames,
+          activityNames_ar: activityNamesAr,
           targetType: e.targetType,
           createdAt: e.createdAt,
         };

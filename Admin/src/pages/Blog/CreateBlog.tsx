@@ -27,11 +27,11 @@ const CreateBlog = () => {
 
   const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (!titleEn.trim()) newErrors.titleEn = "English title is required";
-    if (!titleAr.trim()) newErrors.titleAr = "Arabic title is required";
-    if (!descEn.trim()) newErrors.descEn = "English description is required";
-    if (!descAr.trim()) newErrors.descAr = "Arabic description is required";
-    if (!media) newErrors.media = "Media image is required";
+    if (!titleEn.trim()) newErrors.titleEn = t.blog.titleEnRequired;
+    if (!titleAr.trim()) newErrors.titleAr = t.blog.titleArRequired;
+    if (!descEn.trim()) newErrors.descEn = t.blog.descEnRequired;
+    if (!descAr.trim()) newErrors.descAr = t.blog.descArRequired;
+    if (!media) newErrors.media = t.blog.mediaRequired;
 
     if (field) {
       setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
@@ -70,23 +70,23 @@ const CreateBlog = () => {
       if (editorEnRef.current) {
         const savedData = await editorEnRef.current.save();
         if (!savedData.blocks || savedData.blocks.length === 0) {
-          contentErrors.contentEn = "English content is required";
+          contentErrors.contentEn = t.blog.contentEnRequired;
         } else {
           contentEnData = JSON.stringify(savedData);
         }
       } else {
-        contentErrors.contentEn = "English content is required";
+        contentErrors.contentEn = t.blog.contentEnRequired;
       }
 
       if (editorArRef.current) {
         const savedData = await editorArRef.current.save();
         if (!savedData.blocks || savedData.blocks.length === 0) {
-          contentErrors.contentAr = "Arabic content is required";
+          contentErrors.contentAr = t.blog.contentArRequired;
         } else {
           contentArData = JSON.stringify(savedData);
         }
       } else {
-        contentErrors.contentAr = "Arabic content is required";
+        contentErrors.contentAr = t.blog.contentArRequired;
       }
 
       if (Object.keys(contentErrors).length > 0) {
@@ -129,7 +129,7 @@ const CreateBlog = () => {
       img.onload = () => {
         const aspectRatio = img.naturalWidth / img.naturalHeight;
         if (aspectRatio < 1.3) {
-          setErrors(prev => ({ ...prev, media: "Image must be wide/landscape (not square or portrait)" }));
+          setErrors(prev => ({ ...prev, media: t.blog.imageLandscape }));
           setMedia(null);
           setMediaPreview(null);
           URL.revokeObjectURL(objectUrl);
@@ -143,7 +143,7 @@ const CreateBlog = () => {
         }
       };
       img.onerror = () => {
-        setErrors(prev => ({ ...prev, media: "Invalid image file" }));
+        setErrors(prev => ({ ...prev, media: t.blog.invalidImage }));
         setMedia(null);
         setMediaPreview(null);
         URL.revokeObjectURL(objectUrl);
@@ -159,7 +159,7 @@ const CreateBlog = () => {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          <span className="font-semibold text-sm">Back to Blog Posts</span>
+          <span className="font-semibold text-sm">{t.blog.backToBlog}</span>
         </Link>
       </div>
 
@@ -280,8 +280,8 @@ const CreateBlog = () => {
                   <svg className="w-8 h-8 text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-medium text-secondary">Click to upload image</span>
-                  <span className="text-[10px] text-secondary/50">Images up to 20MB</span>
+                  <span className="text-sm font-medium text-secondary">{t.blog.uploadHint}</span>
+                  <span className="text-[10px] text-secondary/50">{t.blog.mediaSizeHint}</span>
                 </div>
               )}
             </div>
@@ -296,7 +296,7 @@ const CreateBlog = () => {
               {t.blog.cancel}
             </Link>
             <PrimaryBtn type="submit" className="flex-1" disabled={submitting}>
-              {submitting ? "Saving..." : t.blog.save}
+              {submitting ? t.blog.saving : t.blog.save}
             </PrimaryBtn>
           </div>
         </form>

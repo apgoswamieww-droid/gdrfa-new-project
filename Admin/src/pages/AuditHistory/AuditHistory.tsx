@@ -16,16 +16,9 @@ interface ApprovalRecord {
   comment: string | null;
   event_id: number;
   activity_id: number | null;
-  event_name_en: string;
-  event_name_ar: string;
+  event_name_en: string | null;
+  event_name_ar: string | null;
 }
-
-const levelLabels: Record<string, string> = {
-  section: "Section Manager",
-  department: "Department Manager",
-  admin: "Admin",
-  admin_override: "Admin Override",
-};
 
 const StatusBadge = ({ status, t }: { status: string; t: any }) => {
   const map: Record<string, { label: string; cls: string }> = {
@@ -42,7 +35,8 @@ const StatusBadge = ({ status, t }: { status: string; t: any }) => {
 };
 
 const AuditHistory = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
   const [data, setData] = useState<ApprovalRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,8 +69,8 @@ const AuditHistory = () => {
 
   const filteredData = data.filter(row =>
     !searchTerm ||
-    row.event_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row.event_name_ar.includes(searchTerm) ||
+    row.event_name_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.event_name_ar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     row.approver_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -93,7 +87,9 @@ const AuditHistory = () => {
       label: t.auditHistory.event,
       sortable: true,
       className: "font-medium text-black text-sm",
-      render: (_v, row) => row.event_name_en || row.event_name_ar || `#${row.event_id}`,
+      render: (_v, row) => isArabic
+        ? row.event_name_ar || row.event_name_en || `#${row.event_id}`
+        : row.event_name_en || row.event_name_ar || `#${row.event_id}`,
     },
     {
       key: "approval_level",

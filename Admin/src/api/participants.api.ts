@@ -3,9 +3,11 @@ import { apiRequest } from "./request";
 export interface ParticipantUser {
   id: string;
   name: string;
+  nameAr?: string | null;
   email: string;
   mobile: string;
   jobTitle?: string;
+  jobTitleAr?: string | null;
   department?: string;
   image?: string;
   dob?: string | null;
@@ -27,11 +29,13 @@ export interface EventActivity {
   name: string;
   name_ar?: string;
   typeName?: string;
+  typeNameAr?: string;
 }
 
 export interface EventPerson {
   id: string;
   name: string;
+  nameAr?: string | null;
   email: string;
   mobile: string;
   image?: string;
@@ -52,6 +56,7 @@ export interface ParticipantEvent {
   status?: string;
   eventActiveStatus?: string;
   eventDescription?: string;
+  eventDescriptionAr?: string;
   activities?: EventActivity[];
   eventCoordinators?: EventPerson[];
   eventAdmins?: EventPerson[];
@@ -72,9 +77,12 @@ export interface Participant {
   sportActivity?: {
     id: number;
     name: string;
+    name_ar?: string;
+    activityTypeNameAr?: string;
   };
   team?: ParticipantTeam | null;
   activityType?: string;
+  activityTypeAr?: string;
   status: string;
   currentApprovalLevel?: string | null;
   workflowStatus?: string | null;

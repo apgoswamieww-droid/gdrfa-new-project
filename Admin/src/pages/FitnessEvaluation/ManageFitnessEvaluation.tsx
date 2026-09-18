@@ -17,7 +17,9 @@ import FitnessEvaluationTable from "./FitnessEvaluationTable";
 import FitnessEvaluationModal from "./FitnessEvaluationModal";
 
 const ManageFitnessEvaluation = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const fallback = (english: string, arabic: string) => (isArabic ? arabic : english);
   const navigate = useNavigate();
   const [evaluations, setEvaluations] = useState<FitnessEvaluation[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -51,7 +53,7 @@ const ManageFitnessEvaluation = () => {
         setTotalRecords(res.data.total || 0);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to load evaluations");
+      toast.error(error.message || t.fitnessEvaluation.failedLoad);
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ const ManageFitnessEvaluation = () => {
   const handleUploadClick = () => {
     setSelectedEval(null);
     setModalMode("upload");
-    setModalTitle(t.fitnessEvaluation.uploadTitle || "Upload Fitness Evaluation Excel");
+    setModalTitle(t.fitnessEvaluation.uploadTitle);
     setModalOpen(true);
   };
 
@@ -101,10 +103,10 @@ const ManageFitnessEvaluation = () => {
         // Refresh years after successful import
         fetchYears();
       } else {
-        toast.error(res.message || "Import failed");
+        toast.error(res.message || fallback("Import failed", "فشل الاستيراد"));
       }
     } catch (error: any) {
-      toast.error(error.message || "Import failed");
+      toast.error(error.message || fallback("Import failed", "فشل الاستيراد"));
     }
   };
 
@@ -121,7 +123,7 @@ const ManageFitnessEvaluation = () => {
       setSelectedEval(row);
     }
     setModalMode("view");
-    setModalTitle("View Fitness Evaluation");
+    setModalTitle(t.fitnessEvaluation.viewDetails);
     setModalOpen(true);
   };
 
@@ -141,13 +143,13 @@ const ManageFitnessEvaluation = () => {
     try {
       const res = await deleteFitnessEvaluationApi(deleteTarget.id);
       if (res.status) {
-        toast.success(res.message || "Evaluation deleted successfully");
+        toast.success(res.message || fallback("Evaluation deleted successfully", "تم حذف التقييم بنجاح"));
         setRefreshKey(prev => prev + 1);
       } else {
-        toast.error(res.message || "Delete failed");
+        toast.error(res.message || fallback("Delete failed", "فشل الحذف"));
       }
     } catch (error: any) {
-      toast.error(error.message || "Delete failed");
+      toast.error(error.message || fallback("Delete failed", "فشل الحذف"));
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -214,10 +216,10 @@ const ManageFitnessEvaluation = () => {
       {/* Delete Confirmation */}
       <ConfirmModal
         open={deleteTarget !== null}
-        title="Delete Evaluation"
-        message={`Are you sure you want to delete the evaluation record for "${deleteTarget?.employee_name || "this employee"}"? This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
+        title={t.fitnessEvaluation.deleteEvaluation}
+        message={t.fitnessEvaluation.deleteEvaluationMessage.replace("{name}", deleteTarget?.employee_name || fallback("this employee", "هذا الموظف"))}
+        confirmLabel={t.fitnessEvaluation.delete}
+        cancelLabel={t.fitnessEvaluation.cancel}
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
         loading={deleting}

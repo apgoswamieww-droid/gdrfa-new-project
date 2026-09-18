@@ -63,15 +63,15 @@ const FacilityModal = ({ isOpen, onClose, onSubmit, initialData, title }: Facili
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.title.trim()) newErrors.title = "Title (EN) is required";
-    else if (hasHtml(formData.title)) newErrors.title = "HTML tags are not allowed";
-    if (!formData.title_ar.trim()) newErrors.title_ar = "Title (AR) is required";
-    else if (hasHtml(formData.title_ar)) newErrors.title_ar = "HTML tags are not allowed";
-    if (!formData.description.trim()) newErrors.description = "Description (EN) is required";
-    else if (hasHtml(formData.description)) newErrors.description = "HTML tags are not allowed";
-    if (!formData.description_ar.trim()) newErrors.description_ar = "Description (AR) is required";
-    else if (hasHtml(formData.description_ar)) newErrors.description_ar = "HTML tags are not allowed";
-    if (!initialData && !image) newErrors.image = "Image is required";
+    if (!formData.title.trim()) newErrors.title = t.facility.titleRequired;
+    else if (hasHtml(formData.title)) newErrors.title = t.facility.htmlNotAllowed;
+    if (!formData.title_ar.trim()) newErrors.title_ar = t.facility.titleArRequired;
+    else if (hasHtml(formData.title_ar)) newErrors.title_ar = t.facility.htmlNotAllowed;
+    if (!formData.description.trim()) newErrors.description = t.facility.descriptionRequired;
+    else if (hasHtml(formData.description)) newErrors.description = t.facility.htmlNotAllowed;
+    if (!formData.description_ar.trim()) newErrors.description_ar = t.facility.descriptionArRequired;
+    else if (hasHtml(formData.description_ar)) newErrors.description_ar = t.facility.htmlNotAllowed;
+    if (!initialData && !image) newErrors.image = t.facility.imageRequired;
     if (imageError) newErrors.image = imageError;
     
     setErrors(newErrors);

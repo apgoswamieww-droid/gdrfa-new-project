@@ -36,17 +36,18 @@ const PlanModal = ({ isOpen, onClose, onSubmit, initialData, title, kpiOptions }
 
   const validate = () => {
     const newErrors: { year?: string; kpi?: string } = {};
-    
-    if (!year.trim()) {
-      newErrors.year = "Year is required";
-    } else if (!/^\d{4}$/.test(year.trim())) {
-      newErrors.year = "Please enter a valid year (e.g., 2026)";
+
+    const val = year.trim();
+    if (!val) {
+      newErrors.year = t.plan.yearRequired;
+    } else if (!/^\d{4}$/.test(val)) {
+      newErrors.year = t.plan.yearNotValid;
     }
-    
+
     if (!kpi || kpi === "") {
-      newErrors.kpi = "KPI is required";
+      newErrors.kpi = t.plan.kpiRequired;
     }
-    
+
     setErrors(newErrors);
     if (newErrors.year) {
       setTimeout(() => yearInputRef.current?.focus(), 0);

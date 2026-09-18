@@ -105,6 +105,13 @@ export default function FacilitiesTable({
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium whitespace-nowrap",
       render: (value) => formatDate(value as string),
     },
+    {
+      key: "updatedAt",
+      label: t.facility.updatedAt,
+      sortable: true,
+      className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium whitespace-nowrap",
+      render: (value) => formatDate(value as string),
+    },
   ], [t, onToggleStatus]);
 
   const actions = (row: Facility) => (

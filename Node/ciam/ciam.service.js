@@ -1,6 +1,37 @@
 const axios = require("axios");
 const https = require("https");
 
+// ─── Mock Users for Role-Based Testing ────────────────────────────────
+// Login with these accounts to test different role permissions.
+// Each account returns a different roleId so the permission system
+// can enforce role-based access control.
+const MOCK_USERS = {
+  'superadmin@test.com': {
+    password: '123456',
+    userDomain: 'superadmin',
+    name: 'Super Admin User',
+    nameAr: 'مدير عام',
+    email: 'superadmin@test.com',
+    roleId: process.env.SUPERADMINROLEID,
+  },
+  'admin@test.com': {
+    password: '123456',
+    userDomain: 'admin',
+    name: 'Admin User',
+    nameAr: 'مدير',
+    email: 'admin@test.com',
+    roleId: process.env.ADMINROLEID,
+  },
+  'manager@test.com': {
+    password: '123456',
+    userDomain: 'manager',
+    name: 'Manager User',
+    nameAr: 'مشرف',
+    email: 'manager@test.com',
+    roleId: process.env.MANAGERROLEID,
+  },
+};
+
 class CiamService {
   constructor() {
     this.config = {
@@ -80,9 +111,53 @@ class CiamService {
       projectId: this.config.projectId,
     };
 
-    //const res = await this.axios.post('/client/auth/login', payload, { skipAuth });
-    // return res.data;
+    // ─── MOCK MODE: Check mock user map first ───────────────────────
+    const mockUser = MOCK_USERS[credentials.userName];
+    if (mockUser && mockUser.password === credentials.password) {
+      const jwt = require('jsonwebtoken');
+      const mockToken = jwt.sign(
+        {
+          sub: mockUser.userDomain,
+          email: mockUser.email,
+          client_user_id: require('uuid').v4(),
+          user_type: 'internal',
+          jti: require('uuid').v4(),
+          name_en: mockUser.name,
+          name_ar: mockUser.nameAr,
+          grp: '687',
+          emp_code: '4020',
+          user_id: '354',
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '365d', issuer: 'GDRFA.CIAM', audience: 'GDRFA.CIAM.Clients' }
+      );
 
+      console.log(`[CIAM Mock] Login as ${mockUser.name} (${mockUser.email}) — roleId: ${mockUser.roleId}`);
+
+      return {
+        value: {
+          accessToken: mockToken,
+          refreshToken: "60bcca7a-1d7f-432b-9c8f-b466a72d18d0",
+          accessTokenExpirationUtcDateTime: "2027-05-18T23:44:27.4618485Z",
+          refreshTokenExpirationUtcDateTime: "2026-04-04T07:44:27.4618642Z",
+          userId: 354,
+          grp: 687,
+          userDomain: mockUser.userDomain,
+          name: mockUser.name,
+          nameArAe: mockUser.nameAr,
+          email: mockUser.email,
+          userName: null,
+          mobile: "0509888345",
+          isSupervisor: 1,
+          currentManagerId: "107",
+          userType: "internal",
+          mockRoleId: mockUser.roleId,
+          encryptedRoles: null,
+        },
+      };
+    }
+
+    // ─── FALLBACK: Original mock for legacy hardcoded user ───────────
     const jwt = require('jsonwebtoken');
     const mockToken = jwt.sign(
       {
@@ -189,16 +264,27 @@ class CiamService {
 
   async getUserRoles(userId, myAuthToken = null) {
     try {
-      // const res = await this.axios.post(
-      //   `${this.config.baseUrl}client/client-user/get`,
-      //   {
-      //     "userDomain": userId,
-      //     "projectId": this.config.projectId
-      //   },
-      //   { myAuthToken }
-      // );
-      // return res.data.value;
+      // ─── MOCK MODE: Check if userId matches a mock user ────────────
+      const mockUser = MOCK_USERS[userId + '@test.com'];
+      if (mockUser) {
+        console.log(`[CIAM Mock] getUserRoles for ${userId} — returning roleId: ${mockUser.roleId}`);
+        return {
+          id: 354,
+          grp: 687,
+          userDomain: userId,
+          name: mockUser.name,
+          nameArAe: mockUser.nameAr,
+          email: mockUser.email,
+          mobile: "0509888345",
+          isSupervisor: 1,
+          currentManagerId: "107",
+          userType: "internal",
+          mockRoleId: mockUser.roleId,
+          encryptedRoles: null,
+        };
+      }
 
+      // ─── FALLBACK: Original mock for legacy hardcoded user ─────────
       return {
         id: 354,
         grp: 687,
@@ -369,6 +455,116 @@ class CiamService {
       domainIds = domainIds.filter((x) => x.trim() !== "");
       if (domainIds.length == 0) {
         return { isError: false, value: [] };
+      }
+
+      // ─── MOCK MODE: Check if any domainId matches a mock user ──────
+      const mockResults = [];
+      for (const domainId of domainIds) {
+        const mockUser = MOCK_USERS[domainId + '@test.com'];
+        if (mockUser) {
+          mockResults.push({
+            id: 354,
+            grp: "687",
+            iGRP: 687,
+            nameEn: mockUser.name,
+            nameAr: mockUser.nameAr,
+            classID: 1,
+            rankID: 5,
+            rankAR: "نقيب",
+            rankEN: "Captain",
+            mobile: "0509888345",
+            jobID: 201,
+            jobTitleEN: "Customer Happiness Star",
+            jobTitleAR: "نجم سعادة متعاملين",
+            classEN: "Military",
+            classAR: "عسكري",
+            mangerID: 0,
+            backupManagerID: 0,
+            currentManagerID: 3245,
+            currentManagerUserDomain: "m412",
+            currentManagerNameEn: "Sharifa Jassim Mohmmad",
+            currentManagerNameAr: "شريفه جاسم محمد",
+            organizeID: 326,
+            orgEName: "Humanitarian Cases Section",
+            orgAName: "قسم الحالات الإنسانية",
+            orgType: 4,
+            sectorID: 24,
+            deptID: 44,
+            sectionID: 326,
+            branchID: 0,
+            unitID: 0,
+            sectorManagerId: 3456,
+            departmentManagerId: 3197,
+            sectionManagerId: 3245,
+            sectorManagerUserDomain: "ml16",
+            departmentManagerUserDomain: "ml283",
+            sectionManagerUserDomain: "m412",
+            sectorNameAR: "قطاع أذونات الدخول والإقامة",
+            sectorNameEN: "Entry Permits And Residence Sector",
+            deptNameAR: "إدارة أذونات الإقامة",
+            deptNameEN: "Residence Permits Department",
+            sectionNameAr: "قسم الحالات الإنسانية",
+            sectionNameEn: "Humanitarian Cases Section",
+            branchNameAR: null,
+            branchNameEN: null,
+            unitNameAR: null,
+            unitNameEN: null,
+            loginName: domainId,
+            emailAddress: mockUser.email,
+            hireDate: "2005-10-19T00:00:00",
+            hireTypeID: 1,
+            hireTypeEN: "Local",
+            hireTypeAR: "المحلي",
+            uaeid: "784-1981-6964071-5",
+            serviceDurationYears: 20,
+            serviceDurationMonths: 4,
+            serviceDurationDays: 0,
+            lastPromotionDate: "2023-07-01T00:00:00",
+            positionCategoryID: 3,
+            positionCategoryEN: "-",
+            positionCategoryAR: "موظف",
+            qualificationID: 15,
+            qualificationEN: "Diploma",
+            qualificationAR: "الدبلوم",
+            positionTypeID: 5,
+            positionTypeEN: "Administrative and Technical Posts",
+            positionTypeAR: "الوظائف الفنية والادارية",
+            extension: null,
+            userDomain: domainId,
+            natID: 1,
+            nationalityAR: "الإمارات",
+            nationalityEN: "UAE",
+            sex: 1,
+            terminationType: 0,
+            endDate: "0001-01-01T00:00:00",
+            upgradeType: "دورية",
+            active: 1,
+            catID: 1,
+            attendanceTypeID: 1,
+            attendanceTypeEN: "-",
+            attendanceTypeAR: "الرسمي",
+            rankOrder: 6,
+            fromDNRD: 1,
+            insuranceClass: null,
+            birthDate: "1981-10-13T00:00:00",
+            employeeTitleID: 0,
+            employeeTtileAR: null,
+            employeeTtileEN: null,
+            isSupervisor: 0,
+            supervisorType: 0,
+            img: null,
+            totalRowCount: null,
+            subEmployeeCount: 0,
+            jobDescriptionDocumentUrl: null,
+            vaccinationDate: null,
+            vaccineName: null,
+          });
+        }
+      }
+
+      if (mockResults.length > 0) {
+        console.log(`[CIAM Mock] getUserByDomainId — found ${mockResults.length} mock user(s)`);
+        return { isError: false, value: mockResults };
       }
       // const res = await this.axios.post(
       //     `${this.config.baseUrl}client/hr-digital/get/employees-details`,

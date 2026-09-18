@@ -5,6 +5,7 @@ import { getApprovalHistoryApi } from "../../api/approvalHistory.api";
 import type { Participant } from "../../api/participants.api";
 import { formatDate } from "../../utils/dateUtils";
 import toast from "react-hot-toast";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
 
@@ -26,37 +27,38 @@ interface ApprovalHistoryItem {
   comment: string | null;
 }
 
-const levelLabel: Record<string, string> = {
-  section: "Section Manager",
-  department: "Department Manager",
-  admin: "Admin",
-};
-
 const StatusBadge = ({ status, currentApprovalLevel, workflowStatus }: { status: string; currentApprovalLevel?: string | null; workflowStatus?: string | null }) => {
+  const { t } = useTranslation();
+  const levelLabel: Record<string, string> = { section: t.participants.sectionMgr, department: t.participants.deptMgr, admin: t.participants.admin };
   const levelSuffix = currentApprovalLevel ? ` (${levelLabel[currentApprovalLevel] || currentApprovalLevel})` : "";
+  const approved = t.participants.approvedStatus || t.participants.approved;
+  const rejected = t.participants.rejectedStatus || t.participants.rejected;
+  const pending = t.participants.pendingStatus || t.participants.pending;
   if (workflowStatus === "fully_approved" || status === "1")
-    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />Approved</span>;
+    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />{approved}</span>;
   if (workflowStatus === "rejected" || status === "2")
-    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-700"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />Rejected</span>;
-  return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />Pending{levelSuffix}</span>;
+    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-700"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />{rejected}</span>;
+  return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />{pending}{levelSuffix}</span>;
 };
 
 const EventStatusBadge = ({ status }: { status?: string }) => {
+  const { t } = useTranslation();
   if (status === "1")
-    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />Approved</span>;
-  return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-700"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />Rejected</span>;
+    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />{t.participants.approvedStatus || t.participants.approved}</span>;
+  return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-700"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />{t.participants.rejectedStatus || t.participants.rejected}</span>;
 };
 
 const EventActiveBadge = ({ status }: { status?: string }) => {
+  const { t } = useTranslation();
   if (status === "1")
-    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" />In Progress</span>;
-  return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />Completed</span>;
+    return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" />{t.participants.inProgress}</span>;
+  return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />{t.participants.completed}</span>;
 };
 
 const DetailRow = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
   <div>
     <p className="text-xs font-semibold text-secondary/50 mb-0.5 uppercase tracking-wider">{label}</p>
-    <p className="text-secondary font-medium">{value ?? "N/A"}</p>
+    <p className="text-secondary font-medium">{value ?? "-"}</p>
   </div>
 );
 
@@ -78,6 +80,11 @@ const SectionCard = ({ title, subtitle, icon, children }: { title: string; subti
 const ViewParticipant = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const fallback = (english: string, arabic: string) => (isArabic ? arabic : english);
+  const localized = (en?: string | null, ar?: string | null, empty = "-") =>
+    (isArabic ? ar || en : en || ar) || empty;
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [loading, setLoading] = useState(true);
   const [approvalHistory, setApprovalHistory] = useState<ApprovalHistoryItem[]>([]);
@@ -92,7 +99,7 @@ const ViewParticipant = () => {
           setParticipant(res.data);
         }
       } catch (error: any) {
-        toast.error(error.message || "Failed to load participant details");
+        toast.error(error.message || fallback("Failed to load participant details", "فشل تحميل تفاصيل المشارك"));
         navigate("/participant-requests");
       } finally {
         setLoading(false);
@@ -123,7 +130,7 @@ const ViewParticipant = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center">
         <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full" />
-        <p className="mt-4 text-secondary/60 font-medium">Loading...</p>
+        <p className="mt-4 text-secondary/60 font-medium">{t.participants.loading}</p>
       </div>
     );
   }
@@ -137,7 +144,7 @@ const ViewParticipant = () => {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          <span className="font-semibold text-sm">Back to Participants</span>
+          <span className="font-semibold text-sm">{t.participants.backToParticipants}</span>
         </Link>
       </div>
 
@@ -145,8 +152,8 @@ const ViewParticipant = () => {
         {/* ── LEFT COLUMN: Participant Details ── */}
         <div className="space-y-6">
           <SectionCard
-            title="Participant Details"
-            subtitle="Personal & organizational information"
+            title={t.participants.details}
+            subtitle={t.participants.personalOrgInfo}
             icon={
               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -157,7 +164,7 @@ const ViewParticipant = () => {
               {participant.user.image ? (
                 <img
                   src={getImageUrl(participant.user.image)!}
-                  alt={participant.user.name}
+                  alt={localized(participant.user.name, (participant.user as any).nameAr)}
                   className="w-28 h-28 rounded-full object-cover border-4 border-gray-100 shadow-sm mx-auto"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
@@ -169,26 +176,26 @@ const ViewParticipant = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              <DetailRow label="Name" value={participant.user.name} />
-              <DetailRow label="Email" value={participant.user.email} />
-              <DetailRow label="Mobile" value={participant.user.mobile} />
-              <DetailRow label="Date of Birth" value={participant.user.dob || "-"} />
-              <DetailRow label="Age" value={participant.user.age != null ? `${participant.user.age} years` : null} />
-              <DetailRow label="Gender" value={participant.user.gender || "-"} />
-              <DetailRow label="Examiner" value={participant.manager?.name || "-"} />
-              <DetailRow label="Activity Name" value={participant.sportActivity?.name || "-"} />
-              <DetailRow label="Activity Type" value={participant.activityType || "-"} />
+              <DetailRow label={t.participants.name} value={localized(participant.user.name, (participant.user as any).nameAr)} />
+              <DetailRow label={t.participants.email} value={participant.user.email} />
+              <DetailRow label={t.participants.mobile} value={participant.user.mobile} />
+              <DetailRow label={t.participants.dateOfBirth} value={participant.user.dob || "-"} />
+              <DetailRow label={t.participants.age} value={participant.user.age != null ? `${participant.user.age} ${t.participants.years}` : null} />
+              <DetailRow label={t.participants.gender} value={participant.user.gender || "-"} />
+              <DetailRow label={t.participants.examiner} value={localized(participant.manager?.name, (participant.manager as any)?.nameAr)} />
+              <DetailRow label={t.participants.activityName} value={localized(participant.sportActivity?.name, (participant.sportActivity as any)?.name_ar)} />
+              <DetailRow label={t.participants.activityType} value={participant.activityType || "-"} />
             </div>
 
             <div className="mt-5 pt-4 border-t border-gray-100">
-              <p className="text-xs font-bold text-secondary/50 mb-3 uppercase tracking-wider">Organization Hierarchy</p>
+              <p className="text-xs font-bold text-secondary/50 mb-3 uppercase tracking-wider">{t.participants.organizationHierarchy}</p>
               <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Sector</span><span className="font-medium text-secondary">{participant.user.sector || "N/A"}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Department</span><span className="font-medium text-secondary">{participant.user.department || "N/A"}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Section</span><span className="font-medium text-secondary">{participant.user.section || "N/A"}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Branch</span><span className="font-medium text-secondary">{participant.user.branch || "N/A"}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Rank</span><span className="font-medium text-secondary">{participant.user.rank || "N/A"}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Job Title</span><span className="font-medium text-secondary">{participant.user.jobTitle || "N/A"}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t.participants.sector}</span><span className="font-medium text-secondary">{localized(participant.user.sector, participant.user.sectorAr)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t.participants.department}</span><span className="font-medium text-secondary">{localized(participant.user.department, participant.user.departmentAr)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t.participants.section}</span><span className="font-medium text-secondary">{localized(participant.user.section, participant.user.sectionAr)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t.participants.branch}</span><span className="font-medium text-secondary">{localized(participant.user.branch, participant.user.branchAr)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t.participants.rank}</span><span className="font-medium text-secondary">{localized(participant.user.rank, participant.user.rankAr)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t.participants.jobTitle}</span><span className="font-medium text-secondary">{localized(participant.user.jobTitle, (participant.user as any).jobTitleAr)}</span></div>
               </div>
             </div>
           </SectionCard>
@@ -197,8 +204,8 @@ const ViewParticipant = () => {
         {/* ── RIGHT COLUMN: Event Details ── */}
         <div className="space-y-6">
           <SectionCard
-            title="Event Details"
-            subtitle="Event information and schedule"
+            title={t.participants.eventDetails}
+            subtitle={t.participants.eventInfoSchedule}
             icon={
               <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -206,39 +213,39 @@ const ViewParticipant = () => {
             }
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              <DetailRow label="Event Name" value={participant.event.name} />
-              <DetailRow label="Year" value={participant.event.year} />
-              <DetailRow label="Start Date" value={participant.event.startDate ? formatDate(participant.event.startDate) : null} />
-              <DetailRow label="End Date" value={participant.event.endDate ? formatDate(participant.event.endDate) : null} />
-              <DetailRow label="Start Time" value={participant.event.startTime || "-"} />
-              <DetailRow label="End Time" value={participant.event.endTime || "-"} />
-              <DetailRow label="Location" value={participant.event.location || "-"} />
-              <DetailRow label="Number of Hours" value={participant.event.numberOfHour} />
+              <DetailRow label={t.participants.eventName} value={localized(participant.event.name, participant.event.nameAr)} />
+              <DetailRow label={t.participants.year} value={participant.event.year} />
+              <DetailRow label={t.participants.startDate} value={participant.event.startDate ? formatDate(participant.event.startDate) : null} />
+              <DetailRow label={t.participants.endDate} value={participant.event.endDate ? formatDate(participant.event.endDate) : null} />
+              <DetailRow label={t.participants.startTime} value={participant.event.startTime || "-"} />
+              <DetailRow label={t.participants.endTime} value={participant.event.endTime || "-"} />
+              <DetailRow label={t.participants.location} value={participant.event.location || "-"} />
+              <DetailRow label={t.participants.numberOfHours} value={participant.event.numberOfHour} />
             </div>
 
             <div className="mt-4 flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-secondary/50 uppercase tracking-wider">Coordinator Status:</span>
+                <span className="text-xs font-semibold text-secondary/50 uppercase tracking-wider">{t.participants.coordinatorStatus}:</span>
                 <EventStatusBadge status={participant.event.status} />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-secondary/50 uppercase tracking-wider">Event Status:</span>
+                <span className="text-xs font-semibold text-secondary/50 uppercase tracking-wider">{t.participants.eventStatus}:</span>
                 <EventActiveBadge status={participant.event.eventActiveStatus} />
               </div>
             </div>
 
             <div className="mt-5 pt-4 border-t border-gray-100">
-              <p className="text-xs font-bold text-secondary/50 mb-2 uppercase tracking-wider">Event Description</p>
+              <p className="text-xs font-bold text-secondary/50 mb-2 uppercase tracking-wider">{t.participants.eventDescription}</p>
               <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
-                {participant.event.eventDescription || "No description available"}
+                {localized(participant.event.eventDescription, participant.event.eventDescriptionAr, t.participants.noDescription)}
               </p>
             </div>
           </SectionCard>
 
           {/* Participant Status */}
-          <SectionCard title="Participation Status">
+          <SectionCard title={t.participants.participationStatus}>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-secondary/50 uppercase tracking-wider">Current Status</span>
+              <span className="text-sm font-semibold text-secondary/50 uppercase tracking-wider">{t.participants.currentStatus}</span>
               <StatusBadge status={participant.status} currentApprovalLevel={participant.currentApprovalLevel} workflowStatus={participant.workflowStatus} />
             </div>
             {(participant.status === "0" || participant.workflowStatus === "in_progress") && (
@@ -249,7 +256,7 @@ const ViewParticipant = () => {
                   return stages.map((stage, i) => (
                     <span key={stage} className={`flex items-center gap-1 ${i <= currentIdx ? "text-primary font-semibold" : "text-gray-300"}`}>
                       {i > 0 && <span className="mx-0.5">→</span>}
-                      {levelLabel[stage]}
+                      {{ section: t.participants.sectionMgr, department: t.participants.deptMgr, admin: t.participants.admin }[stage]}
                     </span>
                   ));
                 })()}
@@ -258,11 +265,11 @@ const ViewParticipant = () => {
           </SectionCard>
 
           {/* Approval History Timeline */}
-          <SectionCard title="Approval Flow">
+          <SectionCard title={t.participants.approvalFlow}>
             {loadingHistory ? (
-              <p className="text-xs text-gray-400">Loading...</p>
+              <p className="text-xs text-gray-400">{t.participants.loading}</p>
             ) : approvalHistory.length === 0 ? (
-              <p className="text-xs text-gray-400">No approval history available</p>
+              <p className="text-xs text-gray-400">{t.participants.noApprovalHistory}</p>
             ) : (
               <div className="space-y-0">
                 {approvalHistory.slice().reverse().map((item, i) => {
@@ -272,9 +279,9 @@ const ViewParticipant = () => {
                     item.status === "rejected" ? "bg-red-500" :
                     item.status === "escalated" ? "bg-orange-400" : "bg-yellow-400";
                   const statusText =
-                    item.status === "approved" ? "Approved" :
-                    item.status === "rejected" ? "Rejected" :
-                    item.status === "escalated" ? "Escalated" : "Pending";
+                    item.status === "approved" ? t.participants.approvedStatus :
+                    item.status === "rejected" ? t.participants.rejectedStatus :
+                    item.status === "escalated" ? t.participants.escalated : t.participants.pendingStatus;
                   return (
                     <div key={item.id} className="relative flex gap-3 pb-4">
                       {!isLast && <div className="absolute left-[11px] top-5 bottom-0 w-0.5 bg-gray-200" />}
@@ -291,7 +298,7 @@ const ViewParticipant = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-secondary">{levelLabel[item.approval_level] || item.approval_level}</span>
+                          <span className="text-sm font-semibold text-secondary">{{ section: t.participants.sectionMgr, department: t.participants.deptMgr, admin: t.participants.admin }[item.approval_level] || item.approval_level}</span>
                           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${
                             item.status === "approved" ? "bg-green-50 text-green-700" :
                             item.status === "rejected" ? "bg-red-50 text-red-700" :
@@ -299,7 +306,7 @@ const ViewParticipant = () => {
                           }`}>{statusText}</span>
                         </div>
                         {item.approver_name && (
-                          <p className="text-xs text-gray-500 mt-0.5">By: {item.approver_name}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{t.participants.by}: {item.approver_name}</p>
                         )}
                         {item.action_date && (
                           <p className="text-[10px] text-gray-400 mt-0.5">{formatDate(item.action_date)}</p>
@@ -308,7 +315,7 @@ const ViewParticipant = () => {
                           <p className="text-xs text-gray-500 italic mt-0.5 border-l-2 border-gray-200 pl-2">"{item.comment}"</p>
                         )}
                         {item.status === "pending" && item.assigned_date && (
-                          <p className="text-[10px] text-gray-400 mt-0.5">Assigned: {formatDate(item.assigned_date)}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{t.participants.assigned}: {formatDate(item.assigned_date)}</p>
                         )}
                       </div>
                     </div>
@@ -320,11 +327,11 @@ const ViewParticipant = () => {
 
           {/* Event Activities */}
           {participant.event.activities && participant.event.activities.length > 0 && (
-            <SectionCard title="Event Activities">
+            <SectionCard title={t.participants.eventActivities}>
               <div className="flex flex-wrap gap-2">
                 {participant.event.activities.map((act) => (
                   <span key={act.id} className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                    {act.name}{act.typeName ? ` — ${act.typeName}` : ""}
+                    {localized(act.name, act.name_ar)}{act.typeName ? ` — ${localized(act.typeName, act.typeNameAr)}` : ""}
                   </span>
                 ))}
               </div>
@@ -333,7 +340,7 @@ const ViewParticipant = () => {
 
           {/* Event Coordinator */}
           {participant.event.eventCoordinators && participant.event.eventCoordinators.length > 0 && (
-            <SectionCard title="Event Coordinator">
+            <SectionCard title={t.participants.eventCoordinator}>
               {participant.event.eventCoordinators.map((coord, i) => (
                 <div key={i} className="flex items-center gap-3">
                   {coord.image ? (
@@ -344,7 +351,7 @@ const ViewParticipant = () => {
                     </div>
                   )}
                   <div>
-                    <p className="font-semibold text-secondary text-sm">{coord.name}</p>
+                    <p className="font-semibold text-secondary text-sm">{localized(coord.name, (coord as any).nameAr)}</p>
                     <p className="text-xs text-gray-500">{coord.email}</p>
                     <p className="text-xs text-gray-500">{coord.mobile}</p>
                   </div>
@@ -354,9 +361,9 @@ const ViewParticipant = () => {
           )}
 
           {/* Timestamps */}
-          <SectionCard title="Details">
+          <SectionCard title={t.participants.detailsLabel}>
             <div className="grid grid-cols-2 gap-3 text-sm text-gray-500">
-              <div><span className="font-semibold">Requested At:</span> {formatDate(participant.createdAt)}</div>
+              <div><span className="font-semibold">{t.participants.requestedAt}:</span> {formatDate(participant.createdAt)}</div>
             </div>
           </SectionCard>
 
@@ -366,7 +373,7 @@ const ViewParticipant = () => {
               to="/participant-requests"
               className="flex items-center justify-center font-bold text-sm rounded-lg px-4 py-1.5 border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
             >
-              Back to List
+              {t.participants.backToList}
             </Link>
           </div>
         </div>

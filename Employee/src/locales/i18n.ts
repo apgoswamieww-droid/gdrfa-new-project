@@ -8,6 +8,10 @@ const resources = {
       Home: "Home",
       backToHome: "Back to Home",
       backToTop: "Back to Top",
+      back: "Back",
+      auth: {
+        required: "Please log in to access this page",
+      },
       pageNotFound: "Page Not Found",
       pageNotFoundMessage: "The page you're looking for doesn't exist or has been moved.",
       "SPEVNT": "Sport Events",
@@ -417,6 +421,10 @@ const resources = {
       HOME: "الرئيسية",
       backToHome: "العودة إلى الرئيسية",
       backToTop: "العودة إلى الأعلى",
+      back: "رجوع",
+      auth: {
+        required: "يرجى تسجيل الدخول للوصول إلى هذه الصفحة",
+      },
       pageNotFound: "الصفحة غير موجودة",
       pageNotFoundMessage: "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
       "Sport Events": "الفعاليات الرياضية",

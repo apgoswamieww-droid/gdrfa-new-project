@@ -43,7 +43,10 @@ export default function ParticipantsTable({
   // onEvaluate?: (data: Participant) => void;
   onDelete?: (id: number) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const localized = (en?: string, ar?: string, fallback = "-") =>
+    (isArabic ? ar || en : en || ar) || fallback;
   const columns: Column<Participant>[] = useMemo(() => [
     {
       key: "id",
@@ -60,10 +63,10 @@ export default function ParticipantsTable({
       render: (user: any) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs">
-            {user.name?.charAt(0).toUpperCase() || '?'}
+            {localized(user.name, user.nameAr)?.charAt(0).toUpperCase() || '?'}
           </div>
           <div>
-            <p className="font-semibold">{user.name}</p>
+            <p className="font-semibold">{localized(user.name, user.nameAr)}</p>
             <p className="text-xs text-gray-500">{user.id}</p>
           </div>
         </div>
@@ -74,14 +77,14 @@ export default function ParticipantsTable({
       label: t.participants.event,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
-      render: (event: any) => event.name,
+      render: (event: any) => localized(event.name, event.nameAr),
     },
     {
       key: "team",
       label: t.participants.team,
       sortable: true,
       className: "text-[#898B8E] 2xl:text-base/light text-base/light font-medium",
-      render: (team: any) => team?.name || "-",
+      render: (team: any) => localized(team?.name, team?.nameAr),
     },
     {
       key: "status",
@@ -146,7 +149,7 @@ export default function ParticipantsTable({
   const actions = (row: Participant) => (
     <div className="flex items-center gap-1.5">
       <button
-        title="View Details"
+        title={t.participants.viewDetails || (isArabic ? "عرض التفاصيل" : "View Details")}
         onClick={() => onView(row)}
         className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors cursor-pointer hover:bg-green-100"
       >
@@ -166,14 +169,14 @@ export default function ParticipantsTable({
       {row.status === "0" && (
         <>
           <button
-            title="Approve"
+            title={t.participants.approve || (isArabic ? "اعتماد" : "Approve")}
             onClick={() => onStatusChange(row.id, "1")}
             className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors cursor-pointer hover:bg-primary/20"
           >
             <CheckIcon />
           </button>
           <button
-            title="Reject"
+            title={t.participants.reject || (isArabic ? "رفض" : "Reject")}
             onClick={() => onStatusChange(row.id, "2")}
             className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 transition-colors cursor-pointer hover:bg-red-100"
           >
@@ -183,7 +186,7 @@ export default function ParticipantsTable({
       )}
       {row.status === "1" && (
         <button
-          title="Cancel Registration"
+          title={t.participants.cancelRegistration || (isArabic ? "إلغاء التسجيل" : "Cancel Registration")}
           onClick={() => onStatusChange(row.id, "2")}
           className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 transition-colors cursor-pointer hover:bg-red-100"
         >
@@ -192,7 +195,7 @@ export default function ParticipantsTable({
       )}
       {row.status === "2" && (
         <button
-          title="Re-approve"
+          title={t.participants.reapprove || (isArabic ? "إعادة اعتماد" : "Re-approve")}
           onClick={() => onStatusChange(row.id, "1")}
           className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors cursor-pointer hover:bg-primary/20"
         >
@@ -202,7 +205,7 @@ export default function ParticipantsTable({
 
       {onDelete && (
         <button
-          title="Remove Participant"
+          title={t.participants.removeParticipant || (isArabic ? "إزالة مشارك" : "Remove Participant")}
           onClick={() => onDelete(row.id)}
           className="min-w-8 w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 transition-colors cursor-pointer hover:bg-red-100"
         >

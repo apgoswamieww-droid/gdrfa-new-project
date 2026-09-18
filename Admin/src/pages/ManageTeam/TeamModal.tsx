@@ -78,9 +78,20 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
 
   const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = "Team Name is required";
-    if (!activity) newErrors.activity = "Activity is required";
-    if (numberOfMembers <= 0) newErrors.numberOfMembers = "Number of members must be greater than 0";
+    const val = name.trim();
+    const valAr = nameAr.trim();
+
+    if (!val) newErrors.name = t.team.nameRequired;
+    else if (val.length < 3) newErrors.name = t.team.nameMinLength;
+    else if (/<[^>]*>/g.test(val)) newErrors.name = t.team.htmlNotAllowed;
+
+    if (!valAr) newErrors.nameAr = t.team.nameArRequired;
+    else if (valAr.length < 3) newErrors.nameAr = t.team.nameArMinLength;
+    else if (/<[^>]*>/g.test(valAr)) newErrors.nameAr = t.team.htmlNotAllowed;
+
+    if (!activity) newErrors.activity = t.team.activityRequired;
+    if (numberOfMembers <= 0) newErrors.numberOfMembers = t.team.membersGreaterThanZero;
+    if (staffMembers.length === 0) newErrors.staffMembers = t.team.staffMembersRequired;
 
     if (field) {
       setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
@@ -137,14 +148,14 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
 
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      toast.error("Only image files (JPG, PNG, GIF, WebP) are allowed.");
+      toast.error(t.team.uploadInvalidType);
       e.target.value = "";
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error("Image size must be less than 5 MB.");
+      toast.error(t.team.uploadTooLarge);
       e.target.value = "";
       return;
     }
@@ -183,6 +194,9 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
               placeholder={t.team.placeholderAr}
               value={nameAr}
               onChange={(e) => handleFieldChange("name_ar", e.target.value)}
+              onBlur={() => handleBlur("nameAr")}
+              error={errors.nameAr}
+              required
             />
 
             <Selectfield
@@ -227,8 +241,11 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
               onChange={(e) => {
                 const values = Array.from(e.target.selectedOptions, option => option.value);
                 setStaffMembers(values);
+                if (errors.staffMembers) {
+                  setErrors((prev) => ({ ...prev, staffMembers: "" }));
+                }
               }}
-              className="appearance-none transition-all duration-200 bg-white border border-[#364B9B66] rounded-lg py-2 w-full focus:outline-none text-sm text-gray-700 h-28 px-4"
+              className={`appearance-none transition-all duration-200 bg-white border rounded-lg py-2 w-full focus:outline-none text-sm text-gray-700 h-28 px-4 ${errors.staffMembers ? "border-red-500" : "border-[#364B9B66]"}`}
             >
               {staffList.map((staff) => (
                 <option key={staff.value} value={staff.value}>
@@ -236,6 +253,9 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
                 </option>
               ))}
             </select>
+            {errors.staffMembers && (
+              <span className="text-red-500 text-xs mt-1">{errors.staffMembers}</span>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -249,9 +269,9 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
               />
               {imagePreview ? (
                 <div className="relative group">
-                  <img src={imagePreview} alt="Preview" className="w-24 h-24 rounded-lg object-cover border" />
+                  <img src={imagePreview} alt={t.team.previewAlt} className="w-24 h-24 rounded-lg object-cover border" />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg text-white text-xs">
-                    Change
+                    {t.team.change}
                   </div>
                 </div>
               ) : (
@@ -259,8 +279,8 @@ const TeamModal = ({ isOpen, onClose, onSubmit, initialData, title }: TeamModalP
                   <svg className="w-8 h-8 text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-medium text-secondary">Click to upload</span>
-                  <span className="text-[10px] text-secondary/50">PNG, JPG up to 5MB</span>
+                  <span className="text-sm font-medium text-secondary">{t.team.uploadHint}</span>
+                  <span className="text-[10px] text-secondary/50">{t.team.uploadSizeHint}</span>
                 </div>
               )}
             </div>

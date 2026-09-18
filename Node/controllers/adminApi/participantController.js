@@ -61,9 +61,9 @@ class ParticipantController {
             let query = `
                 SELECT p.id, p.user_id, p.event_id, p.activity_id, p.team_id, p.status, p.createdAt,
                        p.current_approval_level, p.workflow_status,
-                       e.name as eventName, e.image as eventImage,
-                       sa.name as activityName,
-                       tm.name as teamName
+                       e.name as eventName, e.name_ar as eventNameAr, e.image as eventImage,
+                       sa.name as activityName, sa.name_ar as activityNameAr,
+                       tm.name as teamName, tm.name_ar as teamNameAr
                 FROM participates p
                 LEFT JOIN events e ON p.event_id = e.id
                 LEFT JOIN sport_activities sa ON p.activity_id = sa.id
@@ -90,6 +90,7 @@ class ParticipantController {
                         if (domainId) {
                             playerInfoMap.set(domainId, {
                                 name: user.nameEn || user.nameAr || '-',
+                                nameAr: user.nameAr || null,
                                 email: user.emailAddress || '-',
                                 mobile: user.mobile || '-'
                             });
@@ -105,21 +106,25 @@ class ParticipantController {
                     user: {
                         id: row.user_id,
                         name: userInfo.name,
+                        nameAr: userInfo.nameAr || null,
                         email: userInfo.email,
                         mobile: userInfo.mobile
                     },
                     event: {
                         id: row.event_id,
                         name: row.eventName,
+                        nameAr: row.eventNameAr || null,
                         image: row.eventImage
                     },
                     sportActivity: {
                         id: row.activity_id,
-                        name: row.activityName
+                        name: row.activityName,
+                        name_ar: row.activityNameAr || null
                     },
                     team: row.team_id ? {
                         id: row.team_id,
-                        name: row.teamName
+                        name: row.teamName,
+                        nameAr: row.teamNameAr || null
                     } : null,
                     status: row.status,
                     currentApprovalLevel: row.current_approval_level || null,
@@ -154,10 +159,11 @@ class ParticipantController {
                         e.name as eventName, e.name_ar as eventNameAr, e.image as eventImage,
                         e.year, e.startDate, e.endDate, e.startTime, e.endTime,
                         e.location, e.numberOfHour, e.status as eventStatus,
-                        e.eventActiveStatus, e.eventDescription, e.eventCoordinators,
+                        e.eventActiveStatus, e.eventDescription, e.eventDescription_ar, e.eventCoordinators,
                         e.eventAdmins, e.activityId as eventActivityIds,
                         e.selectedEmployees,
-                        sa.name as activityName, at.name as activityTypeName
+                        sa.name as activityName, sa.name_ar as activityNameAr,
+                        at.name as activityTypeName, at.name_ar as activityTypeNameAr
                  FROM participates p
                  LEFT JOIN events e ON p.event_id = e.id
                  LEFT JOIN sport_activities sa ON p.activity_id = sa.id
@@ -224,9 +230,11 @@ class ParticipantController {
                 return {
                     id: u.userDomain || u.loginName,
                     name: u.nameEn || u.nameAr || '-',
+                    nameAr: u.nameAr || null,
                     email: u.emailAddress || '-',
                     mobile: u.mobile || '-',
                     jobTitle: u.jobTitleEN || u.jobTitleAR || '-',
+                    jobTitleAr: u.jobTitleAR || null,
                     department: u.deptNameEN || u.deptNameAR || '-',
                     image: u.img,
                     dob: u.birthDate || null,
@@ -251,7 +259,7 @@ class ParticipantController {
                 if (activityIds.length > 0) {
                     const placeholders = activityIds.map(() => '?').join(',');
                     eventActivities = await db.query(
-                        `SELECT sa.id, sa.name, at.name as typeName
+                        `SELECT sa.id, sa.name, sa.name_ar, at.name as typeName, at.name_ar as typeNameAr
                          FROM sport_activities sa
                          LEFT JOIN activity_types at ON sa.activityType = at.id
                          WHERE sa.id IN (${placeholders})`,
@@ -268,6 +276,7 @@ class ParticipantController {
                     return {
                         id: u.userDomain || u.loginName,
                         name: u.nameEn || u.nameAr || id,
+                        nameAr: u.nameAr || null,
                         email: u.emailAddress || '-',
                         mobile: u.mobile || '-',
                         image: u.img
@@ -281,6 +290,7 @@ class ParticipantController {
                 currentApprovalLevel: participant.current_approval_level || null,
                 workflowStatus: participant.workflow_status || null,
                 activityType: participant.activityTypeName,
+                activityTypeAr: participant.activityTypeNameAr,
                 createdAt: participant.createdAt,
                 user: getUserData(participant.user_id),
                 manager: getUserData(participant.manager_id),
@@ -300,6 +310,7 @@ class ParticipantController {
                     status: participant.eventStatus,
                     eventActiveStatus: participant.eventActiveStatus,
                     eventDescription: participant.eventDescription,
+                    eventDescriptionAr: participant.eventDescription_ar,
                     activities: eventActivities,
                     eventCoordinators: resolvePeople(eventCoordinatorIds),
                     eventAdmins: resolvePeople(eventAdminIds),
@@ -307,7 +318,9 @@ class ParticipantController {
                 },
                 sportActivity: {
                     id: participant.activity_id,
-                    name: participant.activityName
+                    name: participant.activityName,
+                    name_ar: participant.activityNameAr,
+                    activityTypeNameAr: participant.activityTypeNameAr
                 }
             };
 

@@ -17,6 +17,7 @@ const EventTypeModal = ({ isOpen, onClose, onSubmit, initialData, title }: Event
   const [name, setName] = useState("");
   const [nameAr, setNameAr] = useState("");
   const [error, setError] = useState("");
+  const [errorAr, setErrorAr] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Sync state when modal opens or initialData changes
@@ -25,6 +26,7 @@ const EventTypeModal = ({ isOpen, onClose, onSubmit, initialData, title }: Event
       setName(initialData?.name || "");
       setNameAr(initialData?.name_ar || "");
       setError("");
+      setErrorAr("");
     }
   }, [isOpen, initialData]);
 
@@ -32,20 +34,36 @@ const EventTypeModal = ({ isOpen, onClose, onSubmit, initialData, title }: Event
 
   const validate = () => {
     const val = name.trim();
+    const valAr = nameAr.trim();
+    let isValid = true;
+
     if (!val) {
-      setError("Event Type Name is required");
-      return false;
+      setError(t.eventType.nameRequired);
+      isValid = false;
+    } else if (val.length < 3) {
+      setError(t.eventType.nameMinLength);
+      isValid = false;
+    } else if (/<[^>]*>/g.test(val)) {
+      setError(t.eventType.htmlNotAllowed);
+      isValid = false;
+    } else {
+      setError("");
     }
-    if (val.length < 3) {
-      setError("Event Type Name must be at least 3 characters long");
-      return false;
+
+    if (!valAr) {
+      setErrorAr(t.eventType.nameArRequired);
+      isValid = false;
+    } else if (valAr.length < 3) {
+      setErrorAr(t.eventType.nameArMinLength);
+      isValid = false;
+    } else if (/<[^>]*>/g.test(valAr)) {
+      setErrorAr(t.eventType.htmlNotAllowed);
+      isValid = false;
+    } else {
+      setErrorAr("");
     }
-    if (/<[^>]*>/g.test(val)) {
-      setError("HTML tags are not allowed");
-      return false;
-    }
-    setError("");
-    return true;
+
+    return isValid;
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +110,12 @@ const EventTypeModal = ({ isOpen, onClose, onSubmit, initialData, title }: Event
             label={t.eventType.nameAr}
             placeholder={t.eventType.placeholderAr}
             value={nameAr}
-            onChange={(e) => setNameAr(e.target.value)}
+            onChange={(e) => {
+              setNameAr(e.target.value);
+              if (errorAr) setErrorAr("");
+            }}
+            error={errorAr}
+            required
           />
 
           <div className="flex gap-3 pt-4">

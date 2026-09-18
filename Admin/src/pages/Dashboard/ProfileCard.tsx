@@ -18,6 +18,20 @@ const ProfileCard = () => {
     } catch { return null; }
   }, []);
 
+  // Fetch uploaded profile image from user_profile_image table (by user_domain).
+  // Priority: table image > CIAM image > default.
+  const [tableImage, setTableImage] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest({ url: "/api/profile-image" })
+      .then((res: any) => {
+        if (cancelled) return;
+        if (res?.data?.image) setTableImage(res.data.image);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // Fetch roles and resolve role name dynamically
   useEffect(() => {
     if (!roleId) return;
@@ -34,10 +48,11 @@ const ProfileCard = () => {
     return () => { cancelled = true; };
   }, [roleId]);
 
-  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
-  const rawImage = adminUser?.image || null;
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "http://localhost:3000/";
+  // Table image (uploaded) wins over CIAM image; default fallback last.
+  const rawImage = tableImage || adminUser?.image || null;
   const userImage = rawImage
-    ? rawImage.startsWith("http")
+    ? (rawImage.startsWith("http") || rawImage.startsWith("data:"))
       ? rawImage
       : `${IMAGE_BASE_URL}${rawImage}`
     : UserImg;

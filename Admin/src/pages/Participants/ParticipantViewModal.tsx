@@ -3,6 +3,7 @@ import { formatDate } from "../../utils/dateUtils";
 import { getParticipantByIdApi } from "../../api/participants.api";
 import type { Participant } from "../../api/participants.api";
 import toast from "react-hot-toast";
+import { useTranslation } from "../../hooks/useTranslation";
 
 interface ParticipantViewModalProps {
   isOpen: boolean;
@@ -13,6 +14,11 @@ interface ParticipantViewModalProps {
 const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantViewModalProps) => {
   const [data, setData] = useState<Participant | null>(null);
   const [loading, setLoading] = useState(false);
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const fallback = (english: string, arabic: string) => (isArabic ? arabic : english);
+  const localized = (en?: string | null, ar?: string | null, empty = "-") =>
+    (isArabic ? ar || en : en || ar) || empty;
 
   useEffect(() => {
     if (isOpen && participantId) {
@@ -24,7 +30,7 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
             setData(res.data);
           }
         } catch (error: any) {
-          toast.error(error.message || "Failed to load details");
+          toast.error(error.message || fallback("Failed to load details", "فشل تحميل التفاصيل"));
         } finally {
           setLoading(false);
         }
@@ -39,7 +45,7 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-hidden">
             <div className="bg-white rounded-xl w-full max-w-[500px] max-h-[90vh] overflow-y-auto custom-scrollbar">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-          <h2 className="text-xl font-bold text-secondary">Participant Request Details</h2>
+          <h2 className="text-xl font-bold text-secondary">{t.participants.participantRequestDetails || fallback("Participant Request Details", "تفاصيل طلب المشارك")}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -48,7 +54,7 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-gray-500">Loading details...</div>
+          <div className="p-12 text-center text-gray-500">{t.participants.loadingDetails}</div>
         ) : data ? (
           <div className="p-5 space-y-8">
             {/* User Section */}
@@ -61,8 +67,8 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
                 </div>
               )}
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900">{data.user.name}</h3>
-                <p className="text-gray-500">{data.user.jobTitle} • {data.user.department}</p>
+                <h3 className="text-lg font-bold text-gray-900">{localized(data.user.name, (data.user as any).nameAr)}</h3>
+                <p className="text-gray-500">{localized(data.user.jobTitle, (data.user as any).jobTitleAr)} • {localized(data.user.department, data.user.departmentAr)}</p>
                 <div className="mt-2 flex gap-3 text-sm text-gray-600">
                   <span className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,22 +89,22 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Event & Activity */}
               <div className="space-y-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Request Information</h4>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t.participants.requestInformation || fallback("Request Information", "معلومات الطلب")}</h4>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Event</label>
-                    <p className="text-gray-900 font-semibold">{data.event.name}</p>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.event}</label>
+                    <p className="text-gray-900 font-semibold">{localized(data.event.name, data.event.nameAr)}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Sport Activity</label>
-                    <p className="text-gray-900">{data.sportActivity?.name || "-"}</p>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.sportActivity || fallback("Sport Activity", "النشاط الرياضي")}</label>
+                    <p className="text-gray-900">{localized(data.sportActivity?.name, (data.sportActivity as any)?.name_ar)}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Activity Type</label>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.activityType || fallback("Activity Type", "نوع النشاط")}</label>
                     <p className="text-gray-900">{data.activityType || "-"}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Requested At</label>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.requestedAt}</label>
                     <p className="text-gray-900">{formatDate(data.createdAt)}</p>
                   </div>
                 </div>
@@ -106,25 +112,25 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
 
               {/* Stakeholders */}
               <div className="space-y-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Stakeholders</h4>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t.participants.stakeholders || fallback("Stakeholders", "أصحاب المصلحة")}</h4>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Manager</label>
-                    <p className="text-gray-900">{data.manager?.name} ({data.manager?.id})</p>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.manager || fallback("Manager", "المدير")}</label>
+                    <p className="text-gray-900">{localized(data.manager?.name, data.manager?.nameAr)} ({data.manager?.id})</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Coordinator</label>
-                    <p className="text-gray-900">{data.coordinator?.name} ({data.coordinator?.id})</p>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.coordinator || fallback("Coordinator", "المنسق")}</label>
+                    <p className="text-gray-900">{localized(data.coordinator?.name, data.coordinator?.nameAr)} ({data.coordinator?.id})</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Current Status</label>
+                    <label className="text-sm font-medium text-gray-500">{t.participants.currentStatus || fallback("Current Status", "الحالة الحالية")}</label>
                     <div className="mt-1">
                       {data.status === "1" ? (
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Approved</span>
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">{t.participants.approvedStatus || t.participants.approved}</span>
                       ) : data.status === "2" ? (
-                        <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">Rejected</span>
+                        <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">{t.participants.rejectedStatus || t.participants.rejected}</span>
                       ) : (
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">Pending</span>
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">{t.participants.pendingStatus || t.participants.pending}</span>
                       )}
                     </div>
                   </div>
@@ -133,7 +139,7 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
             </div>
           </div>
         ) : (
-          <div className="p-12 text-center text-gray-500">Participant details not found</div>
+          <div className="p-12 text-center text-gray-500">{t.participants.participantNotFound || fallback("Participant details not found", "لم يتم العثور على تفاصيل المشارك")}</div>
         )}
 
         <div className="p-4 border-t border-gray-100 flex justify-end">
@@ -141,7 +147,7 @@ const ParticipantViewModal = ({ isOpen, onClose, participantId }: ParticipantVie
             onClick={onClose}
             className="px-8 py-3 rounded-lg border border-gray-300 text-gray-600 font-bold hover:bg-gray-50 transition-colors"
           >
-            Close
+            {t.participants.close || fallback("Close", "إغلاق")}
           </button>
         </div>
       </div>

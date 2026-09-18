@@ -124,7 +124,7 @@ const ManageContacts = () => {
   const actions = (row: any) => (
     <div className="flex items-center gap-1.5">
       <button
-        title="View"
+        title={t.common.view}
         onClick={() => navigate(`/cms/contacts/view/${row.id}`)}
         className="2xl:min-w-10 min-w-8 2xl:w-10 w-8 2xl:h-10 h-8 flex items-center justify-center rounded-lg bg-[#364B9B]/10 transition-colors cursor-pointer hover:bg-[#364B9B]/20"
       >
@@ -132,7 +132,7 @@ const ManageContacts = () => {
       </button>
       <span className="text-primary text-base">|</span>
       <button
-        title="Delete"
+        title={t.contactUs.delete}
         onClick={() => handleDelete(row.id)}
         className="2xl:min-w-10 min-w-8 2xl:w-10 w-8 2xl:h-10 h-8 flex items-center justify-center rounded-lg bg-primary/20 transition-colors cursor-pointer hover:bg-primary/10"
       >

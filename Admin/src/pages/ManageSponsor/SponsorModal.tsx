@@ -44,6 +44,7 @@ const SponsorModal = ({ isOpen, onClose, onSubmit, initialData, title }: Sponsor
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = t.sponsor.nameRequired;
     if (!websiteUrl.trim()) newErrors.websiteUrl = t.sponsor.websiteUrlRequired;
+    else if (!websiteUrl.trim().startsWith("https://")) newErrors.websiteUrl = t.sponsor.websiteHttpsOnly;
 
     if (field) {
       setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));

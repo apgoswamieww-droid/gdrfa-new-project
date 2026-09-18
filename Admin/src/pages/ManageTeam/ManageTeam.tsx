@@ -10,7 +10,8 @@ import { useTranslation } from "../../hooks/useTranslation";
 import SearchInput from "../../component/Input/SearchInput";
 
 const ManageTeam = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingTeam, setEditingTeam] = useState<Team | undefined>(undefined);
@@ -31,7 +32,7 @@ const ManageTeam = () => {
       setRefreshKey((prev) => prev + 1);
     } catch (error: any) {
       console.error("Failed to save team:", error);
-      toast.error(error.message || "Something went wrong", { id: loadingToast });
+      toast.error(isArabic ? t.team.errorSomethingWrong : error.message || t.team.errorSomethingWrong, { id: loadingToast });
     }
   };
 
@@ -61,7 +62,7 @@ const ManageTeam = () => {
                 setRefreshKey((prev) => prev + 1);
               } catch (error: any) {
                 console.error("Failed to delete team:", error);
-                toast.error(error.message || "Failed to delete team", { id: loadingToast });
+                toast.error(isArabic ? t.team.errorDelete : error.message || t.team.errorDelete, { id: loadingToast });
               }
             }}
             className="px-4 py-2 rounded-lg text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer"

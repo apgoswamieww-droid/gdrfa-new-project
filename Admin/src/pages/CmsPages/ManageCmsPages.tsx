@@ -85,13 +85,8 @@ const ManageCmsPages = () => {
       setRefreshKey((prev) => prev + 1);
     } catch (error: any) {
       console.error("Failed to update status:", error);
-      toast.error(error.message || "Failed to update status", { id: loadingToast });
+      toast.error(error.message || t.cms.errorUpdateStatus, { id: loadingToast });
     }
-  };
-
-  const openCreateModal = () => {
-    setEditingPage(undefined);
-    setIsModalOpen(true);
   };
 
   return (

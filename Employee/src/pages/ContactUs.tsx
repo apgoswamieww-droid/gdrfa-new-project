@@ -25,7 +25,7 @@ const suspiciousPattern =
 const fieldLimits: Record<keyof ContactForm, number> = {
   name: 80,
   email: 120,
-  phone: 10,
+  phone: 9,
   message: 800,
 };
 

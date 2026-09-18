@@ -3,6 +3,7 @@ import type { CmsPage } from "../../api/cms.api";
 import InputField from "../../component/Input/InputField";
 import PrimaryBtn from "../../component/Button/PrimaryButton";
 import EditorField from "../../component/Editor/EditorField";
+import { useTranslation } from "../../hooks/useTranslation";
 
 interface CmsPageModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface CmsPageModalProps {
 }
 
 const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPageModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name_en: "",
     name_ar: "",
@@ -22,6 +24,7 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const editorEnRef = useRef<any>(null);
   const editorArRef = useRef<any>(null);
 
@@ -45,6 +48,9 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
         });
       }
       setErrors({});
+      setIsInitialized(true);
+    } else {
+      setIsInitialized(false);
     }
   }, [initialData, isOpen]);
 
@@ -52,8 +58,8 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name_en.trim()) newErrors.name_en = "Page Name (EN) is required";
-    if (!formData.name_ar.trim()) newErrors.name_ar = "Page Name (AR) is required";
+    if (!formData.name_en.trim()) newErrors.name_en = t.cms.nameEnRequired;
+    if (!formData.name_ar.trim()) newErrors.name_ar = t.cms.nameArRequired;
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -77,11 +83,11 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
         }
 
         if (!descriptionEnData || descriptionEnData === '{"blocks":[]}') {
-            setErrors(prev => ({ ...prev, description_en: "Description (EN) is required" }));
+            setErrors(prev => ({ ...prev, description_en: t.cms.descEnRequired }));
             return;
         }
         if (!descriptionArData || descriptionArData === '{"blocks":[]}') {
-            setErrors(prev => ({ ...prev, description_ar: "Description (AR) is required" }));
+            setErrors(prev => ({ ...prev, description_ar: t.cms.descArRequired }));
             return;
         }
 
@@ -115,8 +121,8 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
           <form onSubmit={handleSubmit} className="p-4 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <InputField
-                label="Page Name (English)"
-                placeholder="Page Name"
+                label={t.cms.name}
+                placeholder={t.cms.namePlaceholder}
                 value={formData.name_en}
                 onChange={(e) => {
                     setFormData({ ...formData, name_en: e.target.value });
@@ -127,12 +133,12 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
                 />
                 <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-secondary/50 text-right">
-                    اسم الصفحة (بالعربية)
+                    {t.cms.nameAr}
                     <span className="text-red-500 mr-0.5">*</span>
                 </label>
                 <input
                     className={`transition-all duration-200 bg-white border rounded-full py-1.5 px-4 w-full focus:outline-none text-sm text-gray-700 placeholder-gray-400 text-right ${errors.name_ar ? "border-red-400 focus:ring-1 focus:ring-red-100" : "border-[#364B9B66] focus:ring-1 focus:ring-primary/10"}`}
-                    placeholder="اسم الصفحة"
+                    placeholder={t.cms.nameArPlaceholder}
                     value={formData.name_ar}
                     onChange={(e) => {
                     setFormData({ ...formData, name_ar: e.target.value });
@@ -145,24 +151,30 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                    <label className="block text-xs font-semibold text-secondary/50">Description (English) <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-semibold text-secondary/50">{t.cms.description} <span className="text-red-500">*</span></label>
+                    {isInitialized && (
                     <EditorField
+                        key={`editor-en-${initialData?.id || 'new'}`}
                         holder="editor-cms-en"
                         initialData={formData.description_en ? JSON.parse(formData.description_en) : null}
                         onReady={(editor) => { editorEnRef.current = editor; }}
-                        placeholder="Description..."
+                        placeholder={t.cms.descPlaceholder}
                         error={errors.description_en}
                     />
+                    )}
                 </div>
                 <div className="flex flex-col gap-1.5">
-                    <label className="block text-xs font-semibold text-secondary/50 text-right">الوصف (بالعربية) <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-semibold text-secondary/50 text-right">{t.cms.descriptionAr} <span className="text-red-500">*</span></label>
+                    {isInitialized && (
                     <EditorField
+                        key={`editor-ar-${initialData?.id || 'new'}`}
                         holder="editor-cms-ar"
                         initialData={formData.description_ar ? JSON.parse(formData.description_ar) : null}
                         onReady={(editor) => { editorArRef.current = editor; }}
-                        placeholder="الوصف..."
+                        placeholder={t.cms.descArPlaceholder}
                         error={errors.description_ar}
                     />
+                    )}
                 </div>
             </div>
 
@@ -172,10 +184,10 @@ const CmsPageModal = ({ isOpen, onClose, onSubmit, initialData, title }: CmsPage
                 onClick={onClose}
                 className="flex justify-center items-center font-bold text-sm rounded-lg px-6 border border-gray-200 py-1.5 text-gray-600 hover:bg-gray-50 transition-all cursor-pointer flex-1"
                 >
-                Cancel
+                {t.cms.cancel}
                 </button>
                 <PrimaryBtn type="submit" className="flex-1" disabled={submitting}>
-                {submitting ? "Saving..." : (initialData ? "Update Page" : "Create Page")}
+                {submitting ? t.cms.saving : (initialData ? t.cms.updatePage : t.cms.createPage)}
                 </PrimaryBtn>
             </div>
         </form>

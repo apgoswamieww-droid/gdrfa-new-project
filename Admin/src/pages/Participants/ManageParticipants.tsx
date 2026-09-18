@@ -9,7 +9,9 @@ import ConfirmModal from "../../component/ConfirmModal/ConfirmModal";
 import { useTranslation } from "../../hooks/useTranslation";
 
 const ManageParticipants = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isArabic = language === "ar";
+  const fallback = (english: string, arabic: string) => (isArabic ? arabic : english);
   const navigate = useNavigate();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +35,7 @@ const ManageParticipants = () => {
         setParticipants(res.data.data);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to load participants");
+      toast.error(error.message || fallback("Failed to load participants", "فشل تحميل المشاركين"));
     }
   };
 
@@ -63,13 +65,13 @@ const ManageParticipants = () => {
         isReject ? rejectReason.trim() : undefined
       );
       if (res.status || res.success) {
-        toast.success(res.message || "Status updated");
+        toast.success(res.message || fallback("Status updated", "تم تحديث الحالة"));
         setRefreshKey(prev => prev + 1);
       } else {
-        toast.error(res.message || "Failed to update status");
+        toast.error(res.message || fallback("Failed to update status", "فشل تحديث الحالة"));
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to update status");
+      toast.error(error.message || fallback("Failed to update status", "فشل تحديث الحالة"));
     } finally {
       setStatusChanging(false);
       setStatusChangeTarget(null);
@@ -91,7 +93,7 @@ const ManageParticipants = () => {
         setRefreshKey(prev => prev + 1);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to remove participant");
+      toast.error(error.message || fallback("Failed to remove participant", "فشل إزالة المشارك"));
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -107,7 +109,7 @@ const ManageParticipants = () => {
       <div className="flex sm:flex-row flex-col gap-3 justify-between md:mb-7 mb-5">
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <SearchInput
-            placeholder={t.participants?.searchPlaceholder || "Search by event name..."}
+            placeholder={t.participants?.searchPlaceholder || fallback("Search by event name...", "البحث حسب اسم الفعالية...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

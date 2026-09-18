@@ -47,9 +47,11 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
 
   const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (!titleEn.trim()) newErrors.titleEn = "English title is required";
-    if (!descEn.trim()) newErrors.descEn = "English description is required";
-    if (!initialData && !media) newErrors.media = "Media file is required";
+    if (!titleEn.trim()) newErrors.titleEn = t.homeSlider.titleEnRequired;
+    if (!titleAr.trim()) newErrors.titleAr = t.homeSlider.titleArRequired;
+    if (!descEn.trim()) newErrors.descEn = t.homeSlider.descEnRequired;
+    if (!descAr.trim()) newErrors.descAr = t.homeSlider.descArRequired;
+    if (!initialData && !media) newErrors.media = t.homeSlider.mediaRequired;
 
     if (field) {
       setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
@@ -102,7 +104,7 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
     const isVideo = file.type.startsWith("video/");
 
     if (!isImage && !isVideo) {
-      toast.error("Only image and video files are allowed.");
+      toast.error(t.homeSlider.mediaOnly);
       e.target.value = "";
       return;
     }
@@ -190,15 +192,15 @@ const HomeSliderModal = ({ isOpen, onClose, onSubmit, initialData, title }: Home
                   <svg className="w-8 h-8 text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-medium text-secondary">Click to upload image or video</span>
-                  <span className="text-[10px] text-secondary/50">Images up to 20MB, Videos up to 100MB</span>
+                    <span className="text-sm font-medium text-secondary">{t.homeSlider.uploadHint}</span>
+                    <span className="text-[10px] text-secondary/50">{t.homeSlider.mediaSizeHint}</span>
                 </div>
               )}
             </div>
             {errors.media && <p className="text-red-500 text-xs">{errors.media}</p>}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 space-y-1">
-              <p><strong>Image:</strong> Must be exactly <strong>1440x800</strong> pixels, max 20MB.</p>
-              <p><strong>Video:</strong> Must be <strong>wide/landscape</strong> orientation, max 100MB.</p>
+                    <p>{t.homeSlider.noteImage}</p>
+                    <p>{t.homeSlider.noteVideo}</p>
             </div>
           </div>
 

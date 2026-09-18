@@ -9,7 +9,7 @@ class EvaluationController {
   static async getCategories(req, res) {
     try {
       const categories = await db.query(
-        `SELECT id, name, slug, unit_type, unit, status
+        `SELECT id, name, name_ar, slug, unit_type, unit, status
          FROM fitness_categories
          WHERE status = '1' AND deletedAt IS NULL
          ORDER BY name ASC`
@@ -152,7 +152,7 @@ class EvaluationController {
         // Attach results with category info
         const placeholders = evalIds.map(() => '?').join(',');
         const results = await db.query(
-          `SELECT er.*, fc.name as categoryName, fc.slug, fc.unit_type
+          `SELECT er.*, fc.name as categoryName, fc.name_ar as categoryNameAr, fc.slug, fc.unit_type
            FROM evaluation_results er
            LEFT JOIN fitness_categories fc ON er.fitness_category_id = fc.id
            WHERE er.evaluation_id IN (${placeholders}) AND er.deletedAt IS NULL
@@ -258,7 +258,7 @@ class EvaluationController {
       }
 
       const results = await db.query(
-        `SELECT er.*, fc.name as categoryName, fc.slug, fc.unit_type
+        `SELECT er.*, fc.name as categoryName, fc.name_ar as categoryNameAr, fc.slug, fc.unit_type
          FROM evaluation_results er
          LEFT JOIN fitness_categories fc ON er.fitness_category_id = fc.id
          WHERE er.evaluation_id = ? AND er.deletedAt IS NULL`,

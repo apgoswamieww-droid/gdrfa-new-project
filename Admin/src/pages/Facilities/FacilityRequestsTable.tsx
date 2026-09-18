@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Column } from "../../component/Table/DataTable";
 import DataTable from "../../component/Table/DataTable";
 import { formatDate } from "../../utils/dateUtils";
@@ -102,22 +102,17 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
   const { t, language } = useTranslation();
   const [data, setData] = useState<FacilityRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const itemsPerPage = 10;
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const res: any = await getFacilityRequestsApi({
-        start: (currentPage - 1) * itemsPerPage,
-        length: itemsPerPage,
-        search: searchTerm,
+        start: 0,
+        length: 1000,
       });
 
       if (res?.status) {
         setData(res.data?.data || []);
-        setTotalRecords(res.data?.recordsTotal || 0);
       }
     } catch (error: any) {
       toast.error(error.message || t.facilityRequest.errorDelete);
@@ -128,7 +123,19 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, searchTerm]);
+  }, []);
+
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return data;
+    const term = searchTerm.toLowerCase();
+    return data.filter((row) =>
+      row.title?.toLowerCase().includes(term) ||
+      (row.title_ar || "").toLowerCase().includes(term) ||
+      row.name?.toLowerCase().includes(term) ||
+      (row.name_ar || "").toLowerCase().includes(term) ||
+      row.email?.toLowerCase().includes(term)
+    );
+  }, [data, searchTerm]);
 
   if (loading) {
     return <div className="bg-white rounded-xl p-5 text-center text-gray-400">{t.facilityRequest.loading}</div>;
@@ -268,9 +275,9 @@ export default function FacilityRequestsTable({ searchTerm, onView, onStatusClic
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      <div className="mb-4 text-sm text-gray-500">{t.facilityRequest.totalRequests} {totalRecords}</div>
+      <div className="mb-4 text-sm text-gray-500">{t.facilityRequest.totalRequests} {filteredData.length}</div>
       <DataTable
-        data={data}
+        data={filteredData}
         columns={columns}
         actions={actions}
         perPageOptions={[5, 10, 20, 50]}

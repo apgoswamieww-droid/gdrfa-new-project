@@ -20,7 +20,7 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
   const [nameAr, setNameAr] = useState("");
   const [activityType, setActivityType] = useState<number | "">("");
   const [isTeam, setIsTeam] = useState("0");
-  const [errors, setErrors] = useState<{ name?: string; activityType?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; nameAr?: string; activityType?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,16 +42,28 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
   if (!isOpen) return null;
 
   const validate = () => {
-    const newErrors: { name?: string; activityType?: string } = {};
+    const newErrors: { name?: string; nameAr?: string; activityType?: string } = {};
     
-    if (!name.trim()) {
-      newErrors.name = "Activity Name is required";
-    } else if (name.trim().length < 3) {
-      newErrors.name = "Activity Name must be at least 3 characters long";
+    const val = name.trim();
+    if (!val) {
+      newErrors.name = t.eventActivity.nameRequired;
+    } else if (val.length < 3) {
+      newErrors.name = t.eventActivity.nameMinLength;
+    } else if (/<[^>]*>/g.test(val)) {
+      newErrors.name = t.eventActivity.htmlNotAllowed;
+    }
+    
+    const valAr = nameAr.trim();
+    if (!valAr) {
+      newErrors.nameAr = t.eventActivity.nameArRequired;
+    } else if (valAr.length < 3) {
+      newErrors.nameAr = t.eventActivity.nameArMinLength;
+    } else if (/<[^>]*>/g.test(valAr)) {
+      newErrors.nameAr = t.eventActivity.htmlNotAllowed;
     }
     
     if (!activityType) {
-      newErrors.activityType = "Event Type is required";
+      newErrors.activityType = t.eventActivity.activityTypeRequired;
     }
     
     setErrors(newErrors);
@@ -113,7 +125,12 @@ const EventActivityModal = ({ isOpen, onClose, onSubmit, initialData, title, act
               label={t.eventActivity.nameAr}
               placeholder={t.eventActivity.placeholderAr}
               value={nameAr}
-              onChange={(e) => setNameAr(e.target.value)}
+              onChange={(e) => {
+                setNameAr(e.target.value);
+                if (errors.nameAr) setErrors(prev => ({ ...prev, nameAr: undefined }));
+              }}
+              error={errors.nameAr}
+              required
             />
           </div>
 

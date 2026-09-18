@@ -41,10 +41,39 @@ class FitnessEvaluationController {
         [...params, start, length]
       );
 
+      const domains = [...new Set((data || []).map((row) => {
+        const grp = String(row.grp || '').trim();
+        return grp ? (grp.startsWith('ml') ? grp : `ml${grp}`) : null;
+      }).filter(Boolean))];
+      const nameMap = new Map();
+      if (domains.length > 0) {
+        const token = req.user?.token || req.session?.user?.token || null;
+        const usersResponse = await ciamService.getUserByDomainId(domains, token);
+        if (usersResponse && !usersResponse.isError) {
+          const users = usersResponse.value?.internalClientUsers || usersResponse.value || [];
+          (Array.isArray(users) ? users : []).forEach((user) => {
+            const domain = String(user.userDomain || user.loginName || '').toLowerCase();
+            const names = { nameEn: user.nameEn || null, nameAr: user.nameAr || null };
+            nameMap.set(domain, names);
+            if (domain.startsWith('ml')) nameMap.set(domain.slice(2), names);
+          });
+        }
+      }
+      const formattedData = (data || []).map((row) => {
+        const grp = String(row.grp || '').trim();
+        const domain = (grp ? (grp.startsWith('ml') ? grp : `ml${grp}`) : '').toLowerCase();
+        const names = nameMap.get(domain) || nameMap.get(domain.startsWith('ml') ? domain.slice(2) : `ml${domain}`);
+        return {
+          ...row,
+          employee_name: names?.nameEn || row.employee_name,
+          employee_name_ar: names?.nameAr || null,
+        };
+      });
+
       return res.json({
         status: true,
         message: 'Fitness evaluations retrieved successfully',
-        data: { data: data || [], total }
+        data: { data: formattedData, total }
       });
     } catch (error) {
       console.error('Error in list fitness evaluations:', error);
@@ -67,7 +96,7 @@ class FitnessEvaluationController {
       }
 
       const results = await db.query(
-        `SELECT er.*, fc.name as categoryName, fc.slug, fc.unit_type
+        `SELECT er.*, fc.name as categoryName, fc.name_ar as categoryNameAr, fc.slug, fc.unit_type
          FROM evaluation_results er
          LEFT JOIN fitness_categories fc ON er.fitness_category_id = fc.id
          WHERE er.evaluation_id = ? AND er.deletedAt IS NULL
@@ -377,6 +406,12 @@ class FitnessEvaluationController {
 
           userData = {
             name: user.nameEn || user.name || null,
+            nameEn: user.nameEn || null,
+            nameAr: user.nameAr || null,
+            rankEn: user.rankEN || null,
+            rankAr: user.rankAR || null,
+            sectorEn: user.sectorNameEN || null,
+            sectorAr: user.sectorNameAR || null,
             gender,
             dob,
             user_id: user.loginName || user.userDomain || null,

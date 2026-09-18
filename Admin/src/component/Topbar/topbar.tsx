@@ -79,13 +79,12 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
     const fetchProfileImage = async () => {
       try {
         const res: any = await apiRequest({ url: "/api/profile-image" });
-        // Only use uploaded image if CIAM login image is not available
-        const loginImage = adminUser?.image || null;
-        if (res?.data?.image && !loginImage) {
+        // Uploaded image (user_profile_image table) takes priority over CIAM image
+        if (res?.data?.image) {
           setProfileImage(res.data.image);
         }
       } catch {
-        // silently fail, default image will be used
+        // silently fail, CIAM image or default will be used
       }
     };
     fetchProfileImage();
@@ -167,7 +166,7 @@ const Topbar = ({ setOpen }: { setOpen: (open: boolean | ((prev: boolean) => boo
   const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://localhost:3000/";
   const rawImage = profileImage || adminUser?.image || null;
   const userImage = rawImage
-    ? rawImage.startsWith("http")
+    ? (rawImage.startsWith("http") || rawImage.startsWith("data:"))
       ? rawImage
       : `${IMAGE_BASE_URL}${rawImage}`
     : UserImg;

@@ -5,8 +5,10 @@ import PrimaryBtn from "../../component/Button/PrimaryButton";
 import TagsInput from "../../component/TagsInput/TagsInput";
 import { getMediaApi, updateMediaApi } from "../../api/media.api";
 import toast from "react-hot-toast";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const EditMedia = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -41,22 +43,22 @@ const EditMedia = () => {
           setFilePreview(media.file_url || null);
         }
       } catch (error: any) {
-        toast.error(error.message || "Failed to load media");
+        toast.error(error.message || t.media.errorFetch);
         navigate("/cms/media");
       } finally {
         setLoading(false);
       }
     };
     fetchMedia();
-  }, [id, navigate]);
+  }, [id, navigate, t]);
 
   const validate = (field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (!title.trim()) newErrors.title = "Title is required";
-    if (!titleAr.trim()) newErrors.titleAr = "Arabic title is required";
-    if (!description.trim()) newErrors.description = "Description is required";
-    if (!descriptionAr.trim()) newErrors.descriptionAr = "Arabic description is required";
-    if (tags.length === 0) newErrors.tags = "At least one tag is required";
+    if (!title.trim()) newErrors.title = t.media.titleRequired;
+    if (!titleAr.trim()) newErrors.titleAr = t.media.titleArRequired;
+    if (!description.trim()) newErrors.description = t.media.descRequired;
+    if (!descriptionAr.trim()) newErrors.descriptionAr = t.media.descArRequired;
+    if (tags.length === 0) newErrors.tags = t.media.tagsRequired;
 
     if (field) {
       setErrors((prev) => ({ ...prev, [field]: newErrors[field] || "" }));
@@ -93,7 +95,7 @@ const EditMedia = () => {
     e.preventDefault();
     if (!validate()) return;
     setSubmitting(true);
-    const loadingToast = toast.loading("Updating media...");
+    const loadingToast = toast.loading(t.media.updating);
     try {
       const formData = new FormData();
       formData.append("title", title.trim());
@@ -104,7 +106,7 @@ const EditMedia = () => {
       formData.append("tags_ar", JSON.stringify(tagsAr));
       if (file) formData.append("file", file);
       await updateMediaApi(Number(id), formData);
-      toast.success("Media updated successfully", { id: loadingToast });
+      toast.success(t.media.successUpdate, { id: loadingToast });
       navigate("/cms/media");
     } catch (error: any) {
       toast.error(error.message || "Something went wrong", { id: loadingToast });
@@ -117,7 +119,7 @@ const EditMedia = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center">
         <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full" />
-        <p className="mt-4 text-secondary/60 font-medium">Loading...</p>
+        <p className="mt-4 text-secondary/60 font-medium">{t.media.loading}</p>
       </div>
     );
   }
@@ -129,20 +131,20 @@ const EditMedia = () => {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          <span className="font-semibold text-sm">Back to Media</span>
+          <span className="font-semibold text-sm">{t.media.backToMedia}</span>
         </Link>
       </div>
 
       <div className="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100">
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-secondary">Edit Media</h2>
+          <h2 className="text-xl font-bold text-secondary">{t.media.edit}</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField
-              label="Title (English)"
-              placeholder="Enter title"
+              label={t.media.titleEn}
+              placeholder={t.media.titlePlaceholder}
               value={title}
               onChange={(e) => handleFieldChange("title", e.target.value)}
               onBlur={() => handleBlur("title")}
@@ -150,8 +152,8 @@ const EditMedia = () => {
               required
             />
             <InputField
-              label="Title (Arabic)"
-              placeholder="Enter Arabic title"
+              label={t.media.titleAr}
+              placeholder={t.media.titleArPlaceholder}
               value={titleAr}
               onChange={(e) => handleFieldChange("titleAr", e.target.value)}
               onBlur={() => handleBlur("titleAr")}
@@ -162,8 +164,8 @@ const EditMedia = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InputField
-              label="Description (English)"
-              placeholder="Enter description"
+              label={t.media.descPlaceholder}
+              placeholder={t.media.descPlaceholder}
               value={description}
               onChange={(e) => handleFieldChange("description", e.target.value)}
               onBlur={() => handleBlur("description")}
@@ -171,8 +173,8 @@ const EditMedia = () => {
               required
             />
             <InputField
-              label="Description (Arabic)"
-              placeholder="Enter Arabic description"
+              label={t.media.descArPlaceholder}
+              placeholder={t.media.descArPlaceholder}
               value={descriptionAr}
               onChange={(e) => handleFieldChange("descriptionAr", e.target.value)}
               onBlur={() => handleBlur("descriptionAr")}
@@ -183,36 +185,36 @@ const EditMedia = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-xs font-semibold text-secondary/50">Tags (English)</label>
+              <label className="block text-xs font-semibold text-secondary/50">{t.media.tags}</label>
               <TagsInput
                 value={tags}
                 onChange={(newTags) => {
                   setTags(newTags);
                   if (errors.tags) setErrors((prev) => ({ ...prev, tags: "" }));
                 }}
-                placeholder="Type tag and press Enter"
+                placeholder={t.media.tagsPlaceholder}
                 error={errors.tags}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-xs font-semibold text-secondary/50">Tags (Arabic)</label>
+              <label className="block text-xs font-semibold text-secondary/50">{t.media.tagsAr}</label>
               <TagsInput
                 value={tagsAr}
                 onChange={(newTagsAr) => {
                   setTagsAr(newTagsAr);
                   if (errors.tagsAr) setErrors((prev) => ({ ...prev, tagsAr: "" }));
                 }}
-                placeholder="اكتب الوسم بالعربي واضغط Enter"
+                placeholder={t.media.tagsArPlaceholder}
                 error={errors.tagsAr}
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="block text-xs font-semibold text-secondary/50">Media File</label>
+            <label className="block text-xs font-semibold text-secondary/50">{t.media.mediaFile}</label>
             {existingFileUrl && !file && (
               <div className="mb-2">
-                <p className="text-xs text-gray-500 mb-1">Current file:</p>
+                <p className="text-xs text-gray-500 mb-1">{t.media.currentFile}</p>
                 {existingFileType === "image" ? (
                   <img src={existingFileUrl} alt="Current" className="w-32 h-24 rounded-lg object-cover border" />
                 ) : existingFileType === "video" ? (
@@ -243,7 +245,7 @@ const EditMedia = () => {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg text-white text-xs pointer-events-none">
-                    Change
+                    {t.media.change}
                   </div>
                 </div>
               ) : (
@@ -251,8 +253,8 @@ const EditMedia = () => {
                   <svg className="w-8 h-8 text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-medium text-secondary">Click to replace file (optional)</span>
-                  <span className="text-[10px] text-secondary/50">Images: JPG, PNG  |  Media: MP4  |  Documents: PDF, DOCX, PPTX (not PPT)</span>
+                  <span className="text-sm font-medium text-secondary">{t.media.replaceHint}</span>
+                  <span className="text-[10px] text-secondary/50">{t.media.fileFormats}</span>
                 </div>
               )}
             </div>
@@ -263,10 +265,10 @@ const EditMedia = () => {
               to="/cms/media"
               className="flex lg:gap-1.5 gap-1 justify-center items-center font-bold 2xl:text-[0.84vw]/normal lg:text-base/normal text-sm/normal rounded-lg lg:px-4 px-2.5 border border-gray-200 lg:py-1.5 py-1.5 text-gray-600 hover:bg-gray-50 transition ease-in-out duration-300 cursor-pointer flex-1"
             >
-              Cancel
+              {t.media.cancel}
             </Link>
             <PrimaryBtn type="submit" className="flex-1" disabled={submitting}>
-              {submitting ? "Saving..." : "Save"}
+              {submitting ? t.media.saving : t.media.save}
             </PrimaryBtn>
           </div>
         </form>
